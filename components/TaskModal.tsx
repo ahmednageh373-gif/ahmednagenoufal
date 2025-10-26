@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority } from '../types';
+import type { ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, ProjectMember } from '../types';
 import { X } from 'lucide-react';
 
 interface TaskModalProps {
@@ -8,15 +8,16 @@ interface TaskModalProps {
   onSave: (task: Omit<ScheduleTask, 'id'> | ScheduleTask) => void;
   task: ScheduleTask | null;
   allTasks: ScheduleTask[];
+  members: ProjectMember[];
 }
 
-export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, task, allTasks }) => {
+export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, task, allTasks, members }) => {
   const [name, setName] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [progress, setProgress] = useState(0);
   const [dependencies, setDependencies] = useState<number[]>([]);
-  const [assignees, setAssignees] = useState('');
+  const [assignees, setAssignees] = useState<string[]>([]);
   const [status, setStatus] = useState<ScheduleTaskStatus>('To Do');
   const [priority, setPriority] = useState<ScheduleTaskPriority>('Medium');
   const [category, setCategory] = useState('');
@@ -29,7 +30,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             setEnd(task.end);
             setProgress(task.progress);
             setDependencies(task.dependencies || []);
-            setAssignees((task.assignees || []).join(', '));
+            setAssignees(task.assignees || []);
             setStatus(task.status || 'To Do');
             setPriority(task.priority || 'Medium');
             setCategory(task.category || '');
@@ -41,7 +42,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             setEnd(today);
             setProgress(0);
             setDependencies([]);
-            setAssignees('');
+            setAssignees([]);
             setStatus('To Do');
             setPriority('Medium');
             setCategory('');
@@ -53,15 +54,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
     e.preventDefault();
     if (!name.trim() || !start || !end) return;
 
-    const assigneesArray = assignees.split(',').map(a => a.trim()).filter(Boolean);
-
     const taskData = { 
         name, 
         start, 
         end, 
         progress, 
         dependencies,
-        assignees: assigneesArray,
+        assignees,
         status,
         priority,
         category,
@@ -139,8 +138,18 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             </div>
           </div>
            <div className="mb-4">
-            <label htmlFor="taskAssignees" className="block text-sm font-medium mb-2">المسؤولون (افصل بينهم بفاصلة)</label>
-            <input id="taskAssignees" type="text" value={assignees} onChange={e => setAssignees(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded-lg" />
+            <label htmlFor="taskAssignees" className="block text-sm font-medium mb-2">المسؤولون</label>
+            <select
+                id="taskAssignees"
+                multiple
+                value={assignees}
+                onChange={e => setAssignees(Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value))}
+                className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded-lg h-24"
+            >
+                {members.map(member => (
+                    <option key={member.id} value={member.id}>{member.name}</option>
+                ))}
+            </select>
           </div>
 
           <div className="flex justify-end gap-4 mt-6">

@@ -639,6 +639,7 @@ export const createProjectFromTenderText = async (tenderText: string): Promise<O
                 subcontractors: [],
                 subcontractorInvoices: [],
                 structuralAssessments: [],
+                members: [],
             }
         };
         return projectData;

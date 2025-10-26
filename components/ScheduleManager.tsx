@@ -39,6 +39,7 @@ const StatCard: React.FC<{ icon: React.ElementType, label: string, value: string
 
 export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpdateSchedule }) => {
     const schedule = project.data.schedule || [];
+    const members = project.data.members || [];
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -156,7 +157,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
             }
 
             const endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + (genTask.duration - 1));
+            endDate.setDate(endDate.getDate() + (genTask.duration - 1));
 
             return {
                 ...(newTask as ScheduleTask),
@@ -442,7 +443,8 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
             <div className="overflow-x-auto">
                  <div className="min-w-[1000px] printable-gantt">
                     <GanttChart 
-                        tasks={schedule} 
+                        tasks={schedule}
+                        members={members}
                         projectStartDate={project.startDate}
                         onEditTask={handleOpenTaskModalForEdit}
                         onDeleteTask={handleDeleteTask}
@@ -457,6 +459,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
                 onSave={handleSaveTask}
                 task={editingTask}
                 allTasks={schedule}
+                members={members}
             />
 
             <SubTaskGeneratorModal

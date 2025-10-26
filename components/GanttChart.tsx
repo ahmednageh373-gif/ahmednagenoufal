@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 // Fix: Correct import path for types.
-import type { ScheduleTask, CriticalPathAnalysis } from '../types';
+import type { ScheduleTask, CriticalPathAnalysis, ProjectMember } from '../types';
 import { MoreHorizontal, User, Circle, CheckCircle, Clock } from 'lucide-react';
 import { TaskContextMenu } from './TaskContextMenu';
 
@@ -14,6 +14,7 @@ export interface ProcessedScheduleTask extends ScheduleTask {
 
 interface GanttChartProps {
     tasks: ScheduleTask[];
+    members: ProjectMember[];
     projectStartDate: string;
     onEditTask?: (task: ScheduleTask) => void;
     onDeleteTask?: (taskId: number) => void;
@@ -80,7 +81,7 @@ const getBarPriorityClass = (priority?: 'Low' | 'Medium' | 'High') => {
     }
 };
 
-export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, projectStartDate, onEditTask, onDeleteTask, cpmResult }) => {
+export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, members, projectStartDate, onEditTask, onDeleteTask, cpmResult }) => {
     const [activeMenuTaskId, setActiveMenuTaskId] = useState<number | null>(null);
     const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
     const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
@@ -236,145 +237,129 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, projec
                         <div className="flex-grow font-semibold text-sm">المهمة</div>
                         <div className="w-20 font-semibold text-sm text-center">المسؤول</div>
                         <div className="w-20 font-semibold text-sm text-center">الحالة</div>
-                        <div className="w-20 font-semibold text-sm text-center">الأولوية</div>
-                        <div className="w-16 font-semibold text-sm text-center">Float</div>
+                        <div className="w-10"></div>
                     </div>
-                     <div ref={listBodyRef} onScroll={handleScroll} className="overflow-y-scroll overflow-x-hidden" style={{ maxHeight: '60vh' }}>
-                        {processedTasks.map(task => (
-                            <div 
-                                key={task.id} 
-                                className={`h-12 flex items-center p-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-opacity duration-300 ${hoveredTaskId && !highlightedTaskIds.has(task.id) ? 'opacity-20' : 'opacity-100'}`}
-                                onMouseEnter={() => setHoveredTaskId(task.id)}
-                                onMouseLeave={() => setHoveredTaskId(null)}
-                            >
-                                <div className="flex-grow text-sm truncate font-medium">{task.name}</div>
-                                <div className="w-20 flex justify-center items-center">
-                                    {(task.assignees || []).slice(0, 2).map(a => <div key={a} className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold -ml-2 border-2 border-white dark:border-gray-900/50">{a.charAt(0)}</div>)}
+                    <div ref={listBodyRef} className="overflow-y-hidden" style={{ height: `${processedTasks.length * 48}px` }}>
+                        {processedTasks.map(task => {
+                            const assignees = members.filter(m => task.assignees?.includes(m.id));
+                            return (
+                                <div
+                                    key={task.id}
+                                    className={`flex items-center p-3 h-12 border-b border-gray-100 dark:border-gray-800 transition-colors ${
+                                        highlightedTaskIds.has(task.id) ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''
+                                    }`}
+                                >
+                                    <div className={`flex-grow truncate text-sm flex items-center gap-2 border-r-4 pr-2 ${getPriorityColor(task.priority)}`}>
+                                        <span className="font-mono text-xs text-slate-400">{task.id}</span>
+                                        <span className="truncate">{task.name}</span>
+                                    </div>
+                                    <div className="w-20 flex justify-center items-center -space-x-2">
+                                        {assignees.slice(0,3).map(member => (
+                                             <div key={member.id} title={member.name} className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-indigo-600 border-2 border-white dark:border-gray-900">
+                                                {member.name.charAt(0)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="w-20 flex justify-center">{getStatusIcon(task.status)}</div>
+                                    <div className="w-10 flex justify-center">
+                                        {onEditTask && onDeleteTask && (
+                                            <button onClick={(e) => handleMenuClick(e, task.id)} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
+                                                <MoreHorizontal size={18} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="w-20 flex justify-center">{getStatusIcon(task.status)}</div>
-                                <div className="w-20 flex justify-center"><div className={`w-3/4 h-1.5 rounded-full border-2 ${getPriorityColor(task.priority)}`}></div></div>
-                                <div className="w-16 text-sm font-mono text-center">{cpmResult ? (cpmResult.totalFloat[task.id] ?? '-') : '-'}</div>
-                                {onEditTask && onDeleteTask && (
-                                     <button onClick={(e) => handleMenuClick(e, task.id)} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 p-1 rounded-full no-print">
-                                        <MoreHorizontal size={16} />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
                 {/* Timeline (Right Side) */}
-                <div className="flex-grow flex flex-col">
-                    <div ref={timelineHeaderRef} className="h-20 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 overflow-hidden">
-                        <div className="relative" style={{ width: projectDuration * DAY_WIDTH }}>
-                            {/* Month Headers */}
-                             {months.map(month => (
-                                 <div key={month.name} className="absolute top-0 h-10 flex items-center justify-center border-b border-l border-gray-200 dark:border-gray-800" style={{ left: month.startDay * DAY_WIDTH }}>
-                                     <span className="text-xs font-semibold px-2">{month.name}</span>
-                                 </div>
-                             ))}
-                             {/* Day Headers */}
-                             {days.map((day, i) => {
-                                 const isWeekend = day.date.getDay() === 5 || day.date.getDay() === 4; // Fri/Thu
-                                 return <div key={i} className={`absolute top-10 h-10 flex items-center justify-center text-xs border-l border-gray-200 dark:border-gray-800 ${isWeekend ? 'text-gray-400' : ''}`} style={{ left: i * DAY_WIDTH, width: DAY_WIDTH }}>{day.dayNumber}</div>
-                             })}
-                        </div>
-                    </div>
-                    <div ref={timelineBodyRef} onScroll={handleScroll} className="overflow-scroll" style={{ maxHeight: '60vh' }}>
-                        <div className="relative" style={{ width: projectDuration * DAY_WIDTH, height: processedTasks.length * 48 }}>
-                            {/* Grid Lines */}
-                            {days.map((day, i) => {
-                                const isWeekend = day.date.getDay() === 5 || day.date.getDay() === 4;
-                                return <div key={i} className={`absolute top-0 h-full border-l border-gray-200/70 dark:border-gray-800/50 ${isWeekend ? 'bg-gray-50/50 dark:bg-gray-900/20' : ''}`} style={{ left: i * DAY_WIDTH, width: DAY_WIDTH }}></div>
-                            })}
-
-                            {/* Today Marker */}
-                            {todayPosition >= 0 && todayPosition < projectDuration && (
-                                <div className="absolute top-0 h-full border-r-2 border-red-500 z-10" style={{ left: todayPosition * DAY_WIDTH }}>
-                                    <div className="absolute -top-1.5 -right-[9px] text-xs text-white bg-red-500 rounded-full w-5 h-5 flex items-center justify-center font-bold">!</div>
+                <div className="flex-grow overflow-x-auto" onScroll={handleScroll}>
+                    <div ref={timelineHeaderRef} className="h-20 border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-gray-50 dark:bg-gray-900 z-10" style={{ width: `${projectDuration * DAY_WIDTH}px` }}>
+                        {/* Month Headers */}
+                        <div className="h-10 flex border-b border-gray-200 dark:border-gray-800">
+                            {months.map((month, i) => (
+                                <div key={i} className="flex items-center justify-center font-semibold text-sm border-l border-gray-200 dark:border-gray-800" style={{ width: `${(days.filter(d => d.date.toLocaleString('ar-SA', {month:'long', year:'numeric'}) === month.name).length) * DAY_WIDTH}px` }}>
+                                    {month.name}
                                 </div>
-                            )}
-
-                            {/* Task Bars */}
-                            {processedTasks.map((task, index) => {
-                                const isCritical = cpmResult?.criticalActivityIds.includes(task.id);
-                                const criticalPathColors = {
-                                    bg: 'bg-red-100 dark:bg-red-500/10 group-hover:bg-red-200 dark:group-hover:bg-red-500/20',
-                                    fill: 'bg-red-500',
-                                };
-                                const barColors = isCritical ? criticalPathColors : getBarStatusColors(task.status);
-                                const priorityClass = getBarPriorityClass(task.priority);
-
+                            ))}
+                        </div>
+                        {/* Day Headers */}
+                        <div className="h-10 flex">
+                            {days.map((day, i) => {
+                                const isWeekend = day.date.getDay() === 4 || day.date.getDay() === 5; // Thurs, Fri
                                 return (
-                                    <div 
-                                        key={task.id} 
-                                        className={`absolute h-12 flex items-center group transition-opacity duration-300 ${hoveredTaskId && !highlightedTaskIds.has(task.id) ? 'opacity-20' : 'opacity-100'}`}
-                                        style={{ top: index * 48, left: 0, width: projectDuration * DAY_WIDTH }}
-                                        onMouseEnter={() => setHoveredTaskId(task.id)}
-                                        onMouseLeave={() => setHoveredTaskId(null)}
-                                    >
-                                        {/* Baseline Bar */}
-                                        {task.originalStartDay != null && task.originalDuration != null && (
-                                            <div
-                                                className="absolute h-4 top-5 bg-gray-300 dark:bg-gray-600 rounded opacity-80"
-                                                style={{ left: task.originalStartDay * DAY_WIDTH, width: task.originalDuration * DAY_WIDTH }}
-                                                title={`Original: ${task.originalStart} to ${task.originalEnd}`}
-                                            />
-                                        )}
-                                        
-                                        {/* Main Task Bar */}
-                                        <div
-                                            className={`absolute h-8 ${onEditTask ? 'cursor-pointer' : ''} ${barColors.bg} ${priorityClass} rounded flex items-center relative overflow-hidden shadow-sm transition-colors`}
-                                            style={{ top: '8px', left: task.startDay * DAY_WIDTH, width: task.duration * DAY_WIDTH }}
-                                            onClick={() => onEditTask && onEditTask(task)}
-                                        >
-                                            <div className={`absolute top-0 right-0 h-full ${barColors.fill} rounded transition-all duration-300 ease-in-out`} style={{ width: `${task.progress}%` }}></div>
-                                            <span className="text-xs text-gray-800 dark:text-gray-100 font-semibold px-2 truncate relative z-10">{task.name}</span>
-                                        </div>
+                                    <div key={i} className={`w-[${DAY_WIDTH}px] h-full flex items-center justify-center text-xs border-l border-gray-200 dark:border-gray-800 ${isWeekend ? 'bg-gray-100 dark:bg-gray-800/50' : ''}`}>
+                                        {day.dayNumber}
                                     </div>
                                 );
                             })}
-
-                            {/* Dependency Links Overlay */}
-                            {dependencyLinks.length > 0 && (
-                                <svg
-                                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                                    style={{ width: projectDuration * DAY_WIDTH, height: processedTasks.length * 48 }}
-                                >
-                                    <defs>
-                                        <marker
-                                            id="arrowhead"
-                                            viewBox="0 0 10 10"
-                                            refX="8"
-                                            refY="5"
-                                            markerWidth="6"
-                                            markerHeight="6"
-                                            orient="auto-start-reverse"
-                                        >
-                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
-                                        </marker>
-                                    </defs>
-                                    {dependencyLinks.map(link => (
-                                        <path
-                                            key={link.key}
-                                            d={link.d}
-                                            stroke="#3b82f6"
-                                            strokeWidth="1.5"
-                                            fill="none"
-                                            markerEnd="url(#arrowhead)"
-                                            className="opacity-70"
-                                        />
-                                    ))}
-                                </svg>
-                            )}
                         </div>
+                    </div>
+                    <div ref={timelineBodyRef} className="relative" style={{ width: `${projectDuration * DAY_WIDTH}px`, height: `${processedTasks.length * 48}px` }}>
+                         {/* Grid Lines */}
+                        {days.map((_, i) => (
+                            <div key={i} className="absolute top-0 h-full border-l border-gray-100 dark:border-gray-800" style={{ left: `${i * DAY_WIDTH}px`, width: `${DAY_WIDTH}px` }}></div>
+                        ))}
+
+                        {/* Today Line */}
+                        {todayPosition >= 0 && todayPosition < projectDuration && (
+                            <div className="absolute top-0 h-full w-0.5 bg-red-500 z-10" style={{ left: `${todayPosition * DAY_WIDTH + DAY_WIDTH / 2}px` }}>
+                                <div className="absolute -top-4 -translate-x-1/2 text-xs text-red-500 font-bold">اليوم</div>
+                            </div>
+                        )}
+                        
+                        {/* Dependency Lines */}
+                        <svg width="100%" height="100%" className="absolute top-0 left-0 pointer-events-none">
+                           {dependencyLinks.map(link => (
+                               <path key={link.key} d={link.d} stroke="#4f46e5" strokeWidth="1.5" fill="none" markerEnd="url(#arrow)" />
+                           ))}
+                           <defs>
+                               <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                   <path d="M 0 0 L 10 5 L 0 10 z" fill="#4f46e5" />
+                               </marker>
+                           </defs>
+                        </svg>
+
+                        {/* Task Bars */}
+                        {processedTasks.map((task, index) => {
+                            const isCritical = cpmResult?.criticalActivityIds.includes(task.id);
+                            const barColors = getBarStatusColors(task.status);
+                            
+                            // Recovery Plan Baseline Bar
+                            const hasRecoveryBaseline = task.originalStartDay !== undefined && task.originalDuration !== undefined;
+
+                            return (
+                                <div
+                                    key={task.id}
+                                    className={`absolute h-12 flex items-center group cursor-pointer ${highlightedTaskIds.size > 0 && !highlightedTaskIds.has(task.id) ? 'opacity-30' : ''}`}
+                                    style={{ top: `${index * 48}px` }}
+                                    onMouseEnter={() => setHoveredTaskId(task.id)}
+                                    onMouseLeave={() => setHoveredTaskId(null)}
+                                    onClick={() => onEditTask && onEditTask(task)}
+                                >
+                                    {hasRecoveryBaseline && (
+                                        <div 
+                                            className="absolute h-4 bg-gray-300 dark:bg-gray-600 rounded-md opacity-70"
+                                            style={{ left: `${task.originalStartDay! * DAY_WIDTH}px`, width: `${task.originalDuration! * DAY_WIDTH}px` }}
+                                        />
+                                    )}
+                                    <div
+                                        className={`relative h-8 rounded-md flex items-center justify-between px-2 text-xs font-medium text-white ${barColors.bg} ${getBarPriorityClass(task.priority)} ${isCritical ? 'ring-2 ring-red-500' : ''}`}
+                                        style={{ left: `${task.startDay * DAY_WIDTH}px`, width: `${task.duration * DAY_WIDTH}px` }}
+                                    >
+                                        <div className={`absolute top-0 left-0 h-full rounded-md ${barColors.fill}`} style={{ width: `${task.progress}%` }}></div>
+                                        <span className="relative truncate">{task.name}</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
-
-            {activeMenuTaskId && onEditTask && onDeleteTask && (
-                <TaskContextMenu 
+             {activeMenuTaskId && onEditTask && onDeleteTask && (
+                <TaskContextMenu
                     position={menuPosition}
                     onClose={() => setActiveMenuTaskId(null)}
                     onEdit={() => onEditTask(tasks.find(t => t.id === activeMenuTaskId)!)}

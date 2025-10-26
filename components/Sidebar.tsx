@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3 } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -106,7 +106,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavItem icon={DraftingCompass} label="المخططات" viewName="drawings" activeView={activeView} onSelect={handleSelectView} />
                     <NavItem icon={FileText} label="المستندات الهندسية" viewName="docs" activeView={activeView} onSelect={handleSelectView} />
                     <NavItem icon={ShoppingCart} label="المشتريات" viewName="procurement" activeView={activeView} onSelect={handleSelectView} />
-                    <NavItem icon={Users} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} />
+                    <NavItem icon={HardHat} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} />
+                    <NavItem icon={Users} label="أعضاء المشروع" viewName="members" activeView={activeView} onSelect={handleSelectView} />
                     <NavItem icon={ClipboardCheck} label="التقييم والترميم" viewName="assessments" activeView={activeView} onSelect={handleSelectView} />
                     <NavItem icon={LayoutGrid} label="مركز المشروع" viewName="hub" activeView={activeView} onSelect={handleSelectView} />
                     <NavItem icon={Target} label="الأهداف (OKRs)" viewName="okrs" activeView={activeView} onSelect={handleSelectView} />

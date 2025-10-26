@@ -1,30 +1,66 @@
-// Basic types
-export type RiskProbability = 'Low' | 'Medium' | 'High';
-export type RiskImpact = 'Low' | 'Medium' | 'High';
-export type RiskStatus = 'Open' | 'In Progress' | 'Closed';
-export type RiskCategory = 'Financial' | 'Technical' | 'Schedule' | 'Safety' | 'Contractual';
+// Fix: Centralized type definitions for the entire application.
+
+// --- Core Project Structure ---
+
+export interface Project {
+    id: string;
+    name: string;
+    description: string;
+    startDate: string;
+    endDate?: string;
+    data: ProjectData;
+}
+
+export interface ProjectData {
+    schedule: ScheduleTask[];
+    financials: FinancialItem[];
+    riskRegister: Risk[];
+    siteLog: SiteLogEntry[];
+    workLog: WorkLogEntry[];
+    checklists: ChecklistItem[];
+    engineeringDocs: DocumentCategory[];
+    drawings: Drawing[];
+    drawingFolders: DrawingFolder[];
+    purchaseOrders: PurchaseOrder[];
+    suppliers: Supplier[];
+    quotes: Quote[];
+    items: ProjectItem[];
+    workflow: ProjectWorkflow;
+    boqReconciliation: BOQMatch[];
+    comparativeAnalysisReport: string;
+    assistantSettings: AssistantSettings;
+    objectives: Objective[];
+    keyResults: KeyResult[];
+    subcontractors: Subcontractor[];
+    subcontractorInvoices: SubcontractorInvoice[];
+    structuralAssessments: StructuralAssessment[];
+    members: ProjectMember[];
+}
+
+export interface ProjectTemplate {
+    id: string;
+    name: string;
+    description: string;
+    data: Partial<ProjectData>;
+}
+
+// --- Schedule Manager ---
+
 export type ScheduleTaskStatus = 'To Do' | 'In Progress' | 'Done';
 export type ScheduleTaskPriority = 'Low' | 'Medium' | 'High';
-export type PurchaseOrderStatus = 'Pending Approval' | 'Approved' | 'Ordered' | 'Delivered' | 'Cancelled';
-export type KeyResultStatus = 'On Track' | 'At Risk' | 'Off Track';
-export type ProjectItemStatus = 'To Do' | 'In Progress' | 'Review' | 'Done';
-export type ProjectItemPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
-export type ChecklistItemStatus = 'Pending' | 'Pass' | 'Fail' | 'N/A';
-export type ChecklistItemCategory = 'QA/QC' | 'HSE';
 
-// Core Data Structures
 export interface ScheduleTask {
     id: number;
+    wbsCode?: string;
     name: string;
     start: string;
     end: string;
     progress: number;
     dependencies: number[];
     category?: string;
-    status?: ScheduleTaskStatus;
-    priority?: ScheduleTaskPriority;
+    status: ScheduleTaskStatus;
+    priority: ScheduleTaskPriority;
     assignees?: string[];
-    wbsCode?: string;
     resourcesNeeded?: string[];
     // For recovery plan
     originalStart?: string;
@@ -33,6 +69,8 @@ export interface ScheduleTask {
     revisedEnd?: string;
     recoverySuggestion?: 'crashed' | 'fast-tracked' | 're-sequenced' | 'unchanged';
 }
+
+// --- Financial Manager ---
 
 export interface FinancialItem {
     id: string;
@@ -43,6 +81,13 @@ export interface FinancialItem {
     total: number;
 }
 
+// --- Risk Manager ---
+
+export type RiskCategory = 'Financial' | 'Technical' | 'Schedule' | 'Safety' | 'Contractual';
+export type RiskProbability = 'Low' | 'Medium' | 'High';
+export type RiskImpact = 'Low' | 'Medium' | 'High';
+export type RiskStatus = 'Open' | 'In Progress' | 'Closed';
+
 export interface Risk {
     id: string;
     description: string;
@@ -52,6 +97,8 @@ export interface Risk {
     mitigationPlan: string;
     status: RiskStatus;
 }
+
+// --- Site Tracker ---
 
 export interface SiteLogEntry {
     id: string;
@@ -69,16 +116,19 @@ export interface WorkLogEntry {
     activitiesPerformed: string;
     manpowerCount: number;
     linkedTaskIds: number[];
-    notes?: string;
 }
+
+export type ChecklistItemCategory = 'QA/QC' | 'HSE';
+export type ChecklistItemStatus = 'Pending' | 'Pass' | 'Fail' | 'N/A';
 
 export interface ChecklistItem {
     id: string;
     category: ChecklistItemCategory;
     text: string;
     status: ChecklistItemStatus;
-    notes?: string;
 }
+
+// --- Docs & Drawings ---
 
 export interface EngineeringDocument {
     id: string;
@@ -120,12 +170,9 @@ export interface DrawingFolder {
     parentId: string | null;
 }
 
-export interface AuditEntry {
-    timestamp: string;
-    user: string; // 'System (AI)' or user name
-    action: string;
-}
+// --- Procurement ---
 
+export type PurchaseOrderStatus = 'Pending Approval' | 'Approved' | 'Ordered' | 'Delivered' | 'Cancelled';
 
 export interface PurchaseOrder {
     id: string;
@@ -137,11 +184,32 @@ export interface PurchaseOrder {
     orderDate: string;
     expectedDelivery: string;
     status: PurchaseOrderStatus;
-    // New fields for smart procurement
-    supplierId?: string | null;
-    quoteId?: string | null;
-    auditLog?: AuditEntry[];
 }
+
+export interface Supplier {
+    id: string;
+    name: string;
+    trade: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    address: string;
+    performanceIndex: number;
+}
+
+export interface Quote {
+    id: string;
+    supplierId: string;
+    materialName: string;
+    unitPrice: number;
+    validUntil: string;
+    notes?: string;
+}
+
+// --- Project Hub ---
+
+export type ProjectItemStatus = 'To Do' | 'In Progress' | 'Review' | 'Done';
+export type ProjectItemPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
 
 export interface ProjectItem {
     id: string;
@@ -155,6 +223,8 @@ export interface ProjectItem {
     progress: number;
 }
 
+// --- Workflow & OKRs ---
+
 export interface ProjectWorkflow {
     projectCharter: string;
     wbs: string;
@@ -166,6 +236,8 @@ export interface Objective {
     description: string;
 }
 
+export type KeyResultStatus = 'On Track' | 'At Risk' | 'Off Track';
+
 export interface KeyResult {
     id: string;
     objectiveId: string;
@@ -174,6 +246,8 @@ export interface KeyResult {
     targetValue: number;
     status: KeyResultStatus;
 }
+
+// --- Subcontractors ---
 
 export interface Subcontractor {
     id: string;
@@ -184,6 +258,8 @@ export interface Subcontractor {
     contactPhone: string;
 }
 
+export type SubcontractorInvoiceStatus = 'Draft' | 'Submitted' | 'Approved' | 'Paid' | 'Rejected';
+
 export interface SubcontractorInvoiceItem {
     id: string;
     boqItemId?: string;
@@ -192,9 +268,6 @@ export interface SubcontractorInvoiceItem {
     unitPrice: number;
     total: number;
 }
-
-// Fix: Export the SubcontractorInvoiceStatus type.
-export type SubcontractorInvoiceStatus = 'Draft' | 'Submitted' | 'Approved' | 'Paid' | 'Rejected';
 
 export interface SubcontractorInvoice {
     id: string;
@@ -206,33 +279,19 @@ export interface SubcontractorInvoice {
     totalAmount: number;
 }
 
-// Types for Assessment & Retrofitting (Unit 5)
-export type DefectStatus = 'New' | 'Plan Generated' | 'Fixed';
+// --- Assessments ---
+
 export type DefectSeverity = 'Low' | 'Medium' | 'High' | 'Critical';
+export type DefectStatus = 'New' | 'Plan Generated' | 'Fixed';
 
 export interface Defect {
     id: string;
-    location: string; // e.g., "Column C3, Ground Floor"
-    type: string; // e.g., "Structural", "Architectural"
+    location: string;
+    type: 'Structural' | 'Architectural' | 'MEP' | 'إنشائي' | 'معماري'; // Keep both for now
     description: string;
     severity: DefectSeverity;
     status: DefectStatus;
-    photoUrl?: string; // Optional photo of the defect
-}
-
-export interface RetrofittingMaterial {
-    name: string;
-    quantity: number;
-    unit: string;
-    unitCost: number; // Estimated cost per unit in SAR
-}
-
-export interface RetrofittingPlan {
-    procedure: string[]; // Steps to fix
-    requiredMaterials: RetrofittingMaterial[];
-    requiredLaborHours: number;
-    estimatedDurationDays: number;
-    totalCost?: number; // Calculated on the client
+    photoUrl?: string;
 }
 
 export interface StructuralAssessment {
@@ -242,30 +301,34 @@ export interface StructuralAssessment {
     defects: Defect[];
 }
 
+export interface RetrofittingPlan {
+    procedure: string[];
+    requiredMaterials: { name: string; quantity: number; unit: string; unitCost: number }[];
+    requiredLaborHours: number;
+    estimatedDurationDays: number;
+    totalCost?: number;
+}
 
-export interface Supplier {
+
+// --- Project Members ---
+export type MemberRole = 'Admin' | 'Engineer' | 'Viewer';
+
+export interface ProjectMember {
     id: string;
     name: string;
-    trade: string;
-    contactPerson: string;
     email: string;
-    phone: string;
-    address: string;
-    performanceIndex: number; // 0 to 1
-}
-
-export interface Quote {
-    id: string;
-    supplierId: string;
-    materialName: string; // Should match PO itemName
-    unitPrice: number;
-    validUntil: string;
-    notes?: string;
+    role: MemberRole;
 }
 
 
+// --- Gemini Service & Analysis Types ---
 
-// AI-related types
+export interface AssistantSettings {
+    persona: 'projectManager' | 'technicalAssistant' | 'educationalConsultant';
+    tone: 'formal' | 'friendly';
+    style: 'concise' | 'detailed';
+}
+
 export interface BOQMatch {
     boqItemId: string;
     boqItemDescription: string;
@@ -274,10 +337,15 @@ export interface BOQMatch {
     matchConfidence: number;
 }
 
-export interface AssistantSettings {
-    persona: 'projectManager' | 'technicalAssistant' | 'educationalConsultant';
-    tone: 'formal' | 'friendly';
-    style: 'concise' | 'detailed';
+export interface DrawingAnalysisResult {
+    summary: string;
+    extractedText: string;
+    preliminaryBOQ: {
+        item: string;
+        description: string;
+        quantity: number;
+        unit: string;
+    }[];
 }
 
 export interface WhatIfAnalysisResult {
@@ -290,11 +358,11 @@ export interface WhatIfAnalysisResult {
 export interface CriticalPathAnalysis {
     criticalActivityIds: number[];
     projectDuration: number;
-    totalFloat: Record<number, number>; // Task ID -> Total Float
+    totalFloat: Record<number, number>;
 }
 
 export interface CostBreakdownItem {
-    costType: 'مواد' | 'عمالة' | 'معدات';
+    costType: 'Materials' | 'Labor' | 'Equipment' | 'مواد' | 'عمالة' | 'معدات';
     description: string;
     quantity: number;
     unit: string;
@@ -316,35 +384,28 @@ export interface BOQItemSentiment {
 
 export interface LocationContact {
     name: string;
-    type?: string;
-    phone?: string;
-    address?: string;
-    mapsUri?: string;
+    type: string;
+    phone: string;
+    address: string;
+    mapsUri: string;
 }
 
-export interface DrawingAnalysisResult {
-    summary: string;
-    extractedText: string;
-    preliminaryBOQ: {
-        item: string;
-        description: string;
-        quantity: number;
-        unit: string;
-    }[];
+export interface SentimentAnalysisResult {
+    sentiment: 'Positive' | 'Negative' | 'Neutral';
+    confidence: number;
+    justification: string;
 }
 
 export interface BeamSupport {
-    id?: string;
     type: 'Pin' | 'Roller' | 'Fixed';
     position: number;
 }
 
 export interface BeamLoad {
-    id?: string;
-    type: 'Point' | 'UDL'; // UDL: Uniformly Distributed Load
+    type: 'Point' | 'UDL';
     magnitude: number;
     position: number;
-    endPosition?: number; // Only for UDL
+    endPosition?: number;
 }
 
 export interface BeamAnalysisInput {
@@ -360,6 +421,21 @@ export interface BeamAnalysisResult {
     summary: string;
 }
 
+export interface ConceptualEstimateInput {
+    buildingType: string;
+    location: string;
+    floors: number;
+    totalArea: number;
+}
+
+export interface ConceptualEstimateResult {
+    estimatedCost: number;
+    estimatedDuration: number;
+    majorResources: { material: string; quantity: number; unit: string }[];
+    assumptions: string;
+    varianceReport: string;
+}
+
 export interface CuringAnalysisInput {
     concreteGrade: string;
     ambientTemp: number;
@@ -372,37 +448,12 @@ export interface CuringAnalysisResult {
     recommendations: string;
 }
 
-export interface SentimentAnalysisResult {
-    sentiment: 'Positive' | 'Negative' | 'Neutral';
-    confidence: number;
-    justification: string;
-}
-
 export interface DynamicPriceAnalysisItem {
-  itemId: string;
-  itemName: string;
-  originalUnitPrice: number;
-  dynamicUnitPrice: number;
-  justification: string;
-}
-
-export interface ConceptualEstimateInput {
-    buildingType: string;
-    location: string;
-    floors: number;
-    totalArea: number;
-}
-
-export interface ConceptualEstimateResult {
-    estimatedCost: number;
-    estimatedDuration: number;
-    majorResources: {
-        material: string;
-        quantity: number;
-        unit: string;
-    }[];
-    assumptions: string;
-    varianceReport: string;
+    itemId: string;
+    itemName: string;
+    originalUnitPrice: number;
+    dynamicUnitPrice: number;
+    justification: string;
 }
 
 export interface QualityPlanInput {
@@ -411,48 +462,5 @@ export interface QualityPlanInput {
 }
 
 export interface QualityPlanResult {
-    itpReport: string; // Inspection and Test Plan as Markdown
-}
-
-
-// Project Structure
-export interface ProjectData {
-    schedule: ScheduleTask[];
-    financials: FinancialItem[];
-    riskRegister: Risk[];
-    siteLog: SiteLogEntry[];
-    workLog: WorkLogEntry[];
-    checklists: ChecklistItem[];
-    engineeringDocs: DocumentCategory[];
-    drawings: Drawing[];
-    drawingFolders: DrawingFolder[];
-    purchaseOrders: PurchaseOrder[];
-    suppliers: Supplier[];
-    quotes: Quote[];
-    items: ProjectItem[];
-    workflow: ProjectWorkflow;
-    boqReconciliation: BOQMatch[];
-    comparativeAnalysisReport: string;
-    assistantSettings: AssistantSettings;
-    objectives: Objective[];
-    keyResults: KeyResult[];
-    subcontractors: Subcontractor[];
-    subcontractorInvoices: SubcontractorInvoice[];
-    structuralAssessments: StructuralAssessment[];
-}
-
-export interface Project {
-    id: string;
-    name: string;
-    description: string;
-    startDate: string;
-    endDate?: string;
-    data: ProjectData;
-}
-
-export interface ProjectTemplate {
-    id: string;
-    name: string;
-    description: string;
-    data: Partial<ProjectData>;
+    itpReport: string;
 }

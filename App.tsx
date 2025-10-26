@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
 // Fix: Correct import path for types.
-import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem } from './types';
+import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem, ProjectMember } from './types';
 
 // Lazy load all the main view components
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
@@ -26,6 +26,8 @@ const RecoveryPlanner = React.lazy(() => import('./components/RecoveryPlanner').
 const AssessmentManager = React.lazy(() => import('./components/AssessmentManager').then(module => ({ default: module.AssessmentManager })));
 const AuditLogViewer = React.lazy(() => import('./components/AuditLogViewer').then(module => ({ default: module.AuditLogViewer })));
 const AdvancedReporting = React.lazy(() => import('./components/AdvancedReporting'));
+const ProjectMembers = React.lazy(() => import('./components/ProjectMembers').then(module => ({ default: module.ProjectMembers })));
+
 
 const LoadingSpinner = () => (
     <div className="flex justify-center items-center h-full">
@@ -186,6 +188,10 @@ const App: React.FC = () => {
     const handleUpdateAssessments = useCallback((projectId: string, newAssessments: StructuralAssessment[]) => {
         updateProjectData(projectId, () => ({ structuralAssessments: newAssessments }));
     }, [updateProjectData]);
+    
+    const handleUpdateMembers = useCallback((projectId: string, newMembers: ProjectMember[]) => {
+        updateProjectData(projectId, () => ({ members: newMembers }));
+    }, [updateProjectData]);
 
 
     const renderView = () => {
@@ -225,6 +231,8 @@ const App: React.FC = () => {
                 return <ProcurementManager project={activeProject} onUpdatePurchaseOrders={handleUpdatePurchaseOrders} />;
             case 'subcontractors':
                 return <SubcontractorManager project={activeProject} onUpdateSubcontractors={handleUpdateSubcontractors} onUpdateInvoices={handleUpdateSubcontractorInvoices} />;
+            case 'members':
+                return <ProjectMembers project={activeProject} onUpdateMembers={handleUpdateMembers} />;
             case 'assessments':
                 return <AssessmentManager project={activeProject} onUpdateAssessments={handleUpdateAssessments} />;
             case 'hub':

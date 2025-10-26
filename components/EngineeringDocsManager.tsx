@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { Project, DocumentCategory, EngineeringDocument, FinancialItem, ScheduleTask } from '../types';
@@ -239,7 +240,7 @@ export const EngineeringDocsManager: React.FC<EngineeringDocsManagerProps> = ({ 
                         <span>{isGeneratingSchedule ? 'جاري إنشاء الجدول...' : 'رفع مستند'}</span>
                     </button>
                     <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                    <input type="file" ref={folderInputRef} onChange={handleFolderUpload} className="hidden" {...{ webkitdirectory: "", directory: "", multiple: true }} />
+                    <input type="file" ref={folderInputRef} onChange={handleFolderUpload} className="hidden" {...{ webkitdirectory: "", directory: "", multiple: true } as any} />
                 </div>
             </header>
 

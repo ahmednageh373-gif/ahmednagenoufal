@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 // Fix: Correct import path for types.
-import type { Project, SiteLogEntry, WorkLogEntry, ChecklistItem, ScheduleTask, ChecklistItemCategory, ChecklistItemStatus } from '../types';
+// Fix: Add `ScheduleTaskStatus` to the type import to resolve a TypeScript error where the type was not found.
+import type { Project, SiteLogEntry, WorkLogEntry, ChecklistItem, ScheduleTask, ChecklistItemCategory, ChecklistItemStatus, ScheduleTaskStatus } from '../types';
 import { Plus, Camera, LayoutGrid, Map as MapIcon, File, Printer, Bot, BookOpen, ClipboardList, Check, X, AlertTriangle } from 'lucide-react';
 import { SiteLogModal } from './SiteLogModal';
 import { generateChecklist } from '../services/geminiService';
@@ -240,7 +241,7 @@ export const SiteTracker: React.FC<SiteTrackerProps> = ({ project, onUpdateSiteL
             const updatedSchedule = schedule.map(task => {
                 if (newLog.linkedTaskIds.includes(task.id) && task.status !== 'Done') {
                     // Simple logic: assume some progress is made. Could be more complex.
-                    return { ...task, progress: Math.min(100, task.progress + 10), status: 'In Progress' };
+                    return { ...task, progress: Math.min(100, task.progress + 10), status: 'In Progress' as ScheduleTaskStatus };
                 }
                 return task;
             });

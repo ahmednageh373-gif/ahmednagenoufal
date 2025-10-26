@@ -28,6 +28,7 @@ const emptyProjectData = {
     subcontractors: [],
     subcontractorInvoices: [],
     structuralAssessments: [],
+    members: [],
 };
 
 export const projectTemplates: ProjectTemplate[] = [

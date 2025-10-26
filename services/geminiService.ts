@@ -123,19 +123,20 @@ ${csvData}
 
 export const extractTasksFromXER = async (xerContent: string): Promise<ScheduleTask[]> => {
     const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    const prompt = `Act as a Primavera P6 expert and data extraction specialist. The following is the text content of a Primavera P6 .XER file.
+    const prompt = `Act as a Primavera P6 expert and data extraction specialist. The following is the FULL text content of a Primavera P6 .XER file.
 Your task is to parse this file and extract the schedule activities.
-- Activities are in the 'TASK' table (starts with %T	TASK).
-- Predecessors are in the 'TASKPRED' table (starts with %T	TASKPRED).
-- Data rows start with %R.
+- Focus ONLY on the '%T TASK' and '%T TASKPRED' tables to extract the required data and ignore all other tables.
+- Activities are in the 'TASK' table (starts with %T	TASK). Data rows start with %R.
+- Predecessors are in the 'TASKPRED' table (starts with %T	TASKPRED). Data rows start with %R.
 - From the TASK table, extract: task_id, task_code, task_name, target_start_date, target_end_date.
 - From the TASKPRED table, extract: task_id, pred_task_id to build dependencies.
-For each task, provide an object with: 'id' (from task_id, as a number), 'wbsCode' (from task_code), 'name' (from task_name), 'start' (YYYY-MM-DD format), 'end' (YYYY-MM-DD format), 'progress' (default to 0), and 'dependencies' (an array of predecessor task_id numbers).
+For each task from the TASK table, provide a JSON object with: 'id' (from task_id, as a number), 'wbsCode' (from task_code), 'name' (from task_name), 'start' (formatted as YYYY-MM-DD), 'end' (formatted as YYYY-MM-DD), 'progress' (default to 0), and 'dependencies' (an array of predecessor task_id numbers, derived by matching from the TASKPRED table).
+Ensure all dependencies from the TASKPRED table are correctly mapped to their respective tasks.
 The final output must be a valid JSON array of these task objects.
 
 XER Content:
 ---
-${xerContent.substring(0, 50000)}
+${xerContent}
 ---
 `;
 
@@ -1422,5 +1423,44 @@ The output should be a single JSON object with one key: "itpReport", containing 
         return JSON.parse(response.text.trim());
     } catch (e) {
         throw new Error("Could not generate quality plan.");
+    }
+};
+
+export const generateChecklist = async (dailyActivities: string): Promise<ChecklistItem[]> => {
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const prompt = `Based on the following daily construction activities, generate a combined QA/QC and HSE checklist.
+    
+    Today's Activities: "${dailyActivities}"
+
+    Return a JSON array of checklist items. Each item must be an object with:
+    - "id": A unique string ID.
+    - "category": Either "QA/QC" or "HSE".
+    - "text": The checklist item description.
+    - "status": Default to "Pending".
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+        }
+    });
+
+    try {
+        const result = JSON.parse(response.text.trim());
+        // Ensure the format is correct
+        if (Array.isArray(result)) {
+            return result.map(item => ({
+                id: item.id || uuidv4(),
+                category: item.category === "HSE" ? "HSE" : "QA/QC",
+                text: item.text || "No description",
+                status: "Pending",
+            }));
+        }
+        return [];
+    } catch (e) {
+        console.error("Failed to parse checklist JSON:", response.text, e);
+        throw new Error("Could not generate checklist.");
     }
 };

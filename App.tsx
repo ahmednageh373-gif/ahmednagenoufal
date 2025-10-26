@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
 // Fix: Correct import path for types.
-import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment } from './types';
+import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem } from './types';
 
 // Lazy load all the main view components
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
@@ -126,6 +126,14 @@ const App: React.FC = () => {
     const handleUpdateSiteLog = useCallback((projectId: string, newLog: SiteLogEntry[]) => {
         updateProjectData(projectId, () => ({ siteLog: newLog }));
     }, [updateProjectData]);
+
+    const handleUpdateWorkLog = useCallback((projectId: string, newLog: WorkLogEntry[]) => {
+        updateProjectData(projectId, () => ({ workLog: newLog }));
+    }, [updateProjectData]);
+    
+    const handleUpdateChecklists = useCallback((projectId: string, newChecklists: ChecklistItem[]) => {
+        updateProjectData(projectId, () => ({ checklists: newChecklists }));
+    }, [updateProjectData]);
     
     const handleUpdateDrawings = useCallback((projectId: string, newDrawings: Drawing[], newFolders: DrawingFolder[]) => {
         updateProjectData(projectId, () => ({ drawings: newDrawings, drawingFolders: newFolders }));
@@ -202,7 +210,13 @@ const App: React.FC = () => {
             case 'risks':
                 return <RiskManager project={activeProject} onUpdateRisks={handleUpdateRisks} />;
             case 'site':
-                return <SiteTracker project={activeProject} onUpdateSiteLog={handleUpdateSiteLog} />;
+                return <SiteTracker
+                            project={activeProject}
+                            onUpdateSiteLog={handleUpdateSiteLog}
+                            onUpdateWorkLog={handleUpdateWorkLog}
+                            onUpdateChecklists={handleUpdateChecklists}
+                            onUpdateSchedule={handleUpdateSchedule}
+                        />;
             case 'drawings':
                 return <DrawingManager project={activeProject} onUpdateDrawings={handleUpdateDrawings} />;
             case 'docs':

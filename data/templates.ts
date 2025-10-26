@@ -5,6 +5,8 @@ const emptyProjectData = {
     financials: [],
     riskRegister: [],
     siteLog: [],
+    workLog: [],
+    checklists: [],
     engineeringDocs: [
         { id: 'cat-1', name: 'العقود والاتفاقيات', documents: [] },
         { id: 'cat-2', name: 'المواصفات الفنية', documents: [] },

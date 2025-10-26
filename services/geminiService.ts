@@ -1,6 +1,7 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 // Fix: Add ScheduleTaskStatus and ScheduleTaskPriority to the type import.
-import type { Project, FinancialItem, ScheduleTask, Risk, BeamAnalysisInput, BeamAnalysisResult, DrawingAnalysisResult, WhatIfAnalysisResult, CriticalPathAnalysis, DetailedCostBreakdown, CostBreakdownItem, BOQItemSentiment, PurchaseOrder, LocationContact, SentimentAnalysisResult, BeamSupport, BeamLoad, DynamicPriceAnalysisItem, CuringAnalysisInput, CuringAnalysisResult, ConceptualEstimateInput, ConceptualEstimateResult, QualityPlanInput, QualityPlanResult, ScheduleTaskStatus, ScheduleTaskPriority, Supplier, Quote, StructuralAssessment, BOQMatch, Defect, RetrofittingPlan } from "../types";
+import type { Project, FinancialItem, ScheduleTask, Risk, BeamAnalysisInput, BeamAnalysisResult, DrawingAnalysisResult, WhatIfAnalysisResult, CriticalPathAnalysis, DetailedCostBreakdown, CostBreakdownItem, BOQItemSentiment, PurchaseOrder, LocationContact, SentimentAnalysisResult, BeamSupport, BeamLoad, DynamicPriceAnalysisItem, CuringAnalysisInput, CuringAnalysisResult, ConceptualEstimateInput, ConceptualEstimateResult, QualityPlanInput, QualityPlanResult, ScheduleTaskStatus, ScheduleTaskPriority, Supplier, Quote, StructuralAssessment, BOQMatch, Defect, RetrofittingPlan, ChecklistItem } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 
 // This will allow using the XLSX library loaded from the CDN in index.html
@@ -223,211 +224,131 @@ export const processBoqToSchedule = async (items: FinancialItem[], projectStartD
     return finalSchedule;
 };
 
+// Fix: Add the missing generateProjectCharter function, which was being imported in WorkflowArchitect.tsx.
+export const generateProjectCharter = async (project: Project, inputs: Record<string, string>): Promise<string> => {
+    const prompt = `Act as a senior project manager. Generate a comprehensive Project Charter in Markdown format for the following project.
+    
+    Project Details:
+    - Name: ${project.name}
+    - Description: ${project.description}
+    - Start Date: ${project.startDate}
+    - End Date: ${project.endDate || 'Not specified'}
+
+    User-provided Inputs:
+    - High-level Requirements: ${inputs.requirements}
+    - Feasibility Study Summary: ${inputs.feasibility}
+    - Key Stakeholders: ${inputs.stakeholders}
+    - Initial Risks: ${inputs.risks}
+
+    The Project Charter should be well-structured and include at least the following sections:
+    1.  Project Title and Description
+    2.  Project Purpose/Justification
+    3.  Measurable Objectives and Success Criteria
+    4.  High-Level Requirements
+    5.  Assumptions and Constraints
+    6.  High-Level Risks
+    7.  Milestone Schedule
+    8.  Summary Budget
+    9.  Key Stakeholders
+    10. Project Approval Requirements (what constitutes success)
+    11. Project Manager Assignment and Authority Level
+
+    Provide a professional and detailed document.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro', // Using pro for a more detailed document
+        contents: prompt,
+    });
+    return response.text;
+};
+
 export const generateWBS = async (project: Project): Promise<string> => {
     const prompt = `Generate a Work Breakdown Structure (WBS) in markdown list format for a project with the following details:
     Name: ${project.name}
     Description: ${project.description}
     Start Date: ${project.startDate}
-    
-    The WBS should be hierarchical and cover all major phases from planning to closeout.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    End Date: ${project.endDate || 'Not specified'}
+
+    The WBS should cover major project phases like:
+    1. Project Management
+    2. Engineering & Design
+    3. Procurement
+    4. Construction (with sub-phases like Substructure, Superstructure, Finishes)
+    5. Commissioning & Handover
+
+    Provide a detailed, multi-level list.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
     return response.text;
 };
 
 export const generateWBSFromSchedule = async (schedule: ScheduleTask[]): Promise<string> => {
-    const taskNames = schedule.map(t => t.name).join('\n - ');
-    const prompt = `Given the following list of tasks from a project schedule, generate a hierarchical Work Breakdown Structure (WBS) in markdown list format. Group related tasks under appropriate parent items.
+    const scheduleSummary = schedule.map(t => `- ${t.name} (Category: ${t.category || 'None'})`).join('\n');
+    const prompt = `Based on the following list of project activities and their categories, generate a hierarchical Work Breakdown Structure (WBS) in markdown list format. Group related tasks under appropriate parent levels.
 
-Tasks:
-- ${taskNames}
-`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+Activities:
+${scheduleSummary}
+
+The WBS should be logical and well-structured.`;
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
     return response.text;
 };
 
-
-// --- RULE-BASED COST BREAKDOWN ---
 export const getCostBreakdown = async (item: FinancialItem): Promise<DetailedCostBreakdown> => {
-    const breakdown: { items: CostBreakdownItem[], overheadsPercentage: number, profitPercentage: number } = {
-        items: [],
-        overheadsPercentage: 15,
-        profitPercentage: 10,
-    };
+    const prompt = `Act as an expert pricing and execution engineer. Your task is to provide a detailed cost breakdown for ONE unit of the following Bill of Quantities (BOQ) item.
 
-    if (item.item.includes('Concrete') || item.item.includes('خرسانة') || item.item.includes('Column') || item.item.includes('Slab')) {
-        breakdown.items.push({ costType: 'مواد', description: 'أسمنت', quantity: 0.4, unit: 'طن', estimatedUnitPrice: 350, estimatedTotal: 0.4 * 350 });
-        breakdown.items.push({ costType: 'مواد', description: 'حديد تسليح', quantity: 100, unit: 'كجم', estimatedUnitPrice: 3.5, estimatedTotal: 100 * 3.5 });
-        breakdown.items.push({ costType: 'عمالة', description: 'نجار', quantity: 8, unit: 'ساعة', estimatedUnitPrice: 25, estimatedTotal: 8 * 25 });
-        breakdown.items.push({ costType: 'عمالة', description: 'حداد', quantity: 8, unit: 'ساعة', estimatedUnitPrice: 25, estimatedTotal: 8 * 25 });
-        breakdown.items.push({ costType: 'معدات', description: 'خلاطة', quantity: 4, unit: 'ساعة', estimatedUnitPrice: 100, estimatedTotal: 4 * 100 });
-    } else if (item.item.includes('Excavation') || item.item.includes('حفر')) {
-        breakdown.items.push({ costType: 'معدات', description: 'حفار', quantity: 8, unit: 'ساعة', estimatedUnitPrice: 300, estimatedTotal: 8 * 300 });
-        breakdown.items.push({ costType: 'عمالة', description: 'عامل', quantity: 8, unit: 'ساعة', estimatedUnitPrice: 20, estimatedTotal: 8 * 20 });
-    } else {
-        // Fallback for other items
-        const materialCost = item.unitPrice * 0.5;
-        const laborCost = item.unitPrice * 0.3;
-        const equipmentCost = item.unitPrice * 0.2;
-        breakdown.items.push({ costType: 'مواد', description: 'مواد متنوعة', quantity: 1, unit: 'مقطوعية', estimatedUnitPrice: materialCost, estimatedTotal: materialCost });
-        breakdown.items.push({ costType: 'عمالة', description: 'عمالة متنوعة', quantity: 1, unit: 'مقطوعية', estimatedUnitPrice: laborCost, estimatedTotal: laborCost });
-        breakdown.items.push({ costType: 'معدات', description: 'معدات متنوعة', quantity: 1, unit: 'مقطوعية', estimatedUnitPrice: equipmentCost, estimatedTotal: equipmentCost });
-    }
-    
-    // Normalize totals to match unit price
-    const estimatedDirectCost = breakdown.items.reduce((sum, i) => sum + i.estimatedTotal, 0);
-    const scaleFactor = item.unitPrice / (estimatedDirectCost * (1 + (breakdown.overheadsPercentage / 100)) * (1 + (breakdown.profitPercentage / 100)));
-    
-    breakdown.items = breakdown.items.map(i => ({
-        ...i,
-        estimatedUnitPrice: i.estimatedUnitPrice * scaleFactor,
-        estimatedTotal: i.estimatedTotal * scaleFactor
-    }));
+**Crucial Instruction:** You must derive the component quantities based on the main item's unit of measurement. For composite items (like a fence measured in linear meters), calculate the required quantities of base materials (like concrete in m³, rebar in kg) for that single unit. For example, to price 1 linear meter of a fence, you must first calculate the volume of its concrete footing. State any assumptions you make (e.g., footing dimensions) if not specified in the description.
 
-    return breakdown;
-};
+**BOQ Item Details:**
+- Item Description: "${item.item}"
+- Unit of Measurement: ${item.unit}
+- Tender Unit Price: ${item.unitPrice} SAR
 
-// --- NEWLY IMPLEMENTED AI FUNCTIONS ---
+**Required Output:**
+Break down the cost for ONE '${item.unit}' into three categories: 'مواد' (Materials), 'عمالة' (Labor), and 'معدات' (Equipment).
+For each component, provide:
+- description: The specific material, labor type, or equipment.
+- quantity: The consumption rate of this component for ONE unit of the main BOQ item.
+- unit: The component's own unit (e.g., 'm3', 'hour', 'day').
+- estimatedUnitPrice: The market price for one unit of the component.
+- estimatedTotal: The total cost for this component (quantity * estimatedUnitPrice).
 
-export const createProjectFromTenderText = async (tenderText: string): Promise<Omit<Project, 'id'>> => {
-    const prompt = `Analyze the following tender document text and extract the project details. Provide the output as a JSON object with keys: "name", "description", and "startDate". The start date should be a reasonable estimate based on the text, defaulting to next month if not specified.
+Also provide an estimated 'overheadsPercentage' (e.g., 15 for 15%) and 'profitPercentage' (e.g., 10 for 10%).
+The final JSON structure must follow this schema.`;
 
-Tender Text:
----
-${tenderText}
----
-`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    const result = JSON.parse(response.text);
-    return {
-        name: result.name || 'New Project from Tender',
-        description: result.description || '',
-        startDate: result.startDate || new Date().toISOString().split('T')[0],
-        data: {
-            schedule: [], financials: [], riskRegister: [], siteLog: [], engineeringDocs: [], drawings: [], drawingFolders: [],
-            purchaseOrders: [], items: [], workflow: { projectCharter: '', wbs: '' }, boqReconciliation: [],
-            comparativeAnalysisReport: '', assistantSettings: { persona: 'projectManager', tone: 'formal', style: 'concise' },
-            objectives: [], keyResults: [], subcontractors: [], subcontractorInvoices: [], structuralAssessments: [], suppliers: [], quotes: []
-        },
-    };
-};
-
-export const suggestRisks = async (project: Project): Promise<Omit<Risk, 'id' | 'status'>[]> => {
-    const prompt = `For a construction project named "${project.name}" with description "${project.description}", suggest 5 potential risks. For each risk, provide a description, category ('Financial', 'Technical', 'Schedule', 'Safety', 'Contractual'), probability ('Low', 'Medium', 'High'), impact ('Low', 'Medium', 'High'), and a mitigationPlan. Return as a JSON array.`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    return JSON.parse(response.text);
-};
-
-export const analyzeFinancials = async (financials: FinancialItem[]): Promise<string> => {
-    const summary = financials.slice(0, 10).map(i => `${i.item}: ${i.total}`).join('\n');
-    const prompt = `Analyze the following financial items from a Bill of Quantities. Provide a brief summary, identify the top 3 cost drivers, and point out any potential financial risks or opportunities (e.g., items with very high costs, unusual unit prices). Format as markdown.\n\n${summary}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
-
-export const getSaudiCodeAnalysis = async (project: Project, itemIds: string[], userQuery: string): Promise<string> => {
-    const items = project.data.financials.filter(i => itemIds.includes(i.id));
-    const itemsText = items.map(i => `- ${i.item} (Quantity: ${i.quantity} ${i.unit}, Unit Price: ${i.unitPrice})`).join('\n');
-    const prompt = `As a Saudi Building Code (SBC) consultant, answer the user's query regarding the following BOQ items for the project "${project.name}".\n\nItems:\n${itemsText}\n\nUser Query: "${userQuery}"\n\nProvide a detailed answer referencing SBC sections where applicable. Format as markdown.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
-
-export const analyzeBOQForCodeCompliance = async (financials: FinancialItem[]): Promise<string> => {
-    const prompt = `Review the following Bill of Quantities items and identify any potential non-compliance issues or items that require special attention according to the Saudi Building Code (SBC). For each identified item, explain the potential issue. If no issues are found, state that. Format as markdown.\n\nItems:\n${financials.map(i => `- ${i.item}`).join('\n')}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
-
-export const analyzeBOQSentiments = async (financials: FinancialItem[]): Promise<BOQItemSentiment[]> => {
-    const prompt = `Analyze the descriptions of the following BOQ items for potential ambiguity, risk, or unusual wording (sentiment). For each item, provide its id, sentiment ('Positive', 'Negative', 'Neutral'), and a brief justification. Return as a JSON array.\n\nItems:\n${financials.map(i => JSON.stringify({id: i.id, item: i.item})).join('\n')}`;
-    
     const responseStream = await ai.models.generateContentStream({
         model: 'gemini-2.5-flash',
         contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    
-    let responseText = '';
-    for await (const chunk of responseStream) {
-        responseText += chunk.text;
-    }
-    try {
-        const jsonText = responseText.trim();
-        if (!jsonText) throw new Error("AI response was empty.");
-        return JSON.parse(jsonText);
-    } catch (e) {
-        console.error("Failed to parse BOQ Sentiments JSON:", responseText, e);
-        throw new Error("Could not analyze BOQ sentiments. The AI response was invalid.");
-    }
-};
-
-export const analyzeBOQPrices = async (financials: FinancialItem[]): Promise<string> => {
-    const prompt = `Analyze the unit prices in this BOQ. Identify any prices that seem unusually high or low for the Saudi market and suggest what could be the reason. Format as a markdown report.\n\nBOQ:\n${financials.map(i => `- ${i.item}: ${i.unitPrice} SAR/${i.unit}`).join('\n')}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
-
-export const generatePurchaseOrderFromBOQItem = async (item: FinancialItem): Promise<Omit<PurchaseOrder, 'id' | 'total'>> => {
-    return {
-        itemName: item.item,
-        supplier: '',
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        orderDate: new Date().toISOString().split('T')[0],
-        expectedDelivery: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'Pending Approval',
-    };
-};
-
-export const analyzeSitePhoto = async (userNotes: string, imageFile: File): Promise<string> => {
-    const imagePart = await fileToGenerativePart(imageFile);
-    const prompt = `As a construction site manager, analyze the attached site photo. Consider the user's notes: "${userNotes}". Provide a report in markdown covering:
-- Progress Assessment
-- Quality of Work
-- Safety Observations
-- Materials on Site`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
-        contents: [{ parts: [{ text: prompt }, imagePart] }],
-    });
-    return response.text;
-};
-
-export const generateDocumentDraft = async (project: Project, prompt: string, categoryName: string): Promise<{ title: string; content: string }> => {
-    const fullPrompt = `For a project named "${project.name}", generate a document draft for the category "${categoryName}". User prompt: "${prompt}". The output should be a JSON object with "title" and "content" (in markdown).`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: fullPrompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    return JSON.parse(response.text);
-};
-
-export const performWhatIfAnalysis = async (schedule: ScheduleTask[], query: string): Promise<WhatIfAnalysisResult> => {
-    const prompt = `Given a project schedule, perform a "what-if" analysis based on the user's query. Provide a summary of the impact, the new estimated end date, cost impact, and critical path impact. Return a JSON object with keys: "impactSummary", "newEndDate", "costImpact", "criticalPathImpact".\n\nSchedule Summary: ${schedule.length} tasks, from ${schedule[0]?.start} to ${schedule[schedule.length-1]?.end}\n\nQuery: "${query}"`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    return JSON.parse(response.text);
-};
-
-export const calculateCriticalPath = async (schedule: ScheduleTask[]): Promise<CriticalPathAnalysis> => {
-    const prompt = `Calculate the critical path for the following project schedule. The schedule lists tasks with id, duration (end-start), and dependencies. Return a JSON object with "criticalActivityIds" (array of numbers), "projectDuration" (number), and "totalFloat" (object mapping task id to float days).\n\nTasks:\n${schedule.map(t => JSON.stringify({id: t.id, start:t.start, end:t.end, dependencies: t.dependencies})).join('\n')}`;
-    
-    const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-pro',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
+        config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    items: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                costType: { type: Type.STRING, enum: ['مواد', 'عمالة', 'معدات'] },
+                                description: { type: Type.STRING },
+                                quantity: { type: Type.NUMBER },
+                                unit: { type: Type.STRING },
+                                estimatedUnitPrice: { type: Type.NUMBER },
+                                estimatedTotal: { type: Type.NUMBER },
+                            }
+                        }
+                    },
+                    overheadsPercentage: { type: Type.NUMBER },
+                    profitPercentage: { type: Type.NUMBER },
+                }
+            }
+        }
     });
 
     let responseText = '';
@@ -442,30 +363,334 @@ export const calculateCriticalPath = async (schedule: ScheduleTask[]): Promise<C
         }
         return JSON.parse(jsonText);
     } catch (e) {
-        console.error("Failed to parse Critical Path JSON:", responseText, e);
-        throw new Error("Could not calculate critical path. The AI response was invalid.");
+        console.error("Failed to parse Cost Breakdown JSON:", responseText, e);
+        throw new Error("Could not generate cost breakdown. The AI response was invalid.");
     }
 };
+
+export const analyzeFinancials = async (financials: FinancialItem[]): Promise<string> => {
+    if (financials.length === 0) {
+        return "No financial data available to analyze.";
+    }
+    const summary = financials.map(item => `${item.item}: ${item.total} SAR`).join('\n');
+    const totalCost = financials.reduce((sum, item) => sum + item.total, 0);
+
+    const prompt = `Analyze the following Bill of Quantities summary. The total cost is ${totalCost.toLocaleString()} SAR.
+    
+    Summary:
+    ${summary}
+    
+    Provide a concise financial analysis in Markdown format. Highlight the top 3 cost drivers and suggest potential areas for cost savings or value engineering.`;
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
+    return response.text;
+};
+
+export const suggestRisks = async (project: Project): Promise<Omit<Risk, 'id' | 'status'>[]> => {
+    const prompt = `Based on the following project description, suggest 3 to 5 potential risks. For each risk, provide a description, category, probability, impact, and a mitigation plan.
+    
+    Project Name: ${project.name}
+    Description: ${project.description}
+    Start Date: ${project.startDate}
+    
+    Format the output as a JSON array of objects.`;
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        description: { type: Type.STRING },
+                        category: { type: Type.STRING, enum: ['Financial', 'Technical', 'Schedule', 'Safety', 'Contractual'] },
+                        probability: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
+                        impact: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
+                        mitigationPlan: { type: Type.STRING },
+                    }
+                }
+            }
+        }
+    });
+    
+    let responseText = '';
+    for await (const chunk of responseStream) {
+        responseText += chunk.text;
+    }
+
+    try {
+         const jsonText = responseText.trim();
+        if (!jsonText) {
+             throw new Error("AI response was empty.");
+        }
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Failed to parse suggested risks JSON:", responseText, e);
+        throw new Error("Could not suggest risks. The AI response was invalid.");
+    }
+};
+
+export const analyzeSitePhoto = async (userNotes: string, photo: File): Promise<string> => {
+    const imagePart = await fileToGenerativePart(photo);
+
+    const prompt = `Analyze this site photo from a civil engineering project manager's perspective.
+    
+    User notes (for context): "${userNotes || 'No notes provided.'}"
+    
+    Your analysis should be in Markdown and cover:
+    1.  **Progress Assessment:** What stage of work is shown?
+    2.  **Quality Check:** Are there any visible quality issues (e.g., concrete honeycombing, rebar spacing)?
+    3.  **Safety Compliance:** Identify any safety violations (e.g., missing PPE, unsafe scaffolding, poor housekeeping).
+    4.  **Recommendations:** Suggest immediate actions or points to verify.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: { parts: [{ text: prompt }, imagePart] },
+    });
+    return response.text;
+};
+
+export const createProjectFromTenderText = async (tenderText: string): Promise<Omit<Project, 'id'>> => {
+    const prompt = `Analyze the following tender document text and extract the necessary information to create a new project structure. 
+    
+    Tender Text:
+    ---
+    ${tenderText}
+    ---
+    
+    Extract the following and format as JSON:
+    1.  'name': A suitable project name.
+    2.  'description': A concise project description.
+    3.  'startDate': The estimated project start date (format: YYYY-MM-DD).
+    4.  'schedule': An array of 3-5 high-level schedule tasks with id, name, start, end, progress (0), and dependencies ([]).
+    5.  'financials': An array of 3-5 key financial items (BOQ) with id, item, quantity, unit, unitPrice, and total.
+    6.  'riskRegister': An array of 1-2 potential risks based on the tender.
+    
+    Use reasonable estimations if some data is not explicitly mentioned. The entire output must be a single JSON object.`;
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    name: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    startDate: { type: Type.STRING },
+                    schedule: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.NUMBER },
+                                name: { type: Type.STRING },
+                                start: { type: Type.STRING },
+                                end: { type: Type.STRING },
+                                progress: { type: Type.NUMBER },
+                                dependencies: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                            }
+                        }
+                    },
+                    financials: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                item: { type: Type.STRING },
+                                quantity: { type: Type.NUMBER },
+                                unit: { type: Type.STRING },
+                                unitPrice: { type: Type.NUMBER },
+                                total: { type: Type.NUMBER },
+                            }
+                        }
+                    },
+                    riskRegister: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                category: { type: Type.STRING, enum: ['Financial', 'Technical', 'Schedule', 'Safety', 'Contractual'] },
+                                probability: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
+                                impact: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
+                                mitigationPlan: { type: Type.STRING },
+                                status: { type: Type.STRING, enum: ['Open', 'In Progress', 'Closed'] },
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    let responseText = '';
+    for await (const chunk of responseStream) {
+        responseText += chunk.text;
+    }
+    
+    try {
+        const jsonText = responseText.trim();
+        if (!jsonText) {
+             throw new Error("AI response was empty.");
+        }
+        const parsed = JSON.parse(jsonText);
+        // Construct the full project data structure
+        const projectData: Omit<Project, 'id'> = {
+            name: parsed.name,
+            description: parsed.description,
+            startDate: parsed.startDate,
+            data: {
+                schedule: parsed.schedule || [],
+                financials: parsed.financials || [],
+                riskRegister: parsed.riskRegister || [],
+                siteLog: [],
+                workLog: [],
+                checklists: [],
+                engineeringDocs: [],
+                drawings: [],
+                drawingFolders: [],
+                purchaseOrders: [],
+                suppliers: [],
+                quotes: [],
+                items: [],
+                workflow: { projectCharter: '', wbs: '' },
+                boqReconciliation: [],
+                comparativeAnalysisReport: '',
+                assistantSettings: { persona: 'projectManager', tone: 'formal', style: 'concise' },
+                objectives: [],
+                keyResults: [],
+                subcontractors: [],
+                subcontractorInvoices: [],
+                structuralAssessments: [],
+            }
+        };
+        return projectData;
+
+    } catch (e) {
+        console.error("Failed to parse project from tender JSON:", responseText, e);
+        throw new Error("Could not create project from tender. The AI response was invalid.");
+    }
+};
+
+export const generateDocumentDraft = async (project: Project, userPrompt: string, categoryName: string): Promise<{ title: string; content: string }> => {
+    const prompt = `As a senior engineer, create a draft for a document in the category "${categoryName}" for the project "${project.name}".
+    
+    User's Request: "${userPrompt}"
+    
+    The output should be a JSON object with two keys: "title" (a suitable document title) and "content" (the full document content in Markdown format).`;
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    title: { type: Type.STRING },
+                    content: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    
+     let responseText = '';
+    for await (const chunk of responseStream) {
+        responseText += chunk.text;
+    }
+
+    try {
+        const jsonText = responseText.trim();
+        if (!jsonText) {
+             throw new Error("AI response was empty.");
+        }
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Failed to parse document draft JSON:", responseText, e);
+        throw new Error("Could not generate document draft. The AI response was invalid.");
+    }
+};
+
+export const generateSubTasksFromDescription = async (description: string): Promise<{ name: string; duration: number; predecessors: string[] }[]> => {
+    const prompt = `Break down the following high-level construction activity into a detailed list of sub-tasks. For each sub-task, estimate its duration in days and identify its immediate predecessors from the generated list.
+    
+    High-Level Activity: "${description}"
+    
+    The output must be a JSON array of objects, where each object has "name", "duration" (an integer), and "predecessors" (an array of strings).`;
+    
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        name: { type: Type.STRING },
+                        duration: { type: Type.NUMBER },
+                        predecessors: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    }
+                }
+            }
+        }
+    });
+
+    let responseText = '';
+    for await (const chunk of responseStream) {
+        responseText += chunk.text;
+    }
+    
+    try {
+        const jsonText = responseText.trim();
+        if (!jsonText) {
+             throw new Error("AI response was empty.");
+        }
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Failed to parse sub-tasks JSON:", responseText, e);
+        throw new Error("Could not generate sub-tasks. The AI response was invalid.");
+    }
+};
+
+
+// --- Analysis Center Functions ---
 
 export const reconcileBOQWithTakeoff = async (boqFile: File, takeoffFile: File): Promise<BOQMatch[]> => {
     const boqCsv = await excelFileToCsvText(boqFile);
     const takeoffCsv = await excelFileToCsvText(takeoffFile);
 
-    const prompt = `Reconcile the two attached CSV data sets: a Bill of Quantities (BOQ) and a Quantity Takeoff. Match items between them, even if descriptions differ. For each match, provide the BOQ item ID (if available, otherwise use row index), BOQ description, takeoff file name, takeoff description, and a match confidence score (0-1). Return a JSON array.
+    const prompt = `Reconcile the two following CSV files: a Bill of Quantities (BOQ) and a Quantity Takeoff sheet. Match items between them even if the descriptions are not identical.
+    
+    BOQ CSV Data:
+    ---
+    ${boqCsv}
+    ---
+    
+    Takeoff CSV Data:
+    ---
+    ${takeoffCsv}
+    ---
+    
+    Return a JSON array of matches. For each match, provide the BOQ item ID, BOQ description, takeoff file name, takeoff description, and a confidence score (0-1).`;
 
----
-BOQ CSV Data from file: ${boqFile.name}
-${boqCsv}
----
-Takeoff CSV Data from file: ${takeoffFile.name}
-${takeoffCsv}
----
-`;
     const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: prompt,
-        config: { 
-            responseMimeType: 'application/json',
+        config: {
+            responseMimeType: "application/json",
             responseSchema: {
                 type: Type.ARRAY,
                 items: {
@@ -479,9 +704,9 @@ ${takeoffCsv}
                     }
                 }
             }
-        },
+        }
     });
-    
+
     let responseText = '';
     for await (const chunk of responseStream) {
         responseText += chunk.text;
@@ -492,334 +717,603 @@ ${takeoffCsv}
         if (!jsonText) {
              throw new Error("AI response was empty.");
         }
-        const result = JSON.parse(jsonText);
-        // Add the takeoff filename to the result if not present
-        return result.map((item: any) => ({ ...item, takeoffFile: item.takeoffFile || takeoffFile.name }));
+        return JSON.parse(jsonText);
     } catch (e) {
-        console.error("Failed to parse reconciliation JSON:", responseText, e);
-        throw new Error("Could not reconcile BOQ with takeoff. The AI response was invalid.");
+        console.error("Failed to parse BOQ reconciliation JSON:", responseText, e);
+        throw new Error("Could not reconcile BOQs. The AI response was invalid.");
     }
 };
 
-export const runComparativeAnalysis = async (boqFile: File, comparisonFile: File): Promise<string> => {
-    const boqCsv = await excelFileToCsvText(boqFile);
+export const runComparativeAnalysis = async (baseBoqFile: File, comparisonFile: File): Promise<string> => {
+    const baseCsv = await excelFileToCsvText(baseBoqFile);
     const comparisonCsv = await excelFileToCsvText(comparisonFile);
     
-    const prompt = `Analyze and compare the two attached financial documents (a base BOQ and a comparison file), provided as CSV data. Generate a detailed markdown report highlighting key differences in quantities, unit prices, and totals. Provide insights on potential savings or overruns.
+    const prompt = `You are a senior cost control engineer. Perform a comparative analysis between the base BOQ and a financial comparison file (e.g., a subcontractor's quotation).
+    
+    Base BOQ (Our Estimate):
+    ---
+    ${baseCsv}
+    ---
+    
+    Comparison File (Their Quote):
+    ---
+    ${comparisonCsv}
+    ---
+    
+    Provide a detailed report in Markdown format. The report should:
+    1.  Match items between the two files.
+    2.  Highlight significant price differences (variances).
+    3.  Identify any items present in one file but missing in the other (scope gap).
+    4.  Conclude with a summary and recommendations (e.g., "Negotiate on steel prices," "Clarify scope for electrical works").`;
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+    });
+    return response.text;
+};
 
----
-Base BOQ CSV Data from file: ${boqFile.name}
-${boqCsv}
----
-Comparison File CSV Data from file: ${comparisonFile.name}
-${comparisonCsv}
----
-`;
-    const responseStream = await ai.models.generateContentStream({
+export const analyzeBOQForValueEngineering = async (financials: FinancialItem[]): Promise<string> => {
+    const boqSummary = financials.map(item => `- ${item.item} (Unit: ${item.unit}, Total: ${item.total} SAR)`).join('\n');
+    const prompt = `Act as a value engineering expert. Analyze the following BOQ summary and provide a detailed report in Markdown format.
+
+BOQ:
+${boqSummary}
+
+Your report should:
+1.  Identify the top 3-5 items with the highest potential for cost savings.
+2.  For each identified item, suggest specific alternative materials, construction methods, or design modifications.
+3.  For each suggestion, explain the potential cost savings, impact on quality, and effect on the project schedule.
+4.  Conclude with a summary of the most viable value engineering proposals.`;
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+    });
+    return response.text;
+};
+
+export const analyzeBOQForCodeCompliance = async (financials: FinancialItem[]): Promise<string> => {
+    const boqSummary = financials.map(item => `- ${item.item}`).join('\n');
+    const prompt = `As an expert on the Saudi Building Code (SBC), review the following list of BOQ items.
+    
+Items:
+${boqSummary}
+
+Identify any items that might have specific or critical requirements under the SBC. For each identified item, provide a brief explanation of the relevant SBC chapter or requirement (e.g., "Fire resistance rating for partition walls as per SBC 201," "Seismic design considerations for structural columns as per SBC 301"). Format the response as a Markdown list. If no specific critical requirements are apparent, state that the items appear to be standard.`;
+
+    const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
     });
+    return response.text;
+};
+
+export const getSaudiCodeAnalysis = async (project: Project, itemIds: string[], userQuery: string): Promise<string> => {
+    const selectedItems = project.data.financials.filter(item => itemIds.includes(item.id));
+    const itemsText = selectedItems.map(item => `- ${item.item} (Unit Price: ${item.unitPrice} SAR)`).join('\n');
+
+    const prompt = `Act as a consultant engineer specializing in the Saudi Building Code (SBC) and local market prices.
     
+Project Context: ${project.description}
+Selected BOQ Items:
+${itemsText}
+
+User Query: "${userQuery}"
+
+Provide a comprehensive answer in Markdown format, addressing the user's query directly while referencing the SBC and current market conditions where applicable.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+    });
+    return response.text;
+};
+
+export const analyzeDrawingImage = async (imageFile: File): Promise<DrawingAnalysisResult> => {
+    const imagePart = await fileToGenerativePart(imageFile);
+    const prompt = `Analyze the provided engineering drawing. Extract key information and generate a preliminary Bill of Quantities (BOQ).
+
+The output must be a single JSON object with the following structure:
+- "summary": A brief one-paragraph summary of the drawing's content.
+- "extractedText": A string containing all legible text and dimensions from the drawing.
+- "preliminaryBOQ": An array of objects, where each object represents a BOQ item with keys "item", "description", "quantity" (as a number), and "unit".`;
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents: { parts: [{ text: prompt }, imagePart] },
+        config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    summary: { type: Type.STRING },
+                    extractedText: { type: Type.STRING },
+                    preliminaryBOQ: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                item: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                quantity: { type: Type.NUMBER },
+                                unit: { type: Type.STRING },
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
     let responseText = '';
     for await (const chunk of responseStream) {
         responseText += chunk.text;
     }
 
-    return responseText;
+    try {
+        const jsonText = responseText.trim();
+        if (!jsonText) {
+             throw new Error("AI response was empty.");
+        }
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Failed to parse Drawing Analysis JSON:", responseText, e);
+        throw new Error("Could not analyze drawing. The AI response was invalid.");
+    }
 };
 
-export const analyzeDrawingImage = async (imageFile: File): Promise<DrawingAnalysisResult> => {
+// Fix: Correctly implement analyzeImageWithPrompt, which was corrupted in the original file.
+export const analyzeImageWithPrompt = async (prompt: string, imageFile: File): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
-    const prompt = `Analyze the attached engineering drawing. Provide a JSON object with: "summary" (a brief description), "extractedText" (key text and dimensions), and "preliminaryBOQ" (an array of items with item, description, quantity, and unit).`;
+    const fullPrompt = `${prompt}\n\nPlease provide the analysis in Markdown format.`;
+
     const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
-        contents: [{ parts: [{ text: prompt }, imagePart] }],
-        config: { responseMimeType: 'application/json' },
+        model: 'gemini-2.5-flash',
+        contents: { parts: [{ text: fullPrompt }, imagePart] },
     });
-    return JSON.parse(response.text);
+    return response.text;
+};
+
+// Fix: Add all missing functions below to resolve import errors in components.
+
+export const performWhatIfAnalysis = async (schedule: ScheduleTask[], query: string): Promise<WhatIfAnalysisResult> => {
+    const scheduleSummary = schedule.map(t => `ID ${t.id}: ${t.name}, Start: ${t.start}, End: ${t.end}, Dependencies: [${t.dependencies.join(', ')}]`).join('\n');
+
+    const prompt = `Given the following project schedule:
+---
+${scheduleSummary}
+---
+Analyze the following "what-if" scenario: "${query}"
+
+Provide the impact analysis as a JSON object with the following structure:
+- "impactSummary": A concise summary of the impact in Markdown.
+- "newEndDate": The new estimated project end date (YYYY-MM-DD).
+- "costImpact": A brief description of the likely cost impact (e.g., "Increased labor costs", "No significant impact").
+- "criticalPathImpact": A brief description of how the critical path is affected.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    impactSummary: { type: Type.STRING },
+                    newEndDate: { type: Type.STRING },
+                    costImpact: { type: Type.STRING },
+                    criticalPathImpact: { type: Type.STRING },
+                }
+            }
+        }
+    });
+
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        console.error("Failed to parse What-If Analysis JSON:", response.text, e);
+        throw new Error("Could not perform what-if analysis. The AI response was invalid.");
+    }
+};
+
+export const calculateCriticalPath = async (schedule: ScheduleTask[]): Promise<CriticalPathAnalysis> => {
+    const taskDetails = schedule.map(t => ({
+        id: t.id,
+        duration: Math.ceil((new Date(t.end).getTime() - new Date(t.start).getTime()) / (1000 * 60 * 60 * 24)) + 1,
+        dependencies: t.dependencies
+    }));
+
+    const prompt = `Calculate the critical path for the following project tasks.
+Tasks (id, duration, dependencies):
+${JSON.stringify(taskDetails, null, 2)}
+
+Return a JSON object with:
+- "criticalActivityIds": An array of task IDs on the critical path.
+- "projectDuration": The total project duration in days.
+- "totalFloat": An object mapping each task ID to its total float in days.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    criticalActivityIds: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                    projectDuration: { type: Type.NUMBER },
+                    totalFloat: { type: Type.OBJECT }
+                }
+            }
+        }
+    });
+
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        console.error("Failed to parse Critical Path JSON:", response.text, e);
+        throw new Error("Could not calculate critical path. The AI response was invalid.");
+    }
+};
+
+export const analyzeBOQSentiments = async (financials: FinancialItem[]): Promise<BOQItemSentiment[]> => {
+    const prompt = `Analyze the sentiment of the following Bill of Quantities (BOQ) item descriptions. For each item, classify the sentiment as 'Positive', 'Negative', or 'Neutral'. A negative sentiment might indicate ambiguity, potential for disputes, or non-standard items that require clarification. Provide a brief justification.
+BOQ Items:
+${financials.map(f => `${f.id}: ${f.item}`).join('\n')}
+
+Return a JSON array of objects with "itemId", "sentiment", and "justification".`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        itemId: { type: Type.STRING },
+                        sentiment: { type: Type.STRING, enum: ['Positive', 'Negative', 'Neutral'] },
+                        justification: { type: Type.STRING },
+                    }
+                }
+            }
+        }
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not analyze BOQ sentiments.");
+    }
+};
+
+export const analyzeBOQPrices = async (financials: FinancialItem[]): Promise<string> => {
+    const prompt = `As a senior quantity surveyor, analyze the unit prices in the following BOQ. Compare them to your general knowledge of current market prices in Saudi Arabia. Provide a Markdown report highlighting items that seem significantly overpriced or underpriced, and suggest potential reasons or negotiation points.
+BOQ:
+${financials.map(f => `- ${f.item}: ${f.unitPrice} SAR/${f.unit}`).join('\n')}`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+    });
+    return response.text;
+};
+
+export const generatePurchaseOrderFromBOQItem = async (item: FinancialItem): Promise<Omit<PurchaseOrder, 'id' | 'total'>> => {
+    const prompt = `Generate a draft Purchase Order for the following BOQ item. Suggest a generic supplier name. The output should be a JSON object.
+Item: ${item.item}
+Quantity: ${item.quantity}
+Unit Price: ${item.unitPrice}
+`;
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    itemName: { type: Type.STRING },
+                    supplier: { type: Type.STRING },
+                    quantity: { type: Type.NUMBER },
+                    unitPrice: { type: Type.NUMBER },
+                    orderDate: { type: Type.STRING },
+                    expectedDelivery: { type: Type.STRING },
+                    status: { type: Type.STRING, enum: ['Pending Approval', 'Approved', 'Ordered', 'Delivered', 'Cancelled'] },
+                }
+            }
+        }
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not generate purchase order draft.");
+    }
 };
 
 export const processComplexQuery = async (prompt: string): Promise<string> => {
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: prompt,
-        config: { thinkingConfig: { thinkingBudget: 8192 } },
+        config: {
+            thinkingConfig: { thinkingBudget: 8192 }
+        }
     });
     return response.text;
 };
 
-export const analyzeImageWithPrompt = async (prompt: string, imageFile: File): Promise<string> => {
-    const imagePart = await fileToGenerativePart(imageFile);
-    const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
-        contents: [{ parts: [{ text: prompt }, imagePart] }],
-    });
-    return response.text;
-};
-
-export const generateImage = async (prompt: string, aspectRatio: '1:1' | '16:9' | '9:16' | '4:3' | '3:4'): Promise<string> => {
+export const generateImage = async (prompt: string, aspectRatio: string): Promise<string> => {
     const response = await ai.models.generateImages({
         model: 'imagen-4.0-generate-001',
-        prompt,
-        config: { numberOfImages: 1, aspectRatio, outputMimeType: 'image/jpeg' },
+        prompt: prompt,
+        config: {
+            numberOfImages: 1,
+            aspectRatio: aspectRatio as any,
+            outputMimeType: "image/jpeg"
+        }
     });
     return response.generatedImages[0].image.imageBytes;
 };
 
-export const generateVideos = async (prompt: string, aspectRatio: '16:9' | '9:16', resolution: '1080p' | '720p'): Promise<string> => {
+export const queryWithMaps = async (prompt: string, location: { latitude: number, longitude: number }): Promise<LocationContact[]> => {
+    const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `Based on my current location, find places related to: "${prompt}". For each place found, extract its name, type (e.g., 'Supplier', 'Contractor'), phone number, address, and Google Maps URI. Format the result as a JSON array of objects.`,
+        config: {
+            tools: [{ googleMaps: {} }],
+            toolConfig: {
+                retrievalConfig: { latLng: location }
+            },
+            responseMimeType: 'application/json',
+            responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        name: { type: Type.STRING },
+                        type: { type: Type.STRING },
+                        phone: { type: Type.STRING },
+                        address: { type: Type.STRING },
+                        mapsUri: { type: Type.STRING },
+                    }
+                }
+            }
+        },
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not process location query.");
+    }
+};
+
+export const generateVideos = async (prompt: string, aspectRatio: string, resolution: string): Promise<string> => {
     let operation = await ai.models.generateVideos({
         model: 'veo-3.1-fast-generate-preview',
-        prompt,
-        config: { numberOfVideos: 1, resolution, aspectRatio },
+        prompt: prompt,
+        config: {
+            numberOfVideos: 1,
+            aspectRatio: aspectRatio as any,
+            resolution: resolution as any,
+        }
     });
     while (!operation.done) {
         await new Promise(resolve => setTimeout(resolve, 10000));
         operation = await ai.operations.getVideosOperation({ operation: operation });
     }
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-    if (!downloadLink) throw new Error("Video generation failed to produce a download link.");
-    
-    const videoResponse = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
-    const blob = await videoResponse.blob();
-    return URL.createObjectURL(blob);
-};
-
-export const queryWithMaps = async (prompt: string, location: { latitude: number; longitude: number }): Promise<LocationContact[]> => {
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-            tools: [{ googleMaps: {} }],
-            toolConfig: { retrievalConfig: { latLng: location } }
-        },
-    });
-    
-    // The response text is often a natural language summary. The structured data is in grounding chunks.
-    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (!chunks) return [];
-    
-    return chunks.map((chunk: any) => ({
-        name: chunk.maps?.title || 'Unknown',
-        type: chunk.maps?.placeSubCategory || undefined,
-        phone: chunk.maps?.phoneNumber || undefined,
-        address: chunk.maps?.address || undefined,
-        mapsUri: chunk.maps?.uri || undefined,
-    }));
-};
-
-export const getConceptualEstimate = async (input: ConceptualEstimateInput, currentBoqTotal: number): Promise<ConceptualEstimateResult> => {
-    const prompt = `Provide a conceptual cost and duration estimate for a construction project with these details: ${JSON.stringify(input)}. The current detailed BOQ total is ${currentBoqTotal > 0 ? currentBoqTotal : 'not available'}.
-    Return a JSON object with:
-    - "estimatedCost": number
-    - "estimatedDuration": number (in days)
-    - "majorResources": array of {material, quantity, unit}
-    - "assumptions": markdown string
-    - "varianceReport": markdown string comparing the conceptual estimate to the current BOQ total.`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    return JSON.parse(response.text);
+    if (!downloadLink) {
+        throw new Error("Video generation succeeded but no download link was provided.");
+    }
+    const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+    const videoBlob = await response.blob();
+    return URL.createObjectURL(videoBlob);
 };
 
 export const analyzeSentiment = async (text: string): Promise<SentimentAnalysisResult> => {
-    const prompt = `Analyze the sentiment of the following text. Return a JSON object with "sentiment" ('Positive', 'Negative', 'Neutral'), "confidence" (0-1), and "justification" (string).\n\nText: "${text}"`;
+    const prompt = `Analyze the sentiment of the following text. Return a JSON object with "sentiment" ('Positive', 'Negative', 'Neutral'), "confidence" (a number between 0 and 1), and "justification" (a brief explanation).
+Text:
+---
+${text}
+---`;
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
-        config: { responseMimeType: 'application/json' },
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    sentiment: { type: Type.STRING, enum: ['Positive', 'Negative', 'Neutral'] },
+                    confidence: { type: Type.NUMBER },
+                    justification: { type: Type.STRING },
+                }
+            }
+        }
     });
-    return JSON.parse(response.text);
-};
-
-export const performDynamicPriceAnalysis = async (financials: FinancialItem[]): Promise<DynamicPriceAnalysisItem[]> => {
-    const prompt = `Act as a procurement expert in Saudi Arabia. For the following BOQ items, provide dynamic, competitive unit prices based on current market rates, bulk discounts, etc. Return a JSON array with "itemId", "itemName", "originalUnitPrice", "dynamicUnitPrice", and "justification" for each item.\n\nItems:\n${financials.map(i => JSON.stringify({id: i.id, item: i.item, quantity: i.quantity, unitPrice: i.unitPrice})).join('\n')}`;
-    
-    const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-
-    let responseText = '';
-    for await (const chunk of responseStream) {
-        responseText += chunk.text;
-    }
-
     try {
-        const jsonText = responseText.trim();
-        if (!jsonText) throw new Error("AI response was empty.");
-        return JSON.parse(jsonText);
+        return JSON.parse(response.text.trim());
     } catch (e) {
-        console.error("Failed to parse Dynamic Price Analysis JSON:", responseText, e);
-        throw new Error("Could not perform dynamic price analysis. The AI response was invalid.");
+        throw new Error("Could not analyze sentiment.");
     }
-};
-
-export const performCuringAnalysis = async (input: CuringAnalysisInput): Promise<CuringAnalysisResult> => {
-    const prompt = `Based on concrete curing principles (e.g., ACI guidelines), analyze the following scenario: ${JSON.stringify(input)}.
-    Return a JSON object with:
-    - "curingDays": number (estimated minimum curing days)
-    - "earlyStrippingPossible": boolean
-    - "recommendations": markdown string with detailed advice.`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    return JSON.parse(response.text);
-};
-
-export const generateQualityPlan = async (project: Project, input: QualityPlanInput): Promise<QualityPlanResult> => {
-    const items = project.data.financials.filter(i => input.itemIds.includes(i.id));
-    const prompt = `Generate a detailed Inspection and Test Plan (ITP) in markdown format for the following construction activities, referencing these standards: ${input.standards.join(', ')}.\n\nActivities:\n${items.map(i => `- ${i.item}`).join('\n')}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return { itpReport: response.text };
-};
-
-export const generateProjectCharter = async (project: Project, inputs: Record<string, string>): Promise<string> => {
-    const prompt = `Generate a professional Project Charter in markdown format for a project named "${project.name}" (${project.description}). Use the following details:\n\n${Object.entries(inputs).map(([key, value]) => `- ${key}: ${value}`).join('\n')}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
-
-export const generateSubTasksFromDescription = async (description: string): Promise<{ name: string; duration: number; predecessors: string[] }[]> => {
-    const prompt = `Break down the construction activity "${description}" into a list of sub-tasks with logical predecessors and estimated durations in days. Return a JSON array of objects, each with "name", "duration" (number), and "predecessors" (array of strings).`;
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
-    });
-    return JSON.parse(response.text);
 };
 
 export const analyzeScribdDocument = async (title: string, query: string): Promise<string> => {
-    const prompt = `I am providing the title of a Scribd document: "${title}". Based on public knowledge of this document, please answer the following question: "${query}"`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
-
-export const analyzeStructuralAssessment = async (buildingName: string, findings: string): Promise<{ riskAnalysis: string; recommendations: string; }> => {
-    const prompt = `Act as an expert structural engineer analyzing an assessment for "${buildingName}". Findings: "${findings}". Provide a JSON object with "riskAnalysis" and "recommendations" in markdown format, referencing Saudi Building Code (SBC) where applicable.`;
+    const prompt = `Using Google Search, find information and summaries about a Scribd document titled "${title}". Based on the information you find, answer the following question: "${query}"`;
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
-        config: { responseMimeType: 'application/json' },
+        config: {
+            tools: [{ googleSearch: {} }],
+        }
     });
-    return JSON.parse(response.text);
+    return response.text;
 };
 
-export const generateRetrofittingPlan = async (defect: Defect): Promise<Omit<RetrofittingPlan, 'totalCost'>> => {
-    const prompt = `Act as a senior structural retrofitting consultant. For the following defect in a building, provide a detailed retrofitting plan.
-    Defect Details:
-    - Location: ${defect.location}
-    - Type: ${defect.type}
-    - Description: ${defect.description}
-    - Severity: ${defect.severity}
+export const generateRecoveryPlan = async (project: Project, newEndDate: string, newStartDate?: string): Promise<{ plan: string; revisedSchedule: ScheduleTask[] }> => {
+    const prompt = `
+    Project: ${project.name}
+    Current Schedule: ${JSON.stringify(project.data.schedule)}
+    New Target End Date: ${newEndDate}
+    ${newStartDate ? `New Target Start Date: ${newStartDate}` : ''}
 
-    Provide a JSON object with the following structure:
-    {
-      "procedure": ["Step 1...", "Step 2...", "..."],
-      "requiredMaterials": [{ "name": "Material Name", "quantity": 10, "unit": "kg", "unitCost": 50 }],
-      "requiredLaborHours": 16,
-      "estimatedDurationDays": 2
-    }
+    Analyze the schedule and generate a recovery plan to meet the new target date. Provide:
+    1. A "plan" as a markdown string explaining the strategy (crashing, fast-tracking, re-sequencing).
+    2. A "revisedSchedule" as a JSON array of tasks. For each task, include all original fields plus:
+       - originalStart, originalEnd: The dates from the current schedule.
+       - revisedStart, revisedEnd: The new proposed dates.
+       - recoverySuggestion: 'crashed', 'fast-tracked', 're-sequenced', or 'unchanged'.
+       The 'start' and 'end' dates in the main task object should be the new revised dates.
 
-    The procedure should be clear and professional. Base the materials and quantities on the defect description. The unitCost should be a reasonable estimate in SAR. Required labor hours and duration should be practical.
+    Return a single JSON object: { "plan": "...", "revisedSchedule": [...] }.
     `;
-
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            responseMimeType: 'application/json',
-        },
-    });
-
-    try {
-        const plan = JSON.parse(response.text);
-        // Basic validation
-        if (plan.procedure && plan.requiredMaterials && plan.requiredLaborHours && plan.estimatedDurationDays) {
-            return plan;
-        } else {
-            throw new Error("AI response is missing required fields for the plan.");
+            responseMimeType: "application/json",
         }
+    });
+    try {
+        const result = JSON.parse(response.text.trim());
+        // Ensure start/end are updated
+        result.revisedSchedule = result.revisedSchedule.map((t: any) => ({
+            ...t,
+            start: t.revisedStart,
+            end: t.revisedEnd,
+        }));
+        return result;
     } catch (e) {
-        console.error("Failed to parse retrofitting plan:", response.text, e);
-        throw new Error("Could not generate a valid retrofitting plan from the AI.");
+        throw new Error("Could not generate recovery plan.");
+    }
+};
+
+export const generateRetrofittingPlan = async (defect: Defect): Promise<RetrofittingPlan> => {
+    const prompt = `Generate a detailed retrofitting plan for the following structural defect.
+Defect: ${JSON.stringify(defect)}
+
+Return a JSON object with:
+- "procedure": An array of step-by-step repair instructions.
+- "requiredMaterials": An array of objects, each with "name", "quantity", "unit", and "unitCost" (estimated cost in SAR).
+- "requiredLaborHours": Estimated total labor hours.
+- "estimatedDurationDays": Estimated total duration in days.`;
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+        }
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not generate retrofitting plan.");
     }
 };
 
 export const analyzeBeam = async (input: BeamAnalysisInput): Promise<BeamAnalysisResult> => {
-    const prompt = `Perform a structural analysis of a simple beam with the following properties: ${JSON.stringify(input)}. Calculate and return a JSON object with maxBendingMoment {value, position}, maxShearForce {value, position}, maxDeflection {value, position}, and a summary (markdown string).`;
+    const prompt = `Perform a structural analysis on a beam with the following properties:
+${JSON.stringify(input, null, 2)}
+
+Calculate the reactions, shear force diagram (SFD), bending moment diagram (BMD), and deflection.
+Return a JSON object with:
+- "maxBendingMoment": { "value": number (kNm), "position": number (m) }
+- "maxShearForce": { "value": number (kN), "position": number (m) }
+- "maxDeflection": { "value": number (mm), "position": number (m) }
+- "summary": A markdown summary of the results, including reaction forces.`;
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: prompt,
-        config: { responseMimeType: 'application/json' },
+        config: { responseMimeType: "application/json" }
     });
-    return JSON.parse(response.text);
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not analyze beam.");
+    }
 };
 
-export const analyzeBOQForValueEngineering = async (financials: FinancialItem[]): Promise<string> => {
-    const prompt = `Perform a value engineering analysis on the following BOQ. Suggest cost-saving alternatives for materials or methods without compromising quality, referencing common practices in Saudi Arabia. Format as a markdown report.\n\nBOQ:\n${financials.map(i => `- ${i.item}: ${i.total}`).join('\n')}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-    return response.text;
-};
+export const getConceptualEstimate = async (input: ConceptualEstimateInput, currentBoqTotal: number): Promise<ConceptualEstimateResult> => {
+    const prompt = `Provide a conceptual cost and duration estimate for the following project:
+${JSON.stringify(input)}
+The current BOQ total is ${currentBoqTotal} SAR.
 
-export const generateRecoveryPlan = async (project: Project, newEndDate: string, newStartDate?: string): Promise<{ plan: string, revisedSchedule: ScheduleTask[] }> => {
-    const prompt = `A construction project named "${project.name}" is delayed. The original schedule has ${project.data.schedule.length} tasks.
-    The goal is to create a recovery plan to meet a new end date of ${newEndDate}.
-    ${newStartDate ? `The project will be fully rescheduled to start on ${newStartDate}.` : 'The project is already in progress.'}
-
-    Suggest a recovery plan including strategies like crashing, fast-tracking, and re-sequencing.
-    Then, provide a revised full schedule as a JSON array. Each task object should have the same properties as the original, plus 'originalStart', 'originalEnd', 'revisedStart', 'revisedEnd', and 'recoverySuggestion' ('crashed', 'fast-tracked', 're-sequenced', 'unchanged').
-
-    Return a single JSON object with two keys:
-    1. "plan": A markdown string explaining the recovery strategy.
-    2. "revisedSchedule": The complete new schedule as a JSON array.
-
-    Original schedule summary:
-    ${project.data.schedule.slice(0, 15).map(t => `Task ${t.id} (${t.name}) from ${t.start} to ${t.end}`).join('\n')}
-    `;
-
-    const responseStream = await ai.models.generateContentStream({
+Return a JSON object with:
+- "estimatedCost": number (SAR)
+- "estimatedDuration": number (days)
+- "majorResources": array of { "material": string, "quantity": number, "unit": string }
+- "assumptions": markdown string of assumptions made.
+- "varianceReport": markdown string comparing your "estimatedCost" with the "currentBoqTotal", explaining any significant variance.`;
+    const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: prompt,
-        config: {
-            responseMimeType: 'application/json',
-        },
+        config: { responseMimeType: 'application/json' }
     });
-
-    let responseText = '';
-    for await (const chunk of responseStream) {
-        responseText += chunk.text;
-    }
-
     try {
-        const jsonText = responseText.trim();
-        if (!jsonText) {
-             throw new Error("AI response was empty.");
-        }
-        const result = JSON.parse(jsonText);
-        // Data validation
-        if (typeof result.plan === 'string' && Array.isArray(result.revisedSchedule)) {
-            const validatedSchedule = result.revisedSchedule.map((task: any) => ({
-                id: task.id,
-                name: task.name,
-                start: task.revisedStart || task.start,
-                end: task.revisedEnd || task.end,
-                progress: task.progress || 0,
-                dependencies: task.dependencies || [],
-                // Keep original data and add new fields
-                ...task,
-            }));
-            return { plan: result.plan, revisedSchedule: validatedSchedule };
-        } else {
-            throw new Error('Invalid JSON structure from AI.');
-        }
+        return JSON.parse(response.text.trim());
     } catch (e) {
-        console.error("Failed to parse recovery plan:", responseText, e);
-        throw new Error("Could not generate a valid recovery plan from the AI.");
+        throw new Error("Could not generate conceptual estimate.");
+    }
+};
+
+export const performDynamicPriceAnalysis = async (financials: FinancialItem[]): Promise<DynamicPriceAnalysisItem[]> => {
+    const prompt = `Act as a procurement expert. Analyze the following BOQ items and provide dynamic, competitive unit prices based on current market conditions, quantity discounts, etc.
+BOQ:
+${JSON.stringify(financials.map(f => ({ id: f.id, name: f.item, quantity: f.quantity, unit: f.unit, unitPrice: f.unitPrice })))}
+
+Return a JSON array, with an object for each item that has a suggested price change. Each object should have: "itemId", "itemName", "originalUnitPrice", "dynamicUnitPrice", and "justification".`;
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not perform dynamic price analysis.");
+    }
+};
+
+export const performCuringAnalysis = async (input: CuringAnalysisInput): Promise<CuringAnalysisResult> => {
+    const prompt = `Based on ACI standards and general engineering principles, analyze the concrete curing time for the following conditions:
+${JSON.stringify(input)}
+
+Return a JSON object with:
+- "curingDays": minimum required curing days (number).
+- "earlyStrippingPossible": boolean.
+- "recommendations": markdown string with detailed recommendations.`;
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not perform curing analysis.");
+    }
+};
+
+export const generateQualityPlan = async (project: Project, planInput: QualityPlanInput): Promise<QualityPlanResult> => {
+    const selectedItems = project.data.financials.filter(f => planInput.itemIds.includes(f.id));
+    const prompt = `For a project '${project.name}', generate an Inspection and Test Plan (ITP) in Markdown format.
+The ITP should cover these BOQ items:
+${selectedItems.map(item => `- ${item.item}`).join('\n')}
+
+It must adhere to these standards:
+${planInput.standards.join(', ')}
+
+The output should be a single JSON object with one key: "itpReport", containing the full markdown text.`;
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+    });
+    try {
+        return JSON.parse(response.text.trim());
+    } catch (e) {
+        throw new Error("Could not generate quality plan.");
     }
 };

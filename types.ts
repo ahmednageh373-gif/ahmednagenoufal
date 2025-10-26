@@ -9,6 +9,8 @@ export type PurchaseOrderStatus = 'Pending Approval' | 'Approved' | 'Ordered' | 
 export type KeyResultStatus = 'On Track' | 'At Risk' | 'Off Track';
 export type ProjectItemStatus = 'To Do' | 'In Progress' | 'Review' | 'Done';
 export type ProjectItemPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
+export type ChecklistItemStatus = 'Pending' | 'Pass' | 'Fail' | 'N/A';
+export type ChecklistItemCategory = 'QA/QC' | 'HSE';
 
 // Core Data Structures
 export interface ScheduleTask {
@@ -59,6 +61,23 @@ export interface SiteLogEntry {
     aiAnalysis: string;
     latitude?: number;
     longitude?: number;
+}
+
+export interface WorkLogEntry {
+    id: string;
+    date: string;
+    activitiesPerformed: string;
+    manpowerCount: number;
+    linkedTaskIds: number[];
+    notes?: string;
+}
+
+export interface ChecklistItem {
+    id: string;
+    category: ChecklistItemCategory;
+    text: string;
+    status: ChecklistItemStatus;
+    notes?: string;
 }
 
 export interface EngineeringDocument {
@@ -402,6 +421,8 @@ export interface ProjectData {
     financials: FinancialItem[];
     riskRegister: Risk[];
     siteLog: SiteLogEntry[];
+    workLog: WorkLogEntry[];
+    checklists: ChecklistItem[];
     engineeringDocs: DocumentCategory[];
     drawings: Drawing[];
     drawingFolders: DrawingFolder[];

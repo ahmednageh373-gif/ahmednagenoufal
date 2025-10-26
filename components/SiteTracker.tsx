@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 // Fix: Correct import path for types.
 import type { Project, SiteLogEntry } from '../types';

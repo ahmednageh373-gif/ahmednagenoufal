@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 // Fix: Correct import path for types.
 import type { Project, ProjectTemplate } from '../types';

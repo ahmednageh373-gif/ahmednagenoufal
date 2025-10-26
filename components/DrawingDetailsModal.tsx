@@ -226,14 +226,4 @@ export const DrawingDetailsModal: React.FC<DrawingDetailsModalProps> = ({ isOpen
         </div>
 
         <div className="flex justify-end gap-4 mt-6 shrink-0 border-t border-gray-200 dark:border-gray-700 pt-4">
-          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-slate-700 dark:text-slate-200 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500">
-            إلغاء
-          </button>
-          <button type="button" onClick={handleSave} className="px-4 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700">
-            حفظ التغييرات وإغلاق
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-slate-700 dark:text-slate-200 bg-gray-200 dark:bg-gray-600 hover

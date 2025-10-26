@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 // Fix: Correct import path for types.
 import type { Project, Risk } from '../types';
 // Fix: Correct import path for geminiService.
@@ -14,7 +14,7 @@ interface RiskManagerProps {
 
 declare var XLSX: any;
 
-const RiskRow: React.FC<{ risk: Risk, onDelete: (riskId: string) => void, onEdit: (risk: Risk) => void }> = ({ risk, onDelete, onEdit }) => {
+const RiskRow: React.FC<{ risk: Risk, onDelete: (riskId: string) => void, onEdit: (risk: Risk) => void }> = React.memo(({ risk, onDelete, onEdit }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const getRiskColor = (level: 'Low' | 'Medium' | 'High') => {
@@ -82,7 +82,7 @@ const RiskRow: React.FC<{ risk: Risk, onDelete: (riskId: string) => void, onEdit
             )}
         </div>
     );
-};
+});
 
 
 export const RiskManager: React.FC<RiskManagerProps> = ({ project, onUpdateRisks }) => {
@@ -102,11 +102,11 @@ export const RiskManager: React.FC<RiskManagerProps> = ({ project, onUpdateRisks
         onUpdateRisks(project.id, risks.map(r => r.id === updatedRisk.id ? updatedRisk : r));
     };
 
-    const handleDeleteRisk = (riskId: string) => {
+    const handleDeleteRisk = useCallback((riskId: string) => {
          if (window.confirm('هل أنت متأكد من حذف هذا الخطر؟')) {
             onUpdateRisks(project.id, risks.filter(r => r.id !== riskId));
          }
-    };
+    }, [project.id, risks, onUpdateRisks]);
     
     const handleSuggestRisks = async () => {
         setIsSuggesting(true);
@@ -132,10 +132,10 @@ export const RiskManager: React.FC<RiskManagerProps> = ({ project, onUpdateRisks
         setIsModalOpen(true);
     };
 
-    const handleOpenModalForEdit = (risk: Risk) => {
+    const handleOpenModalForEdit = useCallback((risk: Risk) => {
         setEditingRisk(risk);
         setIsModalOpen(true);
-    };
+    }, []);
 
     const handleCloseModal = () => {
         setIsModalOpen(false);

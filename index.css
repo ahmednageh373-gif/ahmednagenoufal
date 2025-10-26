@@ -1,0 +1,477 @@
+@tailwind base;
+@tailwind utilities;
+
+/* Custom print styles for Gantt Chart PDF export */
+@media print {
+  /* Hide everything on the page by default */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Make only the printable area and its contents visible */
+  .printable-gantt, .printable-gantt *, #kanban-print-area, #kanban-print-area *, .printable-area, .printable-area * {
+    visibility: visible;
+  }
+  
+  /* Position the printable area to fill the page */
+  .printable-gantt, #kanban-print-area, .printable-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1rem !important; /* Add some padding for printing */
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  /* Hide elements that shouldn't be printed */
+  .no-print, .no-print * {
+      display: none !important;
+      visibility: hidden !important;
+  }
+
+  /* Force browsers to print background colors and text colors */
+  [class*="bg-"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  [class*="text-"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  body {
+    background-color: #fff !important;
+  }
+  
+  .dark .printable-area, .dark .printable-area * {
+     background-color: #fff !important;
+     color: #000 !important;
+     border-color: #ccc !important;
+  }
+
+  /* Ensure the Gantt chart can expand beyond the screen width when printing */
+  .printable-gantt .gantt-container {
+      overflow-x: visible !important;
+  }
+  
+  /* Specific styles for printing the Kanban board */
+  #kanban-print-area .flex.gap-6 {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+  }
+
+  #kanban-print-area .w-80 { /* Column width */
+    width: 48% !important;
+    page-break-inside: avoid;
+    border: 1px solid #eee;
+  }
+}
+
+/* Custom prose styles for documentation viewer */
+.prose {
+    line-height: 1.7;
+}
+.dark .prose {
+    color: #cbd5e1;
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+.prose h1 {
+    font-size: 2.25rem; /* 36px */
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+.dark .prose h1 {
+    border-bottom-color: #475569;
+}
+.prose h2 {
+    font-size: 1.875rem; /* 30px */
+}
+.prose h3 {
+    font-size: 1.5rem; /* 24px */
+}
+.prose p {
+    margin-bottom: 1.25rem;
+}
+.prose ul, .prose ol {
+    margin-bottom: 1.25rem;
+    padding-right: 2rem; /* RTL padding */
+}
+.prose li {
+    margin-bottom: 0.5rem;
+}
+.prose strong {
+    font-weight: 600;
+}
+.prose code {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-family: monospace;
+    direction: ltr;
+    display: inline-block;
+}
+.dark .prose code {
+    background-color: #1e293b;
+    color: #94a3b8;
+}
+.prose pre {
+    background-color: #f1f5f9;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    direction: ltr;
+}
+.dark .prose pre {
+     background-color: #1e293b;
+}
+.prose pre code {
+    padding: 0;
+    background-color: transparent;
+}
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+.prose th, .prose td {
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+}
+.dark .prose th, .dark .prose td {
+     border-color: #475569;
+}
+.prose thead {
+    background-color: #f8fafc;
+}
+.dark .prose thead {
+    background-color: #334155;
+}
+.prose th {
+    font-weight: 600;
+}
+
+/* --- Original Dashboard Styles (Blue Theme) --- */
+.upload-zone {
+    transition: all 0.3s ease;
+    border: 3px dashed #94a3b8;
+}
+.upload-zone.dragover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: scale(1.01);
+}
+ .dark .upload-zone.dragover {
+    background: #1e3a8a;
+}
+
+.document-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.folder-card {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    color: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.document-card {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+ .dark .document-card {
+    background: #334155;
+}
+
+.folder-card:hover, .document-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.phase-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.phase-content {
+    background: #f8fafc;
+    border-radius: 0 0 0.5rem 0.5rem;
+    margin-bottom: 0.5rem;
+    display: none;
+    padding: 0.5rem;
+}
+.dark .phase-content {
+    background: #1e293b;
+}
+.phase-content.active {
+    display: block;
+}
+
+.activity-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+.dark .activity-item {
+    background-color: #334155;
+    border-color: #475569;
+}
+
+/* Fade in animation */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- General Modal Styles --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 50;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(9, 15, 30, 0.7);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-in-out;
+}
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    border-radius: 0.75rem;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+    border: 1px solid #e2e8f0;
+}
+.dark .modal-content {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    display: none;
+    padding: 0.25rem;
+}
+.dark .context-menu {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+.context-menu-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+.context-menu-item:hover {
+    background-color: #f3f4f6;
+}
+.dark .context-menu-item:hover {
+    background-color: #334155;
+}
+
+/* --- Drag & Drop & Interaction Styles --- */
+.sortable-ghost {
+    opacity: 0.4;
+    background: #e0f2fe;
+}
+.dark .sortable-ghost {
+     background: #0c4a6e;
+}
+
+.kanban-column-drag-over, .phase-content.dragover {
+    background-color: #eff6ff !important;
+}
+.dark .kanban-column-drag-over, .dark .phase-content.dragover {
+    background-color: #1e3a8a !important;
+}
+
+@keyframes drop-success-anim {
+    0% { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4); }
+    100% { transform: scale(1); box-shadow: var(--tw-shadow); }
+}
+
+.card-drop-success, .activity-drop-success {
+    animation: drop-success-anim 0.5s ease-out;
+}
+
+.selection-checkbox {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.folder-card.selected, .document-card.selected {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.floating-action-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s ease;
+    z-index: 40;
+}
+.floating-action-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+.floating-action-btn .fab-options {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+.floating-action-btn:hover .fab-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.fab-option {
+    background: white;
+    color: #374151;
+    padding: 8px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-size: 14px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+ .dark .fab-option {
+    background-color: #374151;
+    color: #d1d5db;
+}
+
+/* Other generic styles */
+.progress-item {
+  transition: opacity 0.5s ease-out;
+}
+.progress-bar-fill {
+  transition: width 0.3s ease-in-out;
+}
+.drop-success {
+    border-color: #22c55e !important;
+    background: #dcfce7 !important;
+    border-style: solid !important;
+    transform: scale(1);
+    transition: all 0.2s ease-out;
+}
+
+/* Responsive Table Styles */
+@media (max-width: 767px) {
+    .responsive-table thead {
+        display: none;
+    }
+
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .responsive-table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #4B5563; /* Corresponds to dark:border-gray-600 */
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .dark .responsive-table tr {
+        border-color: #4B5563;
+    }
+
+    .responsive-table td {
+        text-align: right;
+        padding-left: 50% !important; /* Override Tailwind's padding */
+        position: relative;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        border: none;
+    }
+
+    .responsive-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0.5rem;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: #9CA3AF; /* Corresponds to dark:text-gray-400 */
+    }
+    .dark .responsive-table td::before {
+        color: #9CA3AF;
+    }
+}

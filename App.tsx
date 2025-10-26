@@ -1,0 +1,225 @@
+import React, { useState, useCallback, useEffect } from 'react';
+import { Sidebar } from './components/Sidebar';
+import { Dashboard } from './components/Dashboard';
+import { ScheduleManager } from './components/ScheduleManager';
+import { FinancialManager } from './components/FinancialManager';
+import { RiskManager } from './components/RiskManager';
+import { SiteTracker } from './components/SiteTracker';
+import { DrawingManager } from './components/DrawingManager';
+import { EngineeringDocsManager } from './components/EngineeringDocsManager';
+import { ProcurementManager } from './components/ProcurementManager';
+import { SubcontractorManager } from './components/SubcontractorManager';
+import { ProjectHub } from './components/ProjectHub';
+import { OKRManager } from './components/OKRManager';
+import { WorkflowArchitect } from './components/WorkflowArchitect';
+// Fix: Correct import path for AnalysisCenter.
+import { AnalysisCenter } from './components/AnalysisCenter';
+import { LiveAssistant } from './components/LiveAssistant';
+import { DocumentationViewer } from './components/DocumentationViewer';
+import { RecoveryPlanner } from './components/RecoveryPlanner';
+import { AssessmentManager } from './components/AssessmentManager';
+import { AuditLogViewer } from './components/AuditLogViewer';
+import AdvancedReporting from './components/AdvancedReporting';
+import { Menu } from 'lucide-react';
+import { ProjectModal } from './components/ProjectModal';
+import { mockProjects } from './data/mockData';
+// Fix: Correct import path for types.
+import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment } from './types';
+
+const App: React.FC = () => {
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+    const [activeView, setActiveView] = useState('dashboard');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+    useEffect(() => {
+        setProjects(mockProjects);
+        if (mockProjects.length > 0 && !activeProjectId) {
+            setActiveProjectId(mockProjects[0].id);
+        }
+    }, [activeProjectId]);
+
+    const activeProject = projects.find(p => p.id === activeProjectId);
+
+    const updateProjectData = useCallback((projectId: string, dataUpdater: (projectData: Project['data']) => Partial<Project['data']>) => {
+        setProjects(prevProjects =>
+            prevProjects.map(p => {
+                if (p.id === projectId) {
+                    return { ...p, data: { ...p.data, ...dataUpdater(p.data) } };
+                }
+                return p;
+            })
+        );
+    }, []);
+
+    const handleAddProject = (newProjectData: Omit<Project, 'id'>) => {
+        const newProject: Project = { id: `proj-${Date.now()}`, ...newProjectData };
+        setProjects(prev => [...prev, newProject]);
+        setActiveProjectId(newProject.id);
+        setActiveView('dashboard');
+        setIsProjectModalOpen(false);
+    };
+    
+    const handleUpdateFinancials = useCallback((projectId: string, newFinancials: FinancialItem[], fileName?: string) => {
+        updateProjectData(projectId, () => ({
+            financials: newFinancials,
+            ...(fileName && { contractualBOQFile: fileName }),
+        }));
+    }, [updateProjectData]);
+
+    const handleUpdateSchedule = useCallback((projectId: string, newSchedule: ScheduleTask[]) => {
+        updateProjectData(projectId, () => ({ schedule: newSchedule }));
+    }, [updateProjectData]);
+
+    const handleUpdateRisks = useCallback((projectId: string, newRisks: Risk[]) => {
+        updateProjectData(projectId, () => ({ riskRegister: newRisks }));
+    }, [updateProjectData]);
+    
+    const handleUpdateSiteLog = useCallback((projectId: string, newLog: SiteLogEntry[]) => {
+        updateProjectData(projectId, () => ({ siteLog: newLog }));
+    }, [updateProjectData]);
+    
+    const handleUpdateDrawings = useCallback((projectId: string, newDrawings: Drawing[], newFolders: DrawingFolder[]) => {
+        updateProjectData(projectId, () => ({ drawings: newDrawings, drawingFolders: newFolders }));
+    }, [updateProjectData]);
+
+    const handleUpdateDocuments = useCallback((projectId: string, newDocs: DocumentCategory[]) => {
+        updateProjectData(projectId, () => ({ engineeringDocs: newDocs }));
+    }, [updateProjectData]);
+    
+    const handleUpdatePurchaseOrders = useCallback((projectId: string, newOrders: PurchaseOrder[]) => {
+        updateProjectData(projectId, () => ({ purchaseOrders: newOrders }));
+    }, [updateProjectData]);
+
+    const handleUpdateItems = useCallback((projectId: string, newItems: ProjectItem[]) => {
+        updateProjectData(projectId, () => ({ items: newItems }));
+    }, [updateProjectData]);
+
+    const handleUpdateObjectives = useCallback((projectId: string, objectives: Objective[]) => {
+        updateProjectData(projectId, () => ({ objectives }));
+    }, [updateProjectData]);
+
+    const handleUpdateKeyResults = useCallback((projectId: string, keyResults: KeyResult[]) => {
+        updateProjectData(projectId, () => ({ keyResults }));
+    }, [updateProjectData]);
+
+    const handleUpdateWorkflow = useCallback((projectId: string, newWorkflow: Partial<ProjectWorkflow>) => {
+        updateProjectData(projectId, data => ({ workflow: { ...data.workflow, ...newWorkflow } }));
+    }, [updateProjectData]);
+    
+    const handleUpdateBoqReconciliation = useCallback((projectId: string, newMatches: BOQMatch[]) => {
+        updateProjectData(projectId, () => ({ boqReconciliation: newMatches }));
+    }, [updateProjectData]);
+
+    const handleUpdateComparativeAnalysis = useCallback((projectId: string, newReport: string) => {
+        updateProjectData(projectId, () => ({ comparativeAnalysisReport: newReport }));
+    }, [updateProjectData]);
+    
+    const handleUpdateAssistantSettings = useCallback((projectId: string, newSettings: AssistantSettings) => {
+        updateProjectData(projectId, () => ({ assistantSettings: newSettings }));
+    }, [updateProjectData]);
+
+    const handleUpdateSubcontractors = useCallback((projectId: string, newSubcontractors: Subcontractor[]) => {
+        updateProjectData(projectId, () => ({ subcontractors: newSubcontractors }));
+    }, [updateProjectData]);
+
+    const handleUpdateSubcontractorInvoices = useCallback((projectId: string, newInvoices: SubcontractorInvoice[]) => {
+        updateProjectData(projectId, () => ({ subcontractorInvoices: newInvoices }));
+    }, [updateProjectData]);
+
+    const handleUpdateAssessments = useCallback((projectId: string, newAssessments: StructuralAssessment[]) => {
+        updateProjectData(projectId, () => ({ structuralAssessments: newAssessments }));
+    }, [updateProjectData]);
+
+
+    const renderView = () => {
+        if (!activeProject) {
+            return (
+                 <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                    <h2 className="text-2xl font-bold mb-4">لا يوجد مشروع محدد</h2>
+                    <p>الرجاء تحديد مشروع من القائمة أو إنشاء مشروع جديد للبدء.</p>
+                </div>
+            );
+        }
+
+        switch (activeView) {
+            case 'dashboard':
+                return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
+            case 'schedule':
+                return <ScheduleManager project={activeProject} onUpdateSchedule={handleUpdateSchedule} />;
+            case 'recovery-plan':
+                return <RecoveryPlanner project={activeProject} onUpdateSchedule={handleUpdateSchedule} />;
+            case 'financials':
+                return <FinancialManager project={activeProject} onUpdatePurchaseOrders={handleUpdatePurchaseOrders} />;
+            case 'risks':
+                return <RiskManager project={activeProject} onUpdateRisks={handleUpdateRisks} />;
+            case 'site':
+                return <SiteTracker project={activeProject} onUpdateSiteLog={handleUpdateSiteLog} />;
+            case 'drawings':
+                return <DrawingManager project={activeProject} onUpdateDrawings={handleUpdateDrawings} />;
+            case 'docs':
+                 return <EngineeringDocsManager project={activeProject} onUpdateDocuments={handleUpdateDocuments} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} />;
+            case 'procurement':
+                return <ProcurementManager project={activeProject} onUpdatePurchaseOrders={handleUpdatePurchaseOrders} />;
+            case 'subcontractors':
+                return <SubcontractorManager project={activeProject} onUpdateSubcontractors={handleUpdateSubcontractors} onUpdateInvoices={handleUpdateSubcontractorInvoices} />;
+            case 'assessments':
+                return <AssessmentManager project={activeProject} onUpdateAssessments={handleUpdateAssessments} />;
+            case 'hub':
+                return <ProjectHub project={activeProject} onUpdateItems={handleUpdateItems} />;
+            case 'okrs':
+                return <OKRManager project={activeProject} onUpdateObjectives={handleUpdateObjectives} onUpdateKeyResults={handleUpdateKeyResults} />;
+            case 'workflow':
+                return <WorkflowArchitect project={activeProject} onUpdateWorkflow={handleUpdateWorkflow} />;
+            case 'analysis':
+                return <AnalysisCenter project={activeProject} onUpdateBoqReconciliation={handleUpdateBoqReconciliation} onUpdateComparativeAnalysis={handleUpdateComparativeAnalysis} onUpdateFinancials={handleUpdateFinancials} />;
+            case 'advanced-reporting':
+                return <AdvancedReporting project={activeProject} />;
+            case 'assistant':
+                return <LiveAssistant project={activeProject} onUpdateSettings={handleUpdateAssistantSettings} />;
+            case 'docs-viewer':
+                return <DocumentationViewer />;
+            case 'audit-log':
+                return <AuditLogViewer />;
+            default:
+                return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
+        }
+    };
+
+    return (
+        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
+            {isSidebarOpen && <div className="fixed inset-0 bg-black/60 z-30 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
+            <Sidebar
+                projects={projects}
+                activeProjectId={activeProjectId}
+                onSelectProject={setActiveProjectId}
+                activeView={activeView}
+                onSelectView={setActiveView}
+                onAddProject={() => setIsProjectModalOpen(true)}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
+             <div className="flex-1 flex flex-col overflow-hidden">
+                <header className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/70 shrink-0 z-20">
+                    <h1 className="text-lg font-bold text-indigo-600 dark:text-indigo-400 truncate">
+                        {activeProject?.name || 'AN.AI'}
+                    </h1>
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-1">
+                        <Menu size={24} />
+                    </button>
+                </header>
+                <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+                    {renderView()}
+                </main>
+            </div>
+             <ProjectModal
+                isOpen={isProjectModalOpen}
+                onClose={() => setIsProjectModalOpen(false)}
+                onAddProject={handleAddProject}
+            />
+        </div>
+    );
+};
+
+export default App;

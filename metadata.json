@@ -1,0 +1,8 @@
+{
+  "name": "AN.AI Ahmed Nageh",
+  "description": "A comprehensive project management application for civil engineers, designed to centralize files, manage drawings, track schedules, analyze financials, and monitor site progress using AI.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}

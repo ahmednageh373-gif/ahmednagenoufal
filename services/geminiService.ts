@@ -1,5 +1,3 @@
-
-
 import { GoogleGenAI, Type } from "@google/genai";
 // Fix: Add ScheduleTaskStatus and ScheduleTaskPriority to the type import.
 import type { Project, FinancialItem, ScheduleTask, Risk, BeamAnalysisInput, BeamAnalysisResult, DrawingAnalysisResult, WhatIfAnalysisResult, CriticalPathAnalysis, DetailedCostBreakdown, CostBreakdownItem, BOQItemSentiment, PurchaseOrder, LocationContact, SentimentAnalysisResult, BeamSupport, BeamLoad, DynamicPriceAnalysisItem, CuringAnalysisInput, CuringAnalysisResult, ConceptualEstimateInput, ConceptualEstimateResult, QualityPlanInput, QualityPlanResult, ScheduleTaskStatus, ScheduleTaskPriority, Supplier, Quote, StructuralAssessment, BOQMatch, Defect, RetrofittingPlan, ChecklistItem } from "../types";
@@ -122,6 +120,65 @@ ${csvData}
         throw new Error("Could not extract financial items from the file. The format might be unsupported or the AI response was invalid.");
     }
 };
+
+export const extractTasksFromXER = async (xerContent: string): Promise<ScheduleTask[]> => {
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const prompt = `Act as a Primavera P6 expert and data extraction specialist. The following is the text content of a Primavera P6 .XER file.
+Your task is to parse this file and extract the schedule activities.
+- Activities are in the 'TASK' table (starts with %T	TASK).
+- Predecessors are in the 'TASKPRED' table (starts with %T	TASKPRED).
+- Data rows start with %R.
+- From the TASK table, extract: task_id, task_code, task_name, target_start_date, target_end_date.
+- From the TASKPRED table, extract: task_id, pred_task_id to build dependencies.
+For each task, provide an object with: 'id' (from task_id, as a number), 'wbsCode' (from task_code), 'name' (from task_name), 'start' (YYYY-MM-DD format), 'end' (YYYY-MM-DD format), 'progress' (default to 0), and 'dependencies' (an array of predecessor task_id numbers).
+The final output must be a valid JSON array of these task objects.
+
+XER Content:
+---
+${xerContent.substring(0, 50000)}
+---
+`;
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-pro', // Use a more powerful model for complex parsing
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        id: { type: Type.NUMBER },
+                        wbsCode: { type: Type.STRING },
+                        name: { type: Type.STRING },
+                        start: { type: Type.STRING },
+                        end: { type: Type.STRING },
+                        progress: { type: Type.NUMBER },
+                        dependencies: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                    }
+                }
+            }
+        },
+    });
+
+    let responseText = '';
+    for await (const chunk of responseStream) {
+        responseText += chunk.text;
+    }
+
+    try {
+        const jsonText = responseText.trim();
+        if (!jsonText) {
+             throw new Error("AI response was empty.");
+        }
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Failed to parse XER to JSON:", responseText, e);
+        throw new Error("Could not parse the .XER file. It might be in an unexpected format or too large.");
+    }
+};
+
 
 // --- RULE-BASED SCHEDULE GENERATION ---
 const estimateDuration = (item: FinancialItem): number => {

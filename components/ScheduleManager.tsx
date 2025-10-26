@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { Project, ScheduleTask, WhatIfAnalysisResult, CriticalPathAnalysis } from '../types';
 import { GanttChart } from './GanttChart';
@@ -6,8 +6,8 @@ import { TaskModal } from './TaskModal';
 import { SubTaskGeneratorModal } from './SubTaskGeneratorModal';
 import { ScheduleImportModal } from './ScheduleImportModal';
 import { WhatIfModal } from './WhatIfModal';
-import { performWhatIfAnalysis, calculateCriticalPath } from '../services/geminiService';
-import { Bot, Plus, Calendar, File, Printer, Upload, BarChart, CalendarDays, Hash, Network } from 'lucide-react';
+import { performWhatIfAnalysis, calculateCriticalPath, extractTasksFromXER } from '../services/geminiService';
+import { Bot, Plus, Calendar, File, Printer, Upload, BarChart, CalendarDays, Hash, Network, FileCode } from 'lucide-react';
 
 interface ScheduleManagerProps {
     project: Project;
@@ -54,6 +54,8 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
     // Critical Path Method State
     const [cpmResult, setCpmResult] = useState<CriticalPathAnalysis | null>(null);
     const [isCpmLoading, setIsCpmLoading] = useState(false);
+
+    const xerInputRef = useRef<HTMLInputElement>(null);
     
     const projectMetrics = useMemo(() => {
         if (schedule.length === 0) {
@@ -167,7 +169,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
         onUpdateSchedule(project.id, [...currentSchedule, ...finalNewTasks]);
     };
     
-    const handleScheduleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleExcelImport = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -212,6 +214,30 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
         reader.readAsBinaryString(file);
         event.target.value = ''; // Reset file input
     };
+
+    const handleXerImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setImportFileName(file.name);
+        setIsImportModalOpen(true);
+        setImportedTasks([]);
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const content = e.target?.result as string;
+                const tasks = await extractTasksFromXER(content);
+                setImportedTasks(tasks);
+            } catch (error) {
+                 alert(`فشل تحليل ملف XER: ${(error as Error).message}`);
+                 setIsImportModalOpen(false);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // Reset file input
+    };
+
 
     const handleConfirmImport = (tasks: ScheduleTask[]) => {
         onUpdateSchedule(project.id, tasks);
@@ -382,8 +408,13 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
                     </button>
                      <label className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer">
                         <Upload size={18} />
-                        <span>استيراد جدول زمني</span>
-                        <input type="file" onChange={handleScheduleImport} accept=".xlsx, .xls" className="hidden" />
+                        <span>استيراد Excel</span>
+                        <input type="file" onChange={handleExcelImport} accept=".xlsx, .xls" className="hidden" />
+                    </label>
+                     <label className="flex items-center gap-2 bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-700 cursor-pointer">
+                        <FileCode size={18} />
+                        <span>استيراد Primavera (.xer)</span>
+                        <input type="file" ref={xerInputRef} onChange={handleXerImport} accept=".xer" className="hidden" />
                     </label>
                     <button onClick={handleAnalyzeCPM} disabled={isCpmLoading} className="flex items-center gap-2 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-slate-400">
                         {isCpmLoading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <Network size={18} />}

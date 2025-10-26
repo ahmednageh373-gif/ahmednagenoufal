@@ -6,21 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 // This will allow using the XLSX library loaded from the CDN in index.html
 declare var XLSX: any;
 
-// Environment-aware API key getter
-const getApiKey = (): string => {
-    // Vite/local dev environments use import.meta.env with a VITE_ prefix.
-    const localApiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
-    // The live platform injects process.env.API_KEY.
-    const platformApiKey = process.env.API_KEY;
-
-    const apiKey = localApiKey || platformApiKey;
-    if (!apiKey) {
-        throw new Error("An API Key must be provided. Please create a .env.local file with VITE_GEMINI_API_KEY=YOUR_KEY.");
-    }
-    return apiKey;
-};
-
-
 // Helper to read file as base64
 const fileToGenerativePart = async (file: File) => {
     const base64EncodedDataPromise = new Promise<string>((resolve) => {
@@ -62,7 +47,7 @@ const excelFileToCsvText = (file: File): Promise<string> => {
 // --- Service Functions ---
 
 export const extractFinancialItemsFromBOQ = async (file: File): Promise<FinancialItem[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const csvData = await excelFileToCsvText(file);
 
     const prompt = `Extract Bill of Quantities items from the following CSV data. The columns are likely 'Item Description', 'Quantity', 'Unit', 'Unit Price', 'Total'. For each item, provide a unique ID, a description (item), quantity, unit, unit price, and total. Format the output as a JSON array of objects. Example: [{id: 'boq-1', item: 'Excavation', quantity: 100, unit: 'm3', unitPrice: 50, total: 5000}]. Make sure all numbers are parsed correctly. If a row seems to be a header or not a BOQ item, ignore it.
@@ -122,7 +107,7 @@ ${csvData}
 };
 
 export const extractTasksFromXER = async (xerContent: string): Promise<ScheduleTask[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Act as a Primavera P6 expert and data extraction specialist. The following is the FULL text content of a Primavera P6 .XER file.
 Your task is to parse this file and extract the schedule activities.
 - Focus ONLY on the '%T TASK' and '%T TASKPRED' tables to extract the required data and ignore all other tables.
@@ -279,7 +264,7 @@ export const processBoqToSchedule = async (items: FinancialItem[], projectStartD
         startDate.setDate(startDate.getDate() + 1); // Start the day after the last predecessor
         
         const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + (task as any).duration -1);
+        endDate.setDate(endDate.getDate() + (task as any).duration -1);
 
         taskDates.set(task.id, { start: startDate, end: endDate });
         phaseLastActivityId[phase] = task.id;
@@ -299,7 +284,7 @@ export const processBoqToSchedule = async (items: FinancialItem[], projectStartD
 
 // Fix: Add the missing generateProjectCharter function, which was being imported in WorkflowArchitect.tsx.
 export const generateProjectCharter = async (project: Project, inputs: Record<string, string>): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Act as a senior project manager. Generate a comprehensive Project Charter in Markdown format for the following project.
     
     Project Details:
@@ -337,7 +322,7 @@ export const generateProjectCharter = async (project: Project, inputs: Record<st
 };
 
 export const generateWBS = async (project: Project): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Generate a Work Breakdown Structure (WBS) in markdown list format for a project with the following details:
     Name: ${project.name}
     Description: ${project.description}
@@ -361,7 +346,7 @@ export const generateWBS = async (project: Project): Promise<string> => {
 };
 
 export const generateWBSFromSchedule = async (schedule: ScheduleTask[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const scheduleSummary = schedule.map(t => `- ${t.name} (Category: ${t.category || 'None'})`).join('\n');
     const prompt = `Based on the following list of project activities and their categories, generate a hierarchical Work Breakdown Structure (WBS) in markdown list format. Group related tasks under appropriate parent levels.
 
@@ -377,7 +362,7 @@ The WBS should be logical and well-structured.`;
 };
 
 export const getCostBreakdown = async (item: FinancialItem): Promise<DetailedCostBreakdown> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Act as an expert pricing and execution engineer. Your task is to provide a detailed cost breakdown for ONE unit of the following Bill of Quantities (BOQ) item.
 
 **Crucial Instruction:** You must derive the component quantities based on the main item's unit of measurement. For composite items (like a fence measured in linear meters), calculate the required quantities of base materials (like concrete in m³, rebar in kg) for that single unit. For example, to price 1 linear meter of a fence, you must first calculate the volume of its concrete footing. State any assumptions you make (e.g., footing dimensions) if not specified in the description.
@@ -446,7 +431,7 @@ The final JSON structure must follow this schema.`;
 };
 
 export const analyzeFinancials = async (financials: FinancialItem[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     if (financials.length === 0) {
         return "No financial data available to analyze.";
     }
@@ -468,7 +453,7 @@ export const analyzeFinancials = async (financials: FinancialItem[]): Promise<st
 };
 
 export const suggestRisks = async (project: Project): Promise<Omit<Risk, 'id' | 'status'>[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Based on the following project description, suggest 3 to 5 potential risks. For each risk, provide a description, category, probability, impact, and a mitigation plan.
     
     Project Name: ${project.name}
@@ -516,7 +501,7 @@ export const suggestRisks = async (project: Project): Promise<Omit<Risk, 'id' | 
 };
 
 export const analyzeSitePhoto = async (userNotes: string, photo: File): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const imagePart = await fileToGenerativePart(photo);
 
     const prompt = `Analyze this site photo from a civil engineering project manager's perspective.
@@ -538,7 +523,7 @@ export const analyzeSitePhoto = async (userNotes: string, photo: File): Promise<
 };
 
 export const createProjectFromTenderText = async (tenderText: string): Promise<Omit<Project, 'id'>> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Analyze the following tender document text and extract the necessary information to create a new project structure. 
     
     Tender Text:
@@ -665,7 +650,7 @@ export const createProjectFromTenderText = async (tenderText: string): Promise<O
 };
 
 export const generateDocumentDraft = async (project: Project, userPrompt: string, categoryName: string): Promise<{ title: string; content: string }> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `As a senior engineer, create a draft for a document in the category "${categoryName}" for the project "${project.name}".
     
     User's Request: "${userPrompt}"
@@ -705,7 +690,7 @@ export const generateDocumentDraft = async (project: Project, userPrompt: string
 };
 
 export const generateSubTasksFromDescription = async (description: string): Promise<{ name: string; duration: number; predecessors: string[] }[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Break down the following high-level construction activity into a detailed list of sub-tasks. For each sub-task, estimate its duration in days and identify its immediate predecessors from the generated list.
     
     High-Level Activity: "${description}"
@@ -752,7 +737,7 @@ export const generateSubTasksFromDescription = async (description: string): Prom
 // --- Analysis Center Functions ---
 
 export const reconcileBOQWithTakeoff = async (boqFile: File, takeoffFile: File): Promise<BOQMatch[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const boqCsv = await excelFileToCsvText(boqFile);
     const takeoffCsv = await excelFileToCsvText(takeoffFile);
 
@@ -809,7 +794,7 @@ export const reconcileBOQWithTakeoff = async (boqFile: File, takeoffFile: File):
 };
 
 export const runComparativeAnalysis = async (baseBoqFile: File, comparisonFile: File): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const baseCsv = await excelFileToCsvText(baseBoqFile);
     const comparisonCsv = await excelFileToCsvText(comparisonFile);
     
@@ -839,7 +824,7 @@ export const runComparativeAnalysis = async (baseBoqFile: File, comparisonFile: 
 };
 
 export const analyzeBOQForValueEngineering = async (financials: FinancialItem[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const boqSummary = financials.map(item => `- ${item.item} (Unit: ${item.unit}, Total: ${item.total} SAR)`).join('\n');
     const prompt = `Act as a value engineering expert. Analyze the following BOQ summary and provide a detailed report in Markdown format.
 
@@ -860,7 +845,7 @@ Your report should:
 };
 
 export const analyzeBOQForCodeCompliance = async (financials: FinancialItem[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const boqSummary = financials.map(item => `- ${item.item}`).join('\n');
     const prompt = `As an expert on the Saudi Building Code (SBC), review the following list of BOQ items.
     
@@ -877,7 +862,7 @@ Identify any items that might have specific or critical requirements under the S
 };
 
 export const getSaudiCodeAnalysis = async (project: Project, itemIds: string[], userQuery: string): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const selectedItems = project.data.financials.filter(item => itemIds.includes(item.id));
     const itemsText = selectedItems.map(item => `- ${item.item} (Unit Price: ${item.unitPrice} SAR)`).join('\n');
 
@@ -899,7 +884,7 @@ Provide a comprehensive answer in Markdown format, addressing the user's query d
 };
 
 export const analyzeDrawingImage = async (imageFile: File): Promise<DrawingAnalysisResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const imagePart = await fileToGenerativePart(imageFile);
     const prompt = `Analyze the provided engineering drawing. Extract key information and generate a preliminary Bill of Quantities (BOQ).
 
@@ -954,7 +939,7 @@ The output must be a single JSON object with the following structure:
 
 // Fix: Correctly implement analyzeImageWithPrompt, which was corrupted in the original file.
 export const analyzeImageWithPrompt = async (prompt: string, imageFile: File): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const imagePart = await fileToGenerativePart(imageFile);
     const fullPrompt = `${prompt}\n\nPlease provide the analysis in Markdown format.`;
 
@@ -968,7 +953,7 @@ export const analyzeImageWithPrompt = async (prompt: string, imageFile: File): P
 // Fix: Add all missing functions below to resolve import errors in components.
 
 export const performWhatIfAnalysis = async (schedule: ScheduleTask[], query: string): Promise<WhatIfAnalysisResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const scheduleSummary = schedule.map(t => `ID ${t.id}: ${t.name}, Start: ${t.start}, End: ${t.end}, Dependencies: [${t.dependencies.join(', ')}]`).join('\n');
 
     const prompt = `Given the following project schedule:
@@ -1009,7 +994,7 @@ Provide the impact analysis as a JSON object with the following structure:
 };
 
 export const calculateCriticalPath = async (schedule: ScheduleTask[]): Promise<CriticalPathAnalysis> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const taskDetails = schedule.map(t => ({
         id: t.id,
         duration: Math.ceil((new Date(t.end).getTime() - new Date(t.start).getTime()) / (1000 * 60 * 60 * 24)) + 1,
@@ -1050,7 +1035,7 @@ Return a JSON object with:
 };
 
 export const analyzeBOQSentiments = async (financials: FinancialItem[]): Promise<BOQItemSentiment[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Analyze the sentiment of the following Bill of Quantities (BOQ) item descriptions. For each item, classify the sentiment as 'Positive', 'Negative', or 'Neutral'. A negative sentiment might indicate ambiguity, potential for disputes, or non-standard items that require clarification. Provide a brief justification.
 BOQ Items:
 ${financials.map(f => `${f.id}: ${f.item}`).join('\n')}
@@ -1083,7 +1068,7 @@ Return a JSON array of objects with "itemId", "sentiment", and "justification".`
 };
 
 export const analyzeBOQPrices = async (financials: FinancialItem[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `As a senior quantity surveyor, analyze the unit prices in the following BOQ. Compare them to your general knowledge of current market prices in Saudi Arabia. Provide a Markdown report highlighting items that seem significantly overpriced or underpriced, and suggest potential reasons or negotiation points.
 BOQ:
 ${financials.map(f => `- ${f.item}: ${f.unitPrice} SAR/${f.unit}`).join('\n')}`;
@@ -1096,7 +1081,7 @@ ${financials.map(f => `- ${f.item}: ${f.unitPrice} SAR/${f.unit}`).join('\n')}`;
 };
 
 export const generatePurchaseOrderFromBOQItem = async (item: FinancialItem): Promise<Omit<PurchaseOrder, 'id' | 'total'>> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Generate a draft Purchase Order for the following BOQ item. Suggest a generic supplier name. The output should be a JSON object.
 Item: ${item.item}
 Quantity: ${item.quantity}
@@ -1129,7 +1114,7 @@ Unit Price: ${item.unitPrice}
 };
 
 export const processComplexQuery = async (prompt: string): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: prompt,
@@ -1141,7 +1126,7 @@ export const processComplexQuery = async (prompt: string): Promise<string> => {
 };
 
 export const generateImage = async (prompt: string, aspectRatio: string): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateImages({
         model: 'imagen-4.0-generate-001',
         prompt: prompt,
@@ -1155,7 +1140,7 @@ export const generateImage = async (prompt: string, aspectRatio: string): Promis
 };
 
 export const queryWithMaps = async (prompt: string, location: { latitude: number, longitude: number }): Promise<LocationContact[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: `Based on my current location, find places related to: "${prompt}". For each place found, extract its name, type (e.g., 'Supplier', 'Contractor'), phone number, address, and Google Maps URI. Format the result as a JSON array of objects.`,
@@ -1188,7 +1173,7 @@ export const queryWithMaps = async (prompt: string, location: { latitude: number
 };
 
 export const generateVideos = async (prompt: string, aspectRatio: string, resolution: string): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     let operation = await ai.models.generateVideos({
         model: 'veo-3.1-fast-generate-preview',
         prompt: prompt,
@@ -1206,13 +1191,13 @@ export const generateVideos = async (prompt: string, aspectRatio: string, resolu
     if (!downloadLink) {
         throw new Error("Video generation succeeded but no download link was provided.");
     }
-    const response = await fetch(`${downloadLink}&key=${getApiKey()}`);
+    const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
     const videoBlob = await response.blob();
     return URL.createObjectURL(videoBlob);
 };
 
 export const analyzeSentiment = async (text: string): Promise<SentimentAnalysisResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Analyze the sentiment of the following text. Return a JSON object with "sentiment" ('Positive', 'Negative', 'Neutral'), "confidence" (a number between 0 and 1), and "justification" (a brief explanation).
 Text:
 ---
@@ -1241,7 +1226,7 @@ ${text}
 };
 
 export const analyzeScribdDocument = async (title: string, query: string): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Using Google Search, find information and summaries about a Scribd document titled "${title}". Based on the information you find, answer the following question: "${query}"`;
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
@@ -1254,7 +1239,7 @@ export const analyzeScribdDocument = async (title: string, query: string): Promi
 };
 
 export const generateRecoveryPlan = async (project: Project, newEndDate: string, newStartDate?: string): Promise<{ plan: string; revisedSchedule: ScheduleTask[] }> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `
     Project: ${project.name}
     Current Schedule: ${JSON.stringify(project.data.schedule)}
@@ -1293,7 +1278,7 @@ export const generateRecoveryPlan = async (project: Project, newEndDate: string,
 };
 
 export const generateRetrofittingPlan = async (defect: Defect): Promise<RetrofittingPlan> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Generate a detailed retrofitting plan for the following structural defect.
 Defect: ${JSON.stringify(defect)}
 
@@ -1317,7 +1302,7 @@ Return a JSON object with:
 };
 
 export const analyzeBeam = async (input: BeamAnalysisInput): Promise<BeamAnalysisResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Perform a structural analysis on a beam with the following properties:
 ${JSON.stringify(input, null, 2)}
 
@@ -1340,7 +1325,7 @@ Return a JSON object with:
 };
 
 export const getConceptualEstimate = async (input: ConceptualEstimateInput, currentBoqTotal: number): Promise<ConceptualEstimateResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Provide a conceptual cost and duration estimate for the following project:
 ${JSON.stringify(input)}
 The current BOQ total is ${currentBoqTotal} SAR.
@@ -1364,7 +1349,7 @@ Return a JSON object with:
 };
 
 export const performDynamicPriceAnalysis = async (financials: FinancialItem[]): Promise<DynamicPriceAnalysisItem[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Act as a procurement expert. Analyze the following BOQ items and provide dynamic, competitive unit prices based on current market conditions, quantity discounts, etc.
 BOQ:
 ${JSON.stringify(financials.map(f => ({ id: f.id, name: f.item, quantity: f.quantity, unit: f.unit, unitPrice: f.unitPrice })))}
@@ -1383,7 +1368,7 @@ Return a JSON array, with an object for each item that has a suggested price cha
 };
 
 export const performCuringAnalysis = async (input: CuringAnalysisInput): Promise<CuringAnalysisResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Based on ACI standards and general engineering principles, analyze the concrete curing time for the following conditions:
 ${JSON.stringify(input)}
 
@@ -1404,7 +1389,7 @@ Return a JSON object with:
 };
 
 export const generateQualityPlan = async (project: Project, planInput: QualityPlanInput): Promise<QualityPlanResult> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const selectedItems = project.data.financials.filter(f => planInput.itemIds.includes(f.id));
     const prompt = `For a project '${project.name}', generate an Inspection and Test Plan (ITP) in Markdown format.
 The ITP should cover these BOQ items:
@@ -1427,7 +1412,7 @@ The output should be a single JSON object with one key: "itpReport", containing 
 };
 
 export const generateChecklist = async (dailyActivities: string): Promise<ChecklistItem[]> => {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Based on the following daily construction activities, generate a combined QA/QC and HSE checklist.
     
     Today's Activities: "${dailyActivities}"

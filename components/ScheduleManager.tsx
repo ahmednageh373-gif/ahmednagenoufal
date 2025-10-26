@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 // Fix: Correct import path for types.
 import type { Project, ScheduleTask, WhatIfAnalysisResult, CriticalPathAnalysis } from '../types';
 import { GanttChart } from './GanttChart';
@@ -83,10 +83,10 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
         setIsTaskModalOpen(true);
     };
 
-    const handleOpenTaskModalForEdit = (task: ScheduleTask) => {
+    const handleOpenTaskModalForEdit = useCallback((task: ScheduleTask) => {
         setEditingTask(task);
         setIsTaskModalOpen(true);
-    };
+    }, []);
     
     const handleSaveTask = (taskData: Omit<ScheduleTask, 'id'> | ScheduleTask) => {
         let newSchedule: ScheduleTask[];
@@ -100,7 +100,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
         onUpdateSchedule(project.id, newSchedule);
     };
 
-    const handleDeleteTask = (taskId: number) => {
+    const handleDeleteTask = useCallback((taskId: number) => {
         if (window.confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
             // Also remove this task from any dependencies lists
             const newSchedule = schedule
@@ -111,7 +111,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
                 }));
             onUpdateSchedule(project.id, newSchedule);
         }
-    };
+    }, [project.id, schedule, onUpdateSchedule]);
     
     const handleAddGeneratedTasks = (generatedTasks: { name: string; duration: number; predecessors: string[] }[]) => {
         let currentSchedule = [...schedule];

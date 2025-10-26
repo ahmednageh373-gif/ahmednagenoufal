@@ -1,44 +1,91 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './components/Dashboard';
-import { ScheduleManager } from './components/ScheduleManager';
-import { FinancialManager } from './components/FinancialManager';
-import { RiskManager } from './components/RiskManager';
-import { SiteTracker } from './components/SiteTracker';
-import { DrawingManager } from './components/DrawingManager';
-import { EngineeringDocsManager } from './components/EngineeringDocsManager';
-import { ProcurementManager } from './components/ProcurementManager';
-import { SubcontractorManager } from './components/SubcontractorManager';
-import { ProjectHub } from './components/ProjectHub';
-import { OKRManager } from './components/OKRManager';
-import { WorkflowArchitect } from './components/WorkflowArchitect';
-// Fix: Correct import path for AnalysisCenter.
-import { AnalysisCenter } from './components/AnalysisCenter';
-import { LiveAssistant } from './components/LiveAssistant';
-import { DocumentationViewer } from './components/DocumentationViewer';
-import { RecoveryPlanner } from './components/RecoveryPlanner';
-import { AssessmentManager } from './components/AssessmentManager';
-import { AuditLogViewer } from './components/AuditLogViewer';
-import AdvancedReporting from './components/AdvancedReporting';
 import { Menu } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
 // Fix: Correct import path for types.
 import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment } from './types';
 
+// Lazy load all the main view components
+const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
+const ScheduleManager = React.lazy(() => import('./components/ScheduleManager').then(module => ({ default: module.ScheduleManager })));
+const FinancialManager = React.lazy(() => import('./components/FinancialManager').then(module => ({ default: module.FinancialManager })));
+const RiskManager = React.lazy(() => import('./components/RiskManager').then(module => ({ default: module.RiskManager })));
+const SiteTracker = React.lazy(() => import('./components/SiteTracker').then(module => ({ default: module.SiteTracker })));
+const DrawingManager = React.lazy(() => import('./components/DrawingManager').then(module => ({ default: module.DrawingManager })));
+const EngineeringDocsManager = React.lazy(() => import('./components/EngineeringDocsManager').then(module => ({ default: module.EngineeringDocsManager })));
+const ProcurementManager = React.lazy(() => import('./components/ProcurementManager').then(module => ({ default: module.ProcurementManager })));
+const SubcontractorManager = React.lazy(() => import('./components/SubcontractorManager').then(module => ({ default: module.SubcontractorManager })));
+const ProjectHub = React.lazy(() => import('./components/ProjectHub').then(module => ({ default: module.ProjectHub })));
+const OKRManager = React.lazy(() => import('./components/OKRManager').then(module => ({ default: module.OKRManager })));
+const WorkflowArchitect = React.lazy(() => import('./components/WorkflowArchitect').then(module => ({ default: module.WorkflowArchitect })));
+const AnalysisCenter = React.lazy(() => import('./components/AnalysisCenter').then(module => ({ default: module.AnalysisCenter })));
+const LiveAssistant = React.lazy(() => import('./components/LiveAssistant').then(module => ({ default: module.LiveAssistant })));
+const DocumentationViewer = React.lazy(() => import('./components/DocumentationViewer').then(module => ({ default: module.DocumentationViewer })));
+const RecoveryPlanner = React.lazy(() => import('./components/RecoveryPlanner').then(module => ({ default: module.RecoveryPlanner })));
+const AssessmentManager = React.lazy(() => import('./components/AssessmentManager').then(module => ({ default: module.AssessmentManager })));
+const AuditLogViewer = React.lazy(() => import('./components/AuditLogViewer').then(module => ({ default: module.AuditLogViewer })));
+const AdvancedReporting = React.lazy(() => import('./components/AdvancedReporting'));
+
+const LoadingSpinner = () => (
+    <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+);
+
+
 const App: React.FC = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+    // Lazy initialize state from localStorage
+    const [projects, setProjects] = useState<Project[]>(() => {
+        try {
+            const savedProjects = localStorage.getItem('AN_AI_PROJECTS');
+            if (savedProjects) {
+                return JSON.parse(savedProjects);
+            }
+        } catch (error) {
+            console.error("Could not load projects from local storage", error);
+        }
+        return mockProjects; // Fallback to mock data on first load or error
+    });
+
+    const [activeProjectId, setActiveProjectId] = useState<string | null>(() => {
+        try {
+            const savedId = localStorage.getItem('AN_AI_ACTIVE_PROJECT_ID');
+            // Re-read projects here to ensure consistency, as state might not be set yet.
+            const currentProjects = JSON.parse(localStorage.getItem('AN_AI_PROJECTS') || 'null') || mockProjects;
+            
+            // Check if the saved ID is valid for the loaded projects
+            if (savedId && currentProjects.some((p: Project) => p.id === savedId)) {
+                return savedId;
+            }
+             // Fallback to the first project if the saved ID is invalid or doesn't exist
+            if (currentProjects.length > 0) {
+                return currentProjects[0].id;
+            }
+        } catch (error) {
+             console.error("Could not load active project ID from local storage", error);
+        }
+        return null; // No projects available
+    });
+
     const [activeView, setActiveView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-
+    
+    // Effect to save state changes back to localStorage
     useEffect(() => {
-        setProjects(mockProjects);
-        if (mockProjects.length > 0 && !activeProjectId) {
-            setActiveProjectId(mockProjects[0].id);
+        try {
+            localStorage.setItem('AN_AI_PROJECTS', JSON.stringify(projects));
+            if (activeProjectId) {
+                localStorage.setItem('AN_AI_ACTIVE_PROJECT_ID', activeProjectId);
+            } else {
+                 localStorage.removeItem('AN_AI_ACTIVE_PROJECT_ID');
+            }
+        } catch (error) {
+            console.error("Could not save state to local storage", error);
         }
-    }, [activeProjectId]);
+    }, [projects, activeProjectId]);
+
 
     const activeProject = projects.find(p => p.id === activeProjectId);
 
@@ -210,7 +257,9 @@ const App: React.FC = () => {
                     </button>
                 </header>
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-                    {renderView()}
+                    <Suspense fallback={<LoadingSpinner />}>
+                        {renderView()}
+                    </Suspense>
                 </main>
             </div>
              <ProjectModal

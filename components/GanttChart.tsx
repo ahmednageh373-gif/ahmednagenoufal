@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { ScheduleTask, CriticalPathAnalysis } from '../types';
@@ -81,7 +80,7 @@ const getBarPriorityClass = (priority?: 'Low' | 'Medium' | 'High') => {
     }
 };
 
-export const GanttChart: React.FC<GanttChartProps> = ({ tasks, projectStartDate, onEditTask, onDeleteTask, cpmResult }) => {
+export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, projectStartDate, onEditTask, onDeleteTask, cpmResult }) => {
     const [activeMenuTaskId, setActiveMenuTaskId] = useState<number | null>(null);
     const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
     const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
@@ -384,4 +383,4 @@ export const GanttChart: React.FC<GanttChartProps> = ({ tasks, projectStartDate,
             )}
         </div>
     );
-};
+});

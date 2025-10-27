@@ -73,6 +73,7 @@ const App: React.FC = () => {
     const [activeView, setActiveView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+    const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
     
     // Effect to save state changes back to localStorage
     useEffect(() => {
@@ -268,6 +269,8 @@ const App: React.FC = () => {
                 onAddProject={() => setIsProjectModalOpen(true)}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                isDesktopCollapsed={isDesktopSidebarCollapsed}
+                onToggleDesktopCollapse={() => setIsDesktopSidebarCollapsed(prev => !prev)}
             />
              <div className="flex-1 flex flex-col overflow-hidden">
                 <header className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/70 shrink-0 z-20">

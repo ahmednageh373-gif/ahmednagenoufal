@@ -396,6 +396,16 @@ export interface SentimentAnalysisResult {
     justification: string;
 }
 
+// --- AI-Powered Alerts ---
+
+export interface Alert {
+    id: string;
+    type: 'Deadline' | 'Budget' | 'Risk';
+    severity: 'Warning' | 'Concern' | 'Critical';
+    message: string;
+    relatedView: string;
+}
+
 export interface BeamSupport {
     type: 'Pin' | 'Roller' | 'Fixed';
     position: number;

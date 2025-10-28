@@ -568,12 +568,14 @@ export const queryWithMaps = async (prompt: string, location: { latitude: number
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (!chunks) return [];
 
-    return chunks.map((chunk: any) => ({
-        name: chunk.maps.title,
-        type: chunk.maps.placeAnswerSources?.placeDetails?.types?.[0] || 'Business',
-        phone: chunk.maps.placeAnswerSources?.placeDetails?.nationalPhoneNumber || '',
-        address: chunk.maps.placeAnswerSources?.placeDetails?.formattedAddress || '',
-        mapsUri: chunk.maps.uri
+    return chunks
+        .filter((chunk: any) => chunk.maps)
+        .map((chunk: any) => ({
+            name: chunk.maps.title,
+            type: chunk.maps.placeAnswerSources?.[0]?.placeDetails?.types?.[0] || 'Business',
+            phone: chunk.maps.placeAnswerSources?.[0]?.placeDetails?.nationalPhoneNumber || '',
+            address: chunk.maps.placeAnswerSources?.[0]?.placeDetails?.formattedAddress || '',
+            mapsUri: chunk.maps.uri
     }));
 };
 

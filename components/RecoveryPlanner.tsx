@@ -197,7 +197,6 @@ export const RecoveryPlanner: React.FC<RecoveryPlannerProps> = ({ project, onUpd
                     
                     <div className="printable-gantt">
                          <h3 className="text-xl font-bold mb-4">مخطط جانت المعدل</h3>
-                         {/* FIX: Add missing members and cpmResult props to GanttChart */}
                          <GanttChart tasks={revisedSchedule} members={project.data.members || []} projectStartDate={project.startDate} cpmResult={null} />
                     </div>
                 </div>

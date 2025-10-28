@@ -10,12 +10,13 @@ interface ProjectMembersProps {
 
 const RoleIcon: React.FC<{ role: MemberRole }> = ({ role }) => {
     switch (role) {
+        // FIX: Replaced invalid 'title' prop on Lucide icons with a wrapping span and a valid title attribute for tooltips.
         case 'Admin':
-            return <Shield size={16} className="text-red-500" title="Admin" />;
+            return <span title="Admin"><Shield size={16} className="text-red-500" /></span>;
         case 'Engineer':
-            return <HardHat size={16} className="text-blue-500" title="Engineer" />;
+            return <span title="Engineer"><HardHat size={16} className="text-blue-500" /></span>;
         case 'Viewer':
-            return <Eye size={16} className="text-gray-500" title="Viewer" />;
+            return <span title="Viewer"><Eye size={16} className="text-gray-500" /></span>;
         default:
             return null;
     }

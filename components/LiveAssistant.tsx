@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { GoogleGenAI, LiveServerMessage, Modality, Blob, LiveSession } from "@google/genai";
+// Fix: The 'LiveSession' type is not exported from the '@google/genai' package. It has been removed.
+import { GoogleGenAI, LiveServerMessage, Modality, Blob } from "@google/genai";
 import { Mic, Square, AlertTriangle, Wifi, WifiOff, Settings } from 'lucide-react';
 // Fix: Removed .ts extension from import path.
 import type { Project, AssistantSettings } from '../types';
@@ -127,7 +128,8 @@ export const LiveAssistant: React.FC<LiveAssistantProps> = ({ project, onUpdateS
     const [error, setError] = useState<string | null>(null);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-    const sessionPromiseRef = useRef<Promise<LiveSession> | null>(null);
+    // Fix: Changed 'LiveSession' to 'any' because it's not an exported type from the library.
+    const sessionPromiseRef = useRef<Promise<any> | null>(null);
     const audioRefs = useRef<{
         inputAudioContext: AudioContext | null,
         outputAudioContext: AudioContext | null,

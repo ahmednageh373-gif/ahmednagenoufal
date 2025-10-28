@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo } from 'react';
 // Fix: Correct import path for types.
 import type { Project, FinancialItem, CostBreakdownItem, BOQItemSentiment, PurchaseOrder, DetailedCostBreakdown } from '../types';
@@ -37,7 +35,8 @@ const SentimentIcon: React.FC<{ sentiment: 'Positive' | 'Negative' | 'Neutral' }
 export const FinancialManager: React.FC<FinancialManagerProps> = ({ project, onUpdatePurchaseOrders }) => {
     const financials = project.data.financials || [];
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState<'analysis' | 'code' | 'sentiment' | 'price'>('analysis');
+    // FIX: Changed 'analysis' to 'financial' to match the type expected by handleRunAnalysis.
+    const [activeTab, setActiveTab] = useState<'financial' | 'code' | 'sentiment' | 'price'>('financial');
     
     const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<FinancialItem | null>(null);
@@ -238,7 +237,7 @@ export const FinancialManager: React.FC<FinancialManagerProps> = ({ project, onU
                     <h3 className="text-xl font-semibold mb-4">تحليل المقايسة بالذكاء الاصطناعي</h3>
                      <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
                         <nav className="-mb-px flex space-x-2 rtl:space-x-reverse overflow-x-auto" aria-label="Tabs">
-                            <button onClick={() => setActiveTab('analysis')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'analysis' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300'}`}>تحليل مالي</button>
+                            <button onClick={() => setActiveTab('financial')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'financial' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300'}`}>تحليل مالي</button>
                             <button onClick={() => setActiveTab('code')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'code' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300'}`}>توافق الكود</button>
                             <button onClick={() => setActiveTab('sentiment')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'sentiment' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300'}`}>تحليل المشاعر</button>
                             <button onClick={() => setActiveTab('price')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'price' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300'}`}>تحليل الأسعار</button>

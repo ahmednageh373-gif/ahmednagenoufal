@@ -407,11 +407,15 @@ export interface Alert {
 }
 
 export interface BeamSupport {
+    // FIX: Add id for UI state management in React components
+    id: string;
     type: 'Pin' | 'Roller' | 'Fixed';
     position: number;
 }
 
 export interface BeamLoad {
+    // FIX: Add id for UI state management in React components
+    id: string;
     type: 'Point' | 'UDL';
     magnitude: number;
     position: number;
@@ -420,6 +424,7 @@ export interface BeamLoad {
 
 export interface BeamAnalysisInput {
     length: number;
+    // FIX: Omit was causing an error because 'id' was not on the base type. With 'id' added to BeamSupport/BeamLoad, Omit is correct.
     supports: Omit<BeamSupport, 'id'>[];
     loads: Omit<BeamLoad, 'id'>[];
 }

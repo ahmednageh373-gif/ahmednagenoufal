@@ -27,6 +27,7 @@ const AssessmentManager = React.lazy(() => import('./components/AssessmentManage
 const AuditLogViewer = React.lazy(() => import('./components/AuditLogViewer').then(module => ({ default: module.AuditLogViewer })));
 const AdvancedReporting = React.lazy(() => import('./components/AdvancedReporting'));
 const ProjectMembers = React.lazy(() => import('./components/ProjectMembers').then(module => ({ default: module.ProjectMembers })));
+const BOQManualManager = React.lazy(() => import('./components/BOQManualManager').then(module => ({ default: module.BOQManualManager })));
 
 
 const LoadingSpinner = () => (
@@ -242,6 +243,8 @@ const App: React.FC = () => {
                 return <OKRManager project={activeProject} onUpdateObjectives={handleUpdateObjectives} onUpdateKeyResults={handleUpdateKeyResults} />;
             case 'workflow':
                 return <WorkflowArchitect project={activeProject} onUpdateWorkflow={handleUpdateWorkflow} />;
+            case 'boq-manual':
+                return <BOQManualManager project={activeProject} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} />;
             case 'analysis':
                 return <AnalysisCenter project={activeProject} onUpdateBoqReconciliation={handleUpdateBoqReconciliation} onUpdateComparativeAnalysis={handleUpdateComparativeAnalysis} onUpdateFinancials={handleUpdateFinancials} />;
             case 'advanced-reporting':

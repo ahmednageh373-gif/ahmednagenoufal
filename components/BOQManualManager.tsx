@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority } from '../types';
 import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search } from 'lucide-react';
+import { BOQAIAnalysis } from './BOQAIAnalysis';
 
 // Fix: Use XLSX from window since it's loaded via CDN
 declare var XLSX: any;
@@ -659,7 +660,7 @@ interface BOQManualManagerProps {
 export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onUpdateFinancials, onUpdateSchedule }) => {
     const [currentFinancials, setCurrentFinancials] = useState<FinancialItem[]>(project.data.financials || []);
     const [currentSchedule, setCurrentSchedule] = useState<ScheduleTask[]>(project.data.schedule || []);
-    const [activeTab, setActiveTab] = useState<'import' | 'manage' | 'schedule'>('import');
+    const [activeTab, setActiveTab] = useState<'import' | 'manage' | 'schedule' | 'ai-analysis'>('import');
 
     useEffect(() => {
         setCurrentFinancials(project.data.financials || []);
@@ -687,24 +688,30 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
             <h1 className="text-3xl font-bold mb-6">إدارة المقايسات والجداول الزمنية</h1>
             
             {/* Tab Navigation */}
-            <div className="flex gap-2 mb-6 border-b dark:border-gray-700">
+            <div className="flex gap-2 mb-6 border-b dark:border-gray-700 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('import')}
-                    className={`px-4 py-2 ${activeTab === 'import' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
+                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'import' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
                 >
                     1. استيراد المقايسة
                 </button>
                 <button
                     onClick={() => setActiveTab('manage')}
-                    className={`px-4 py-2 ${activeTab === 'manage' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
+                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'manage' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
                 >
                     2. إدارة المقايسة
                 </button>
                 <button
                     onClick={() => setActiveTab('schedule')}
-                    className={`px-4 py-2 ${activeTab === 'schedule' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
+                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'schedule' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
                 >
                     3. إدارة الجدول الزمني
+                </button>
+                <button
+                    onClick={() => setActiveTab('ai-analysis')}
+                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'ai-analysis' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
+                >
+                    4. التحليل بالذكاء الاصطناعي ⚡
                 </button>
             </div>
 
@@ -712,6 +719,7 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
             {activeTab === 'import' && <BOQImport onImportSuccess={handleImportSuccess} />}
             {activeTab === 'manage' && <BOQManager financials={currentFinancials} onUpdateFinancials={handleUpdateFinancials} project={project} />}
             {activeTab === 'schedule' && <ManualScheduleManager schedule={currentSchedule} financials={currentFinancials} onUpdateSchedule={handleUpdateSchedule} />}
+            {activeTab === 'ai-analysis' && <BOQAIAnalysis financials={currentFinancials} onGeneratedSchedule={handleUpdateSchedule} />}
         </div>
     );
 };

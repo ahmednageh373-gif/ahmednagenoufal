@@ -822,3 +822,94 @@ export const generateQualityPlan = async (project: Project, input: QualityPlanIn
     });
     return JSON.parse(response.text);
 };
+
+// Generate Schedule from Financial Items (BOQ) using AI
+export const generateScheduleFromFinancials = async (financials: FinancialItem[]): Promise<ScheduleTask[]> => {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const prompt = `أنت مهندس تخطيط محترف متخصص في إدارة المشاريع الإنشائية.
+مهمتك: تحليل بنود المقايسة (Bill of Quantities) التالية وتحويلها إلى جدول زمني تفصيلي.
+
+بنود المقايسة:
+${JSON.stringify(financials.map(f => ({
+    id: f.id,
+    item: f.item,
+    quantity: f.quantity,
+    unit: f.unit,
+    total: f.total
+})), null, 2)}
+
+المطلوب:
+1. قم بتحليل كل بند وتحديد الأنشطة اللازمة لتنفيذه
+2. قدّر المدة الزمنية المناسبة لكل نشاط (بالأيام)
+3. حدد التبعيات المنطقية بين الأنشطة (أي نشاط يجب أن يسبق الآخر)
+4. قم بتعيين أكواد WBS مناسبة
+5. صنف كل نشاط حسب نوعه (Construction, MEP, Finishing, etc.)
+
+ملاحظات:
+- ضع في الاعتبار التسلسل المنطقي للأعمال الإنشائية (الحفر قبل الصب، الأعمال الإنشائية قبل التشطيبات، إلخ)
+- قدّر مدد واقعية بناءً على الكميات المذكورة
+- استخدم التبعيات لضمان تسلسل منطقي للأعمال
+
+أخرج JSON array مع كل نشاط يحتوي على:
+{
+    "name": "اسم النشاط",
+    "duration": عدد_الأيام,
+    "wbsCode": "X.X.X",
+    "category": "Construction/MEP/Finishing",
+    "boqItemId": "معرف_بند_المقايسة_المرتبط",
+    "dependencies": []
+}`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            name: { type: Type.STRING },
+                            duration: { type: Type.NUMBER },
+                            wbsCode: { type: Type.STRING },
+                            category: { type: Type.STRING },
+                            boqItemId: { type: Type.STRING },
+                            dependencies: { type: Type.ARRAY, items: { type: Type.NUMBER } }
+                        }
+                    }
+                }
+            }
+        });
+
+        const tasksData = JSON.parse(response.text);
+        const today = new Date();
+        
+        // تحويل البيانات إلى ScheduleTask
+        return tasksData.map((taskData: any, index: number) => {
+            const startDate = new Date(today);
+            startDate.setDate(startDate.getDate() + index * 3); // تباعد 3 أيام بين كل مهمة
+            
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + (taskData.duration || 7));
+            
+            return {
+                id: Date.now() + index,
+                name: taskData.name,
+                start: startDate.toISOString().split('T')[0],
+                end: endDate.toISOString().split('T')[0],
+                progress: 0,
+                dependencies: taskData.dependencies || [],
+                status: 'To Do' as ScheduleTaskStatus,
+                priority: 'Medium' as ScheduleTaskPriority,
+                category: taskData.category || 'Construction',
+                wbsCode: taskData.wbsCode || `${index + 1}.0`,
+            };
+        });
+    } catch (error) {
+        console.error('Error generating schedule from financials:', error);
+        throw new Error('فشل في توليد الجدول الزمني من المقايسة');
+    }
+};

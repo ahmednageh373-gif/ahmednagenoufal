@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority } from '../types';
-import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search } from 'lucide-react';
+import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search, Layers } from 'lucide-react';
 import { BOQAIAnalysis } from './BOQAIAnalysis';
+import { BOQItemBreakdown } from './BOQItemBreakdown';
 
 // Fix: Use XLSX from window since it's loaded via CDN
 declare var XLSX: any;
@@ -234,6 +235,7 @@ interface BOQManagerProps {
 const BOQManager: React.FC<BOQManagerProps> = ({ financials, onUpdateFinancials, project }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [newItem, setNewItem] = useState({ item: '', unit: '', quantity: 0, unitPrice: 0 });
+    const [selectedItemForBreakdown, setSelectedItemForBreakdown] = useState<FinancialItem | null>(null);
 
     const filteredFinancials = useMemo(() => {
         return financials.filter(item =>
@@ -365,7 +367,7 @@ const BOQManager: React.FC<BOQManagerProps> = ({ financials, onUpdateFinancials,
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            {['الوصف', 'الوحدة', 'الكمية', 'سعر الوحدة', 'الإجمالي', 'إجراء'].map(h => (
+                            {['الوصف', 'الوحدة', 'الكمية', 'سعر الوحدة', 'الإجمالي', 'إجراءات'].map(h => (
                                 <th key={h} className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                                     {h}
                                 </th>
@@ -409,18 +411,37 @@ const BOQManager: React.FC<BOQManagerProps> = ({ financials, onUpdateFinancials,
                                     {item.total.toLocaleString()}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <button
-                                        onClick={() => handleDeleteItem(item.id)}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setSelectedItemForBreakdown(item)}
+                                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                            title="تفصيل البند"
+                                        >
+                                            <Layers className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteItem(item.id)}
+                                            className="text-red-500 hover:text-red-700"
+                                            title="حذف البند"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+            {/* Modal تفصيل البند */}
+            {selectedItemForBreakdown && (
+                <BOQItemBreakdown
+                    item={selectedItemForBreakdown}
+                    isOpen={!!selectedItemForBreakdown}
+                    onClose={() => setSelectedItemForBreakdown(null)}
+                />
+            )}
         </div>
     );
 };

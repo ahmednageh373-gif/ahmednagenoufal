@@ -74,11 +74,14 @@ export interface ScheduleTask {
 
 export interface FinancialItem {
     id: string;
-    item: string;
-    quantity: number;
-    unit: string;
-    unitPrice: number;
-    total: number;
+    itemNumber?: string;        // الرقم التسلسلي - Item Number (new)
+    code?: string;              // الكود/الرمز الإنشائي - Construction Code (new)
+    category?: string;          // الفئة - Category (new)
+    item: string;               // وصف البند - Description
+    quantity: number;           // الكمية - Quantity
+    unit: string;               // وحدة القياس - Unit of Measurement
+    unitPrice: number;          // سعر الوحدة - Unit Price
+    total: number;              // الإجمالي - Total
 }
 
 // --- Risk Manager ---
@@ -478,4 +481,74 @@ export interface QualityPlanInput {
 
 export interface QualityPlanResult {
     itpReport: string;
+}
+
+// --- Knowledge Database ---
+
+export type KnowledgeDocumentType = 'markdown' | 'pdf' | 'pptx' | 'xlsx' | 'video' | 'image';
+export type KnowledgeCategory = 
+    | 'AutoCAD' 
+    | 'Structural' 
+    | 'BOQ' 
+    | 'Scheduling' 
+    | 'Programming'
+    | 'Management'
+    | 'Technical'
+    | 'General';
+export type KnowledgeDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+export interface KnowledgeDocument {
+    id: string;
+    title: string;
+    titleAr: string;
+    type: KnowledgeDocumentType;
+    category: KnowledgeCategory;
+    difficulty: KnowledgeDifficulty;
+    description: string;
+    descriptionAr: string;
+    content: string;
+    fileUrl?: string;
+    fileSize?: number;
+    uploadDate: string;
+    lastModified: string;
+    tags: string[];
+    topics: string[];
+    estimatedHours?: number;
+    featured?: boolean;
+    author?: string;
+    version?: string;
+    views?: number;
+    downloads?: number;
+}
+
+export interface KnowledgeModule {
+    id: string;
+    titleAr: string;
+    titleEn: string;
+    category: KnowledgeCategory;
+    difficulty: KnowledgeDifficulty;
+    estimatedHours: number;
+    topics: string[];
+    description: string;
+    documents: KnowledgeDocument[];
+    prerequisites?: string[];
+    learningOutcomes?: string[];
+    featured?: boolean;
+    order?: number;
+}
+
+export interface KnowledgeSearchResult {
+    document: KnowledgeDocument;
+    relevance: number;
+    matchedContent: string;
+    highlights: string[];
+}
+
+export interface UserProgress {
+    documentId: string;
+    completed: boolean;
+    progress: number;
+    lastViewed: string;
+    notes?: string;
+    bookmarked?: boolean;
 }

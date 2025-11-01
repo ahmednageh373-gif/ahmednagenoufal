@@ -27,6 +27,9 @@ const AssessmentManager = React.lazy(() => import('./components/AssessmentManage
 const AuditLogViewer = React.lazy(() => import('./components/AuditLogViewer').then(module => ({ default: module.AuditLogViewer })));
 const AdvancedReporting = React.lazy(() => import('./components/AdvancedReporting'));
 const ProjectMembers = React.lazy(() => import('./components/ProjectMembers').then(module => ({ default: module.ProjectMembers })));
+const BOQManualManager = React.lazy(() => import('./BOQManualManager').then(module => ({ default: module.BOQManualManager })));
+const EngineeringKnowledge = React.lazy(() => import('./EngineeringKnowledge').then(module => ({ default: module.EngineeringKnowledge })));
+const KnowledgeDatabase = React.lazy(() => import('./KnowledgeDatabase'));
 
 
 const LoadingSpinner = () => (
@@ -242,6 +245,12 @@ const App: React.FC = () => {
                 return <OKRManager project={activeProject} onUpdateObjectives={handleUpdateObjectives} onUpdateKeyResults={handleUpdateKeyResults} />;
             case 'workflow':
                 return <WorkflowArchitect project={activeProject} onUpdateWorkflow={handleUpdateWorkflow} />;
+            case 'boq-manual':
+                return <BOQManualManager 
+                    project={activeProject} 
+                    onUpdateFinancials={handleUpdateFinancials} 
+                    onUpdateSchedule={handleUpdateSchedule} 
+                />;
             case 'analysis':
                 return <AnalysisCenter project={activeProject} onUpdateBoqReconciliation={handleUpdateBoqReconciliation} onUpdateComparativeAnalysis={handleUpdateComparativeAnalysis} onUpdateFinancials={handleUpdateFinancials} />;
             case 'advanced-reporting':
@@ -252,6 +261,10 @@ const App: React.FC = () => {
                 return <DocumentationViewer />;
             case 'audit-log':
                 return <AuditLogViewer />;
+            case 'engineering-knowledge':
+                return <EngineeringKnowledge project={activeProject} />;
+            case 'knowledge-database':
+                return <KnowledgeDatabase project={activeProject} />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

@@ -1,746 +1,966 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import type { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority } from '../types';
-import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search, Layers } from 'lucide-react';
-import { BOQAIAnalysis } from './BOQAIAnalysis';
-import { BOQItemBreakdown } from './BOQItemBreakdown';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { Upload, Plus, Save, FileDown, Search, Edit2, Trash2, X, Check, FileSpreadsheet, Calendar, Link as LinkIcon } from 'lucide-react';
+import type { Project } from '../types';
 
-// Fix: Use XLSX from window since it's loaded via CDN
-declare var XLSX: any;
+// --- Type Definitions ---
+
+export interface BOQItem {
+    id: string;
+    itemNo: string;
+    description: string;
+    unit: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    notes?: string;
+}
+
+export interface ScheduleItem {
+    id: string;
+    taskName: string;
+    boqItemIds: string[];
+    startDate: string;
+    duration: number;
+    endDate: string;
+    progress: number;
+    status: 'To Do' | 'In Progress' | 'Done';
+    priority: 'Low' | 'Medium' | 'High';
+    notes?: string;
+}
+
+interface BOQManualManagerProps {
+    project: Project;
+}
 
 // --- Helper Functions ---
 
-// Helper function for Excel export (BOQ)
-const exportToExcel = (data: FinancialItem[], fileName: string) => {
-    const exportData = data.map(item => ({
-        'رقم البند': item.id,
-        'الوصف': item.item,
-        'الوحدة': item.unit,
-        'الكمية': item.quantity,
-        'سعر الوحدة': item.unitPrice,
-        'الإجمالي': item.total,
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'المقايسة');
-    XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+const parseExcelDate = (excelDate: number): string => {
+    const date = new Date((excelDate - 25569) * 86400 * 1000);
+    return date.toISOString().split('T')[0];
 };
 
-const parseExcel = (file: File): Promise<FinancialItem[]> => {
+const detectBOQColumns = (headers: string[]): Record<string, number> => {
+    const mapping: Record<string, number> = {};
+    
+    const headerLower = headers.map(h => h.toLowerCase().trim());
+    
+    // Item Number mapping
+    const itemNoPatterns = ['item no', 'رقم', 'item', 'no', 'م'];
+    const itemNoIdx = headerLower.findIndex(h => 
+        itemNoPatterns.some(p => h.includes(p.toLowerCase()))
+    );
+    if (itemNoIdx !== -1) mapping.itemNo = itemNoIdx;
+    
+    // Description mapping
+    const descPatterns = ['description', 'الوصف', 'وصف', 'item description', 'البند'];
+    const descIdx = headerLower.findIndex(h => 
+        descPatterns.some(p => h.includes(p.toLowerCase()))
+    );
+    if (descIdx !== -1) mapping.description = descIdx;
+    
+    // Unit mapping
+    const unitPatterns = ['unit', 'الوحدة', 'وحدة'];
+    const unitIdx = headerLower.findIndex(h => 
+        unitPatterns.some(p => h.includes(p.toLowerCase()))
+    );
+    if (unitIdx !== -1) mapping.unit = unitIdx;
+    
+    // Quantity mapping
+    const qtyPatterns = ['quantity', 'الكمية', 'كمية', 'qty'];
+    const qtyIdx = headerLower.findIndex(h => 
+        qtyPatterns.some(p => h.includes(p.toLowerCase()))
+    );
+    if (qtyIdx !== -1) mapping.quantity = qtyIdx;
+    
+    // Unit Price mapping
+    const pricePatterns = ['unit price', 'سعر الوحدة', 'price', 'rate'];
+    const priceIdx = headerLower.findIndex(h => 
+        pricePatterns.some(p => h.includes(p.toLowerCase()))
+    );
+    if (priceIdx !== -1) mapping.unitPrice = priceIdx;
+    
+    return mapping;
+};
+
+const parseBOQFromExcel = async (file: File): Promise<BOQItem[]> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
+        
         reader.onload = (e) => {
             try {
                 const data = new Uint8Array(e.target?.result as ArrayBuffer);
-                const workbook = XLSX.read(data, { type: 'array' });
+                const workbook = (window as any).XLSX.read(data, { type: 'array' });
                 const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                const json: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                const items: FinancialItem[] = [];
-                let itemIdCounter = 1;
-
-                // Simple parsing - assumes first row is header
-                for (let i = 1; i < json.length; i++) {
-                    const row = json[i];
-                    if (row && row.length >= 4) {
-                        const item = String(row[0] || '').trim();
-                        const unit = String(row[1] || '').trim();
-                        const quantity = Number(row[2]) || 0;
-                        const unitPrice = Number(row[3]) || 0;
-
-                        if (item && (quantity > 0 || unitPrice > 0)) {
-                            items.push({
-                                id: `f-import-${itemIdCounter++}`,
-                                item: item,
-                                unit: unit,
-                                quantity: quantity,
-                                unitPrice: unitPrice,
-                                total: quantity * unitPrice,
-                            });
-                        }
+                const sheet = workbook.Sheets[sheetName];
+                const rows = (window as any).XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                if (rows.length < 2) {
+                    reject(new Error('الملف فارغ أو لا يحتوي على بيانات كافية'));
+                    return;
+                }
+                
+                // Find header row
+                let headerRowIdx = 0;
+                for (let i = 0; i < Math.min(5, rows.length); i++) {
+                    const row = rows[i];
+                    if (row && row.length > 3) {
+                        headerRowIdx = i;
+                        break;
                     }
                 }
                 
-                if (items.length === 0) {
-                    return reject(new Error('لم يتم العثور على بنود مقايسة صالحة في الملف'));
+                const headers = rows[headerRowIdx];
+                const columnMapping = detectBOQColumns(headers);
+                
+                const items: BOQItem[] = [];
+                
+                for (let i = headerRowIdx + 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    const itemNo = columnMapping.itemNo !== undefined ? String(row[columnMapping.itemNo] || '') : '';
+                    const description = columnMapping.description !== undefined ? String(row[columnMapping.description] || '') : '';
+                    
+                    if (!description) continue;
+                    
+                    const unit = columnMapping.unit !== undefined ? String(row[columnMapping.unit] || 'م') : 'م';
+                    const quantity = columnMapping.quantity !== undefined ? parseFloat(row[columnMapping.quantity]) || 0 : 0;
+                    const unitPrice = columnMapping.unitPrice !== undefined ? parseFloat(row[columnMapping.unitPrice]) || 0 : 0;
+                    
+                    items.push({
+                        id: `boq-${Date.now()}-${i}`,
+                        itemNo: itemNo || `${i}`,
+                        description,
+                        unit,
+                        quantity,
+                        unitPrice,
+                        totalPrice: quantity * unitPrice,
+                    });
                 }
                 
                 resolve(items);
-            } catch (error) { 
-                reject(new Error('فشل في تحليل ملف Excel')); 
+            } catch (error) {
+                reject(error);
             }
         };
-        reader.onerror = () => reject(new Error('فشل في قراءة الملف'));
+        
+        reader.onerror = () => reject(new Error('فشل قراءة الملف'));
         reader.readAsArrayBuffer(file);
     });
 };
 
-// Helper function for Schedule Export
-const exportScheduleToExcel = (data: ScheduleTask[], fileName: string) => {
-    const exportData = data.map(task => ({
-        'Activity ID': task.id,
-        'Activity Name': task.name,
-        'WBS Code': task.wbsCode || 'N/A',
-        'Start Date': task.start,
-        'Finish Date': task.end,
-        'Duration (Days)': task.duration || 0,
-        'Status': task.status === 'To Do' ? 'غير مُنجز' : task.status === 'In Progress' ? 'قيد التنفيذ' : 'مُنجز',
-        'Progress (%)': task.progress,
-        'Priority': task.priority === 'High' ? 'عالية' : task.priority === 'Medium' ? 'متوسطة' : 'منخفضة',
-        'Dependencies': task.dependencies.join(', '),
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
+const exportBOQToExcel = (items: BOQItem[], fileName: string) => {
+    const XLSX = (window as any).XLSX;
+    
+    const data = [
+        ['رقم البند', 'الوصف', 'الوحدة', 'الكمية', 'سعر الوحدة', 'الإجمالي', 'ملاحظات'],
+        ...items.map(item => [
+            item.itemNo,
+            item.description,
+            item.unit,
+            item.quantity,
+            item.unitPrice,
+            item.totalPrice,
+            item.notes || '',
+        ])
+    ];
+    
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // Set column widths
+    ws['!cols'] = [
+        { wch: 10 },
+        { wch: 40 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 30 },
+    ];
+    
+    // Style header row
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_col(C) + '1';
+        if (!ws[address]) continue;
+        ws[address].s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '4F46E5' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+        };
+    }
+    
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'الجدول الزمني');
-    XLSX.writeFile(wb, `${fileName}_SCHEDULE_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'BOQ');
+    XLSX.writeFile(wb, fileName);
 };
 
-// --- Child Components ---
-
-interface BOQImportProps {
-    onImportSuccess: (items: FinancialItem[], fileName: string) => void;
-}
-
-const BOQImport: React.FC<BOQImportProps> = ({ onImportSuccess }) => {
-    const [file, setFile] = useState<File | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'file' | 'manual'>('file');
-    const [manualInput, setManualInput] = useState('');
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = event.target.files?.[0] || null;
-        if (selectedFile && selectedFile.name.endsWith('.xlsx')) {
-            setFile(selectedFile);
-            setError(null);
-        } else {
-            setFile(null);
-            setError('صيغة الملف غير مدعومة. الرجاء اختيار ملف Excel (.xlsx)');
-        }
-    };
-
-    const handleUpload = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            let items: FinancialItem[] = [];
-            let fileName = '';
+const exportScheduleToExcel = (schedule: ScheduleItem[], boqItems: BOQItem[], fileName: string) => {
+    const XLSX = (window as any).XLSX;
+    
+    const data = [
+        ['اسم المهمة', 'بنود المقايسة المرتبطة', 'تاريخ البداية', 'المدة (أيام)', 'تاريخ النهاية', 'نسبة الإنجاز %', 'الحالة', 'الأولوية', 'ملاحظات'],
+        ...schedule.map(task => {
+            const linkedBOQs = task.boqItemIds
+                .map(id => boqItems.find(b => b.id === id))
+                .filter(Boolean)
+                .map(b => b!.itemNo)
+                .join(', ');
             
-            if (activeTab === 'file') {
-                if (!file) throw new Error('الرجاء اختيار ملف أولاً');
-                fileName = file.name;
-                items = await parseExcel(file);
-            } else {
-                fileName = 'Manual Input';
-                const lines = manualInput.split('\n').filter(line => line.trim() !== '');
-                items = lines.map((line, index) => {
-                    const parts = line.split('|').map(p => p.trim());
-                    const [item, unit, quantityStr, unitPriceStr] = parts;
-                    const quantity = Number(quantityStr) || 0;
-                    const unitPrice = Number(unitPriceStr) || 0;
-                    return {
-                        id: `f-manual-${index + 1}`,
-                        item,
-                        unit,
-                        quantity,
-                        unitPrice,
-                        total: quantity * unitPrice,
-                    };
-                });
-            }
-            
-            if (items.length === 0) throw new Error('لم يتم استخراج أي بنود');
-            
-            onImportSuccess(items, fileName);
-            alert(`تم استيراد ${items.length} بند بنجاح من ${fileName}`);
-            setFile(null);
-            setManualInput('');
-        } catch (e: any) {
-            setError(e.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center">
-                <Upload className="w-5 h-5 ml-2" /> استيراد المقايسة
-            </h3>
-            
-            <div className="mb-4 flex gap-2">
-                <button
-                    onClick={() => setActiveTab('file')}
-                    className={`px-4 py-2 rounded ${activeTab === 'file' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-                >
-                    تحميل ملف
-                </button>
-                <button
-                    onClick={() => setActiveTab('manual')}
-                    className={`px-4 py-2 rounded ${activeTab === 'manual' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-                >
-                    إدخال يدوي
-                </button>
-            </div>
-
-            {activeTab === 'file' ? (
-                <div className="space-y-4">
-                    <label className="block text-sm font-medium mb-2">
-                        اختر ملف المقايسة (Excel)
-                    </label>
-                    <input
-                        type="file"
-                        onChange={handleFileChange}
-                        accept=".xlsx"
-                        className="w-full p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    {file && <p className="text-sm text-gray-500">الملف المحدد: {file.name}</p>}
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    <label className="block text-sm font-medium mb-2">
-                        أدخل بنود المقايسة (كل بند في سطر بصيغة: الوصف | الوحدة | الكمية | سعر الوحدة)
-                    </label>
-                    <textarea
-                        value={manualInput}
-                        onChange={(e) => setManualInput(e.target.value)}
-                        placeholder="مثال: خرسانة مسلحة | م3 | 100 | 450"
-                        rows={6}
-                        className="w-full p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                </div>
-            )}
-
-            {error && <p className="text-sm text-red-500 mt-4">{error}</p>}
-            
-            <button
-                onClick={handleUpload}
-                disabled={isLoading}
-                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded disabled:opacity-50"
-            >
-                {isLoading ? 'جاري التحميل...' : 'تحميل واستيراد'}
-            </button>
-        </div>
-    );
-};
-
-interface BOQManagerProps {
-    financials: FinancialItem[];
-    onUpdateFinancials: (items: FinancialItem[]) => void;
-    project: Project;
-}
-
-const BOQManager: React.FC<BOQManagerProps> = ({ financials, onUpdateFinancials, project }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [newItem, setNewItem] = useState({ item: '', unit: '', quantity: 0, unitPrice: 0 });
-    const [selectedItemForBreakdown, setSelectedItemForBreakdown] = useState<FinancialItem | null>(null);
-
-    const filteredFinancials = useMemo(() => {
-        return financials.filter(item =>
-            item.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.id.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [financials, searchTerm]);
-
-    const handleAddItem = () => {
-        if (!newItem.item.trim()) return;
-        const newFinancialItem: FinancialItem = {
-            ...newItem,
-            id: `f-manual-${Date.now()}`,
-            total: newItem.quantity * newItem.unitPrice
+            return [
+                task.taskName,
+                linkedBOQs,
+                task.startDate,
+                task.duration,
+                task.endDate,
+                task.progress,
+                task.status,
+                task.priority,
+                task.notes || '',
+            ];
+        })
+    ];
+    
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // Set column widths
+    ws['!cols'] = [
+        { wch: 30 },
+        { wch: 25 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 10 },
+        { wch: 30 },
+    ];
+    
+    // Style header row
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_col(C) + '1';
+        if (!ws[address]) continue;
+        ws[address].s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '10B981' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
         };
-        onUpdateFinancials([...financials, newFinancialItem]);
-        setNewItem({ item: '', unit: '', quantity: 0, unitPrice: 0 });
-    };
-
-    const handleUpdateItem = (id: string, field: keyof FinancialItem, value: string | number) => {
-        onUpdateFinancials(financials.map(item => {
-            if (item.id === id) {
-                const updatedItem = { ...item, [field]: value };
-                if (field === 'quantity' || field === 'unitPrice') {
-                    updatedItem.total = Number(updatedItem.quantity) * Number(updatedItem.unitPrice);
-                }
-                return updatedItem;
-            }
-            return item;
-        }));
-    };
-
-    const handleDeleteItem = (id: string) => {
-        onUpdateFinancials(financials.filter(i => i.id !== id));
-    };
-
-    const handleExport = () => {
-        exportToExcel(financials, 'BOQ_Manual_Export');
-    };
-
-    const totalCost = useMemo(() => financials.reduce((sum, item) => sum + item.total, 0), [financials]);
-
-    return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold flex items-center">
-                    <Table className="w-5 h-5 ml-2" /> إدارة بنود المقايسة
-                </h3>
-                <button
-                    onClick={handleExport}
-                    disabled={financials.length === 0}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center disabled:opacity-50"
-                >
-                    <Download className="w-4 h-4 ml-2" /> تصدير Excel
-                </button>
-            </div>
-
-            {/* Add New Item */}
-            <div className="border dark:border-gray-600 p-4 rounded-lg mb-4">
-                <h4 className="font-semibold mb-3">إضافة بند جديد</h4>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <input
-                        placeholder="وصف البند"
-                        value={newItem.item}
-                        onChange={(e) => setNewItem({ ...newItem, item: e.target.value })}
-                        className="col-span-2 p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <input
-                        placeholder="الوحدة"
-                        value={newItem.unit}
-                        onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-                        className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <input
-                        type="number"
-                        placeholder="الكمية"
-                        value={newItem.quantity}
-                        onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
-                        className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <input
-                        type="number"
-                        placeholder="سعر الوحدة"
-                        value={newItem.unitPrice}
-                        onChange={(e) => setNewItem({ ...newItem, unitPrice: Number(e.target.value) })}
-                        className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                </div>
-                <div className="flex justify-between items-center mt-3">
-                    <p className="font-bold">الإجمالي: {(newItem.quantity * newItem.unitPrice).toLocaleString()} ريال</p>
-                    <button
-                        onClick={handleAddItem}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded flex items-center"
-                    >
-                        <PlusCircle className="w-4 h-4 ml-2" /> إضافة بند
-                    </button>
-                </div>
-            </div>
-
-            {/* Search */}
-            <div className="mb-4">
-                <div className="relative">
-                    <Search className="absolute right-3 top-3 w-4 h-4 text-gray-400" />
-                    <input
-                        placeholder="ابحث بالوصف أو رقم البند..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pr-10 p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                </div>
-            </div>
-
-            {/* Summary */}
-            <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg mb-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">عدد البنود</p>
-                        <p className="text-2xl font-bold text-indigo-600">{filteredFinancials.length}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">الإجمالي</p>
-                        <p className="text-2xl font-bold text-green-600">{totalCost.toLocaleString()} ريال</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* BOQ Table */}
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            {['الوصف', 'الوحدة', 'الكمية', 'سعر الوحدة', 'الإجمالي', 'إجراءات'].map(h => (
-                                <th key={h} className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                    {h}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {filteredFinancials.map((item) => (
-                            <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <td className="px-4 py-3">
-                                    <input
-                                        value={item.item}
-                                        onChange={(e) => handleUpdateItem(item.id, 'item', e.target.value)}
-                                        className="w-full p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
-                                    />
-                                </td>
-                                <td className="px-4 py-3">
-                                    <input
-                                        value={item.unit}
-                                        onChange={(e) => handleUpdateItem(item.id, 'unit', e.target.value)}
-                                        className="w-20 p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
-                                    />
-                                </td>
-                                <td className="px-4 py-3">
-                                    <input
-                                        type="number"
-                                        value={item.quantity}
-                                        onChange={(e) => handleUpdateItem(item.id, 'quantity', Number(e.target.value))}
-                                        className="w-24 p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm text-right"
-                                    />
-                                </td>
-                                <td className="px-4 py-3">
-                                    <input
-                                        type="number"
-                                        value={item.unitPrice}
-                                        onChange={(e) => handleUpdateItem(item.id, 'unitPrice', Number(e.target.value))}
-                                        className="w-24 p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm text-right"
-                                    />
-                                </td>
-                                <td className="px-4 py-3 text-sm font-bold text-blue-600 text-right">
-                                    {item.total.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setSelectedItemForBreakdown(item)}
-                                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                            title="تفصيل البند"
-                                        >
-                                            <Layers className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteItem(item.id)}
-                                            className="text-red-500 hover:text-red-700"
-                                            title="حذف البند"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Modal تفصيل البند */}
-            {selectedItemForBreakdown && (
-                <BOQItemBreakdown
-                    item={selectedItemForBreakdown}
-                    isOpen={!!selectedItemForBreakdown}
-                    onClose={() => setSelectedItemForBreakdown(null)}
-                />
-            )}
-        </div>
-    );
+    }
+    
+    // Color code status
+    for (let R = 1; R <= schedule.length; ++R) {
+        const statusCell = ws[`G${R + 1}`];
+        if (!statusCell) continue;
+        
+        let fillColor = 'F3F4F6';
+        if (statusCell.v === 'Done') fillColor = '10B981';
+        else if (statusCell.v === 'In Progress') fillColor = 'F59E0B';
+        else if (statusCell.v === 'To Do') fillColor = 'EF4444';
+        
+        statusCell.s = {
+            fill: { fgColor: { rgb: fillColor } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+        };
+    }
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
+    XLSX.writeFile(wb, fileName);
 };
 
-interface ManualScheduleManagerProps {
-    schedule: ScheduleTask[];
-    financials: FinancialItem[];
-    onUpdateSchedule: (schedule: ScheduleTask[]) => void;
-}
-
-const ManualScheduleManager: React.FC<ManualScheduleManagerProps> = ({ schedule, financials, onUpdateSchedule }) => {
-    const [tasks, setTasks] = useState<ScheduleTask[]>(schedule);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [newTask, setNewTask] = useState({
-        name: '',
-        duration: 0,
-        start: new Date().toISOString().split('T')[0],
-        status: 'To Do' as ScheduleTaskStatus,
-        priority: 'Medium' as ScheduleTaskPriority,
-    });
-
-    useEffect(() => {
-        setTasks(schedule);
-    }, [schedule]);
-
-    const filteredTasks = useMemo(() => {
-        return tasks.filter(task =>
-            task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            String(task.id).toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [tasks, searchTerm]);
-
-    const handleAddTask = () => {
-        if (!newTask.name.trim() || newTask.duration <= 0) return;
-        
-        const endDate = new Date(new Date(newTask.start).getTime() + newTask.duration * 24 * 60 * 60 * 1000);
-        const newScheduleItem: ScheduleTask = {
-            id: Date.now(),
-            name: newTask.name,
-            start: newTask.start,
-            end: endDate.toISOString().split('T')[0],
-            progress: 0,
-            dependencies: [],
-            status: newTask.status,
-            priority: newTask.priority,
-        };
-        
-        const updatedTasks = [...tasks, newScheduleItem];
-        setTasks(updatedTasks);
-        onUpdateSchedule(updatedTasks);
-        setNewTask({
-            name: '',
-            duration: 0,
-            start: new Date().toISOString().split('T')[0],
-            status: 'To Do',
-            priority: 'Medium',
-        });
-    };
-
-    const handleUpdateTask = (id: number, field: keyof ScheduleTask, value: any) => {
-        const updatedTasks = tasks.map(task => {
-            if (task.id === id) {
-                const updatedTask = { ...task, [field]: value };
-                if (field === 'start') {
-                    const duration = Math.ceil((new Date(task.end).getTime() - new Date(value).getTime()) / (1000 * 60 * 60 * 24));
-                    updatedTask.end = new Date(new Date(value).getTime() + duration * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-                }
-                return updatedTask;
-            }
-            return task;
-        });
-        setTasks(updatedTasks);
-        onUpdateSchedule(updatedTasks);
-    };
-
-    const handleDeleteTask = (id: number) => {
-        const updatedTasks = tasks.filter(task => task.id !== id);
-        setTasks(updatedTasks);
-        onUpdateSchedule(updatedTasks);
-    };
-
-    const handleExportSchedule = () => {
-        exportScheduleToExcel(schedule, 'Project_Schedule_Manual');
-    };
-
-    return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold flex items-center">
-                    <Clock className="w-5 h-5 ml-2" /> إدارة الجدول الزمني
-                </h3>
-                <button
-                    onClick={handleExportSchedule}
-                    disabled={schedule.length === 0}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center disabled:opacity-50"
-                >
-                    <Download className="w-4 h-4 ml-2" /> تصدير Excel
-                </button>
-            </div>
-
-            {/* Add New Task */}
-            <div className="border dark:border-gray-600 p-4 rounded-lg mb-4">
-                <h4 className="font-semibold mb-3">إضافة مهمة جديدة</h4>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <input
-                        placeholder="اسم النشاط"
-                        value={newTask.name}
-                        onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
-                        className="col-span-2 p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <input
-                        type="number"
-                        placeholder="المدة (أيام)"
-                        value={newTask.duration}
-                        onChange={(e) => setNewTask({ ...newTask, duration: Number(e.target.value) })}
-                        className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <input
-                        type="date"
-                        value={newTask.start}
-                        onChange={(e) => setNewTask({ ...newTask, start: e.target.value })}
-                        className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <select
-                        value={newTask.status}
-                        onChange={(e) => setNewTask({ ...newTask, status: e.target.value as ScheduleTaskStatus })}
-                        className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    >
-                        <option value="To Do">غير مُنجز</option>
-                        <option value="In Progress">قيد التنفيذ</option>
-                        <option value="Done">مُنجز</option>
-                    </select>
-                </div>
-                <div className="mt-3 flex justify-end">
-                    <button
-                        onClick={handleAddTask}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded flex items-center"
-                    >
-                        <PlusCircle className="w-4 h-4 ml-2" /> إضافة مهمة
-                    </button>
-                </div>
-            </div>
-
-            {/* Search */}
-            <div className="mb-4">
-                <div className="relative">
-                    <Search className="absolute right-3 top-3 w-4 h-4 text-gray-400" />
-                    <input
-                        placeholder="ابحث بالاسم أو الكود..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pr-10 p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                </div>
-            </div>
-
-            {/* Schedule Table */}
-            <div className="overflow-x-auto">
-                <h4 className="font-semibold mb-2">قائمة المهام ({filteredTasks.length})</h4>
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            {['الاسم', 'بدء', 'انتهاء', 'حالة', 'تقدم (%)', 'إجراء'].map(h => (
-                                <th key={h} className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                    {h}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {filteredTasks.map((task) => (
-                            <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <td className="px-4 py-3">
-                                    <input
-                                        value={task.name}
-                                        onChange={(e) => handleUpdateTask(task.id, 'name', e.target.value)}
-                                        className="w-full p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
-                                    />
-                                </td>
-                                <td className="px-4 py-3">
-                                    <input
-                                        type="date"
-                                        value={task.start}
-                                        onChange={(e) => handleUpdateTask(task.id, 'start', e.target.value)}
-                                        className="w-full p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
-                                    />
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                                    {task.end}
-                                </td>
-                                <td className="px-4 py-3">
-                                    <select
-                                        value={task.status}
-                                        onChange={(e) => handleUpdateTask(task.id, 'status', e.target.value as ScheduleTaskStatus)}
-                                        className="p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
-                                    >
-                                        <option value="To Do">غير مُنجز</option>
-                                        <option value="In Progress">قيد التنفيذ</option>
-                                        <option value="Done">مُنجز</option>
-                                    </select>
-                                </td>
-                                <td className="px-4 py-3">
-                                    <input
-                                        type="number"
-                                        value={task.progress}
-                                        onChange={(e) => handleUpdateTask(task.id, 'progress', Number(e.target.value))}
-                                        min="0"
-                                        max="100"
-                                        className="w-16 p-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm text-right"
-                                    />
-                                </td>
-                                <td className="px-4 py-3">
-                                    <button
-                                        onClick={() => handleDeleteTask(task.id)}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+const calculateEndDate = (startDate: string, duration: number): string => {
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setDate(end.getDate() + duration);
+    return end.toISOString().split('T')[0];
 };
 
 // --- Main Component ---
 
-interface BOQManualManagerProps {
-    project: Project;
-    onUpdateFinancials: (projectId: string, newFinancials: FinancialItem[]) => void;
-    onUpdateSchedule: (projectId: string, newSchedule: ScheduleTask[]) => void;
-}
-
-export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onUpdateFinancials, onUpdateSchedule }) => {
-    const [currentFinancials, setCurrentFinancials] = useState<FinancialItem[]>(project.data.financials || []);
-    const [currentSchedule, setCurrentSchedule] = useState<ScheduleTask[]>(project.data.schedule || []);
-    const [activeTab, setActiveTab] = useState<'import' | 'manage' | 'schedule' | 'ai-analysis'>('import');
-
-    useEffect(() => {
-        setCurrentFinancials(project.data.financials || []);
-        setCurrentSchedule(project.data.schedule || []);
-    }, [project]);
-
-    const handleImportSuccess = (items: FinancialItem[], fileName: string) => {
-        const newItems = [...currentFinancials, ...items];
-        setCurrentFinancials(newItems);
-        onUpdateFinancials(project.id, newItems);
+export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project }) => {
+    const [boqItems, setBOQItems] = useState<BOQItem[]>([]);
+    const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [editingBOQId, setEditingBOQId] = useState<string | null>(null);
+    const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'boq' | 'schedule'>('boq');
+    const [isImporting, setIsImporting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // BOQ form state
+    const [newBOQ, setNewBOQ] = useState<Partial<BOQItem>>({
+        itemNo: '',
+        description: '',
+        unit: 'م',
+        quantity: 0,
+        unitPrice: 0,
+    });
+    
+    // Schedule form state
+    const [newSchedule, setNewSchedule] = useState<Partial<ScheduleItem>>({
+        taskName: '',
+        boqItemIds: [],
+        startDate: new Date().toISOString().split('T')[0],
+        duration: 1,
+        progress: 0,
+        status: 'To Do',
+        priority: 'Medium',
+    });
+    
+    const [selectedBOQsForSchedule, setSelectedBOQsForSchedule] = useState<string[]>([]);
+    
+    // --- BOQ Management ---
+    
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        setIsImporting(true);
+        try {
+            const items = await parseBOQFromExcel(file);
+            setBOQItems(items);
+            alert(`تم استيراد ${items.length} بند بنجاح!`);
+        } catch (error) {
+            alert(`خطأ في الاستيراد: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+        } finally {
+            setIsImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
-
-    const handleUpdateFinancials = (items: FinancialItem[]) => {
-        setCurrentFinancials(items);
-        onUpdateFinancials(project.id, items);
+    
+    const handleAddBOQItem = () => {
+        if (!newBOQ.description) {
+            alert('يرجى إدخال وصف البند');
+            return;
+        }
+        
+        const item: BOQItem = {
+            id: `boq-${Date.now()}`,
+            itemNo: newBOQ.itemNo || `${boqItems.length + 1}`,
+            description: newBOQ.description,
+            unit: newBOQ.unit || 'م',
+            quantity: newBOQ.quantity || 0,
+            unitPrice: newBOQ.unitPrice || 0,
+            totalPrice: (newBOQ.quantity || 0) * (newBOQ.unitPrice || 0),
+            notes: newBOQ.notes,
+        };
+        
+        setBOQItems([...boqItems, item]);
+        setNewBOQ({
+            itemNo: '',
+            description: '',
+            unit: 'م',
+            quantity: 0,
+            unitPrice: 0,
+        });
     };
-
-    const handleUpdateSchedule = (tasks: ScheduleTask[]) => {
-        setCurrentSchedule(tasks);
-        onUpdateSchedule(project.id, tasks);
+    
+    const handleUpdateBOQItem = (id: string, updates: Partial<BOQItem>) => {
+        setBOQItems(items =>
+            items.map(item => {
+                if (item.id === id) {
+                    const updated = { ...item, ...updates };
+                    updated.totalPrice = updated.quantity * updated.unitPrice;
+                    return updated;
+                }
+                return item;
+            })
+        );
+        setEditingBOQId(null);
     };
-
+    
+    const handleDeleteBOQItem = (id: string) => {
+        if (confirm('هل أنت متأكد من حذف هذا البند؟')) {
+            setBOQItems(items => items.filter(item => item.id !== id));
+        }
+    };
+    
+    const handleExportBOQ = () => {
+        if (boqItems.length === 0) {
+            alert('لا توجد بنود للتصدير');
+            return;
+        }
+        
+        const fileName = `BOQ_${project.name}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        exportBOQToExcel(boqItems, fileName);
+    };
+    
+    // --- Schedule Management ---
+    
+    const handleAddScheduleItem = () => {
+        if (!newSchedule.taskName) {
+            alert('يرجى إدخال اسم المهمة');
+            return;
+        }
+        
+        const endDate = calculateEndDate(
+            newSchedule.startDate || new Date().toISOString().split('T')[0],
+            newSchedule.duration || 1
+        );
+        
+        const item: ScheduleItem = {
+            id: `schedule-${Date.now()}`,
+            taskName: newSchedule.taskName,
+            boqItemIds: selectedBOQsForSchedule,
+            startDate: newSchedule.startDate || new Date().toISOString().split('T')[0],
+            duration: newSchedule.duration || 1,
+            endDate,
+            progress: newSchedule.progress || 0,
+            status: newSchedule.status || 'To Do',
+            priority: newSchedule.priority || 'Medium',
+            notes: newSchedule.notes,
+        };
+        
+        setSchedule([...schedule, item]);
+        setNewSchedule({
+            taskName: '',
+            boqItemIds: [],
+            startDate: new Date().toISOString().split('T')[0],
+            duration: 1,
+            progress: 0,
+            status: 'To Do',
+            priority: 'Medium',
+        });
+        setSelectedBOQsForSchedule([]);
+    };
+    
+    const handleUpdateScheduleItem = (id: string, updates: Partial<ScheduleItem>) => {
+        setSchedule(items =>
+            items.map(item => {
+                if (item.id === id) {
+                    const updated = { ...item, ...updates };
+                    if (updates.startDate || updates.duration) {
+                        updated.endDate = calculateEndDate(updated.startDate, updated.duration);
+                    }
+                    return updated;
+                }
+                return item;
+            })
+        );
+        setEditingScheduleId(null);
+    };
+    
+    const handleDeleteScheduleItem = (id: string) => {
+        if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
+            setSchedule(items => items.filter(item => item.id !== id));
+        }
+    };
+    
+    const handleExportSchedule = () => {
+        if (schedule.length === 0) {
+            alert('لا توجد مهام للتصدير');
+            return;
+        }
+        
+        const fileName = `Schedule_${project.name}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        exportScheduleToExcel(schedule, boqItems, fileName);
+    };
+    
+    // --- Filtering and Summary ---
+    
+    const filteredBOQItems = useMemo(() => {
+        if (!searchQuery) return boqItems;
+        const query = searchQuery.toLowerCase();
+        return boqItems.filter(item =>
+            item.itemNo.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query) ||
+            item.unit.toLowerCase().includes(query)
+        );
+    }, [boqItems, searchQuery]);
+    
+    const boqSummary = useMemo(() => {
+        const total = boqItems.reduce((sum, item) => sum + item.totalPrice, 0);
+        return {
+            totalItems: boqItems.length,
+            totalCost: total,
+        };
+    }, [boqItems]);
+    
+    const scheduleSummary = useMemo(() => {
+        const totalTasks = schedule.length;
+        const completedTasks = schedule.filter(t => t.status === 'Done').length;
+        const inProgressTasks = schedule.filter(t => t.status === 'In Progress').length;
+        const avgProgress = schedule.length > 0
+            ? schedule.reduce((sum, t) => sum + t.progress, 0) / schedule.length
+            : 0;
+        
+        return {
+            totalTasks,
+            completedTasks,
+            inProgressTasks,
+            avgProgress: avgProgress.toFixed(1),
+        };
+    }, [schedule]);
+    
+    // --- Render ---
+    
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold mb-6">إدارة المقايسات والجداول الزمنية</h1>
-            
-            {/* Tab Navigation */}
-            <div className="flex gap-2 mb-6 border-b dark:border-gray-700 overflow-x-auto">
-                <button
-                    onClick={() => setActiveTab('import')}
-                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'import' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
-                >
-                    1. استيراد المقايسة
-                </button>
-                <button
-                    onClick={() => setActiveTab('manage')}
-                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'manage' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
-                >
-                    2. إدارة المقايسة
-                </button>
-                <button
-                    onClick={() => setActiveTab('schedule')}
-                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'schedule' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
-                >
-                    3. إدارة الجدول الزمني
-                </button>
-                <button
-                    onClick={() => setActiveTab('ai-analysis')}
-                    className={`px-4 py-2 whitespace-nowrap ${activeTab === 'ai-analysis' ? 'border-b-2 border-indigo-600 text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
-                >
-                    4. التحليل بالذكاء الاصطناعي ⚡
-                </button>
+            {/* Header */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                            إدارة المقايسات والجداول الزمنية (يدوي)
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            إدارة شاملة للمقايسات والجداول الزمنية مع إمكانية الاستيراد والتصدير
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isImporting}
+                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Upload size={20} />
+                            استيراد Excel
+                        </button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".xlsx,.xls"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                        />
+                    </div>
+                </div>
             </div>
-
-            {/* Tab Content */}
-            {activeTab === 'import' && <BOQImport onImportSuccess={handleImportSuccess} />}
-            {activeTab === 'manage' && <BOQManager financials={currentFinancials} onUpdateFinancials={handleUpdateFinancials} project={project} />}
-            {activeTab === 'schedule' && <ManualScheduleManager schedule={currentSchedule} financials={currentFinancials} onUpdateSchedule={handleUpdateSchedule} />}
-            {activeTab === 'ai-analysis' && <BOQAIAnalysis financials={currentFinancials} onGeneratedSchedule={handleUpdateSchedule} />}
+            
+            {/* Tabs */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <div className="border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex">
+                        <button
+                            onClick={() => setActiveTab('boq')}
+                            className={`flex items-center gap-2 px-6 py-3 font-medium border-b-2 transition-colors ${
+                                activeTab === 'boq'
+                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            <FileSpreadsheet size={20} />
+                            المقايسة (BOQ)
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('schedule')}
+                            className={`flex items-center gap-2 px-6 py-3 font-medium border-b-2 transition-colors ${
+                                activeTab === 'schedule'
+                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            <Calendar size={20} />
+                            الجدول الزمني
+                        </button>
+                    </div>
+                </div>
+                
+                <div className="p-6">
+                    {activeTab === 'boq' ? (
+                        <div className="space-y-6">
+                            {/* BOQ Summary */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">إجمالي البنود</p>
+                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                        {boqSummary.totalItems}
+                                    </p>
+                                </div>
+                                <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">إجمالي التكلفة</p>
+                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                        {boqSummary.totalCost.toLocaleString()} ر.س
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {/* BOQ Actions */}
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="flex-1 relative">
+                                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                    <input
+                                        type="text"
+                                        placeholder="البحث في البنود..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pr-10 pl-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleExportBOQ}
+                                    disabled={boqItems.length === 0}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <FileDown size={20} />
+                                    تصدير Excel
+                                </button>
+                            </div>
+                            
+                            {/* Add BOQ Item Form */}
+                            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">إضافة بند جديد</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                                    <input
+                                        type="text"
+                                        placeholder="رقم البند"
+                                        value={newBOQ.itemNo || ''}
+                                        onChange={(e) => setNewBOQ({ ...newBOQ, itemNo: e.target.value })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="الوصف *"
+                                        value={newBOQ.description || ''}
+                                        onChange={(e) => setNewBOQ({ ...newBOQ, description: e.target.value })}
+                                        className="sm:col-span-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="الوحدة"
+                                        value={newBOQ.unit || ''}
+                                        onChange={(e) => setNewBOQ({ ...newBOQ, unit: e.target.value })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="الكمية"
+                                        value={newBOQ.quantity || ''}
+                                        onChange={(e) => setNewBOQ({ ...newBOQ, quantity: parseFloat(e.target.value) || 0 })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="سعر الوحدة"
+                                        value={newBOQ.unitPrice || ''}
+                                        onChange={(e) => setNewBOQ({ ...newBOQ, unitPrice: parseFloat(e.target.value) || 0 })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleAddBOQItem}
+                                    className="mt-3 flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                >
+                                    <Plus size={20} />
+                                    إضافة بند
+                                </button>
+                            </div>
+                            
+                            {/* BOQ Items Table */}
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-100 dark:bg-gray-700">
+                                        <tr>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">رقم البند</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الوصف</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الوحدة</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الكمية</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">سعر الوحدة</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الإجمالي</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {filteredBOQItems.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                    لا توجد بنود. قم بإضافة بنود جديدة أو استيراد من Excel
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredBOQItems.map((item) => (
+                                                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                    <td className="px-4 py-3">{item.itemNo}</td>
+                                                    <td className="px-4 py-3">
+                                                        {editingBOQId === item.id ? (
+                                                            <input
+                                                                type="text"
+                                                                value={item.description}
+                                                                onChange={(e) => handleUpdateBOQItem(item.id, { description: e.target.value })}
+                                                                className="w-full px-2 py-1 border rounded dark:bg-gray-700"
+                                                            />
+                                                        ) : (
+                                                            item.description
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3">{item.unit}</td>
+                                                    <td className="px-4 py-3">
+                                                        {editingBOQId === item.id ? (
+                                                            <input
+                                                                type="number"
+                                                                value={item.quantity}
+                                                                onChange={(e) => handleUpdateBOQItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
+                                                                className="w-full px-2 py-1 border rounded dark:bg-gray-700"
+                                                            />
+                                                        ) : (
+                                                            item.quantity.toLocaleString()
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        {editingBOQId === item.id ? (
+                                                            <input
+                                                                type="number"
+                                                                value={item.unitPrice}
+                                                                onChange={(e) => handleUpdateBOQItem(item.id, { unitPrice: parseFloat(e.target.value) || 0 })}
+                                                                className="w-full px-2 py-1 border rounded dark:bg-gray-700"
+                                                            />
+                                                        ) : (
+                                                            item.unitPrice.toLocaleString()
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3 font-semibold">{item.totalPrice.toLocaleString()}</td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            {editingBOQId === item.id ? (
+                                                                <button
+                                                                    onClick={() => setEditingBOQId(null)}
+                                                                    className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
+                                                                >
+                                                                    <Check size={18} />
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => setEditingBOQId(item.id)}
+                                                                    className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                                                                >
+                                                                    <Edit2 size={18} />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                onClick={() => handleDeleteBOQItem(item.id)}
+                                                                className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            {/* Schedule Summary */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">إجمالي المهام</p>
+                                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                                        {scheduleSummary.totalTasks}
+                                    </p>
+                                </div>
+                                <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">مكتمل</p>
+                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                        {scheduleSummary.completedTasks}
+                                    </p>
+                                </div>
+                                <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">قيد التنفيذ</p>
+                                    <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                                        {scheduleSummary.inProgressTasks}
+                                    </p>
+                                </div>
+                                <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">متوسط الإنجاز</p>
+                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                        {scheduleSummary.avgProgress}%
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {/* Schedule Actions */}
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={handleExportSchedule}
+                                    disabled={schedule.length === 0}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <FileDown size={20} />
+                                    تصدير Excel
+                                </button>
+                            </div>
+                            
+                            {/* Add Schedule Item Form */}
+                            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">إضافة مهمة جديدة</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <input
+                                        type="text"
+                                        placeholder="اسم المهمة *"
+                                        value={newSchedule.taskName || ''}
+                                        onChange={(e) => setNewSchedule({ ...newSchedule, taskName: e.target.value })}
+                                        className="lg:col-span-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <div className="relative">
+                                        <LinkIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                        <select
+                                            multiple
+                                            value={selectedBOQsForSchedule}
+                                            onChange={(e) => setSelectedBOQsForSchedule(Array.from(e.target.selectedOptions, option => option.value))}
+                                            className="w-full pr-10 pl-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                            size={3}
+                                        >
+                                            <option value="">-- ربط ببنود المقايسة --</option>
+                                            {boqItems.map(item => (
+                                                <option key={item.id} value={item.id}>
+                                                    {item.itemNo} - {item.description.substring(0, 30)}...
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <input
+                                        type="date"
+                                        value={newSchedule.startDate || ''}
+                                        onChange={(e) => setNewSchedule({ ...newSchedule, startDate: e.target.value })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="المدة (أيام)"
+                                        value={newSchedule.duration || ''}
+                                        onChange={(e) => setNewSchedule({ ...newSchedule, duration: parseInt(e.target.value) || 1 })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="نسبة الإنجاز %"
+                                        min="0"
+                                        max="100"
+                                        value={newSchedule.progress || ''}
+                                        onChange={(e) => setNewSchedule({ ...newSchedule, progress: parseInt(e.target.value) || 0 })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    />
+                                    <select
+                                        value={newSchedule.status || 'To Do'}
+                                        onChange={(e) => setNewSchedule({ ...newSchedule, status: e.target.value as ScheduleItem['status'] })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    >
+                                        <option value="To Do">لم يبدأ</option>
+                                        <option value="In Progress">قيد التنفيذ</option>
+                                        <option value="Done">مكتمل</option>
+                                    </select>
+                                    <select
+                                        value={newSchedule.priority || 'Medium'}
+                                        onChange={(e) => setNewSchedule({ ...newSchedule, priority: e.target.value as ScheduleItem['priority'] })}
+                                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    >
+                                        <option value="Low">منخفضة</option>
+                                        <option value="Medium">متوسطة</option>
+                                        <option value="High">عالية</option>
+                                    </select>
+                                </div>
+                                <button
+                                    onClick={handleAddScheduleItem}
+                                    className="mt-3 flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                >
+                                    <Plus size={20} />
+                                    إضافة مهمة
+                                </button>
+                            </div>
+                            
+                            {/* Schedule Items Table */}
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-100 dark:bg-gray-700">
+                                        <tr>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">اسم المهمة</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">بنود مرتبطة</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">البداية</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">المدة</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">النهاية</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الإنجاز</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الحالة</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">الأولوية</th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {schedule.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={9} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                    لا توجد مهام. قم بإضافة مهمة جديدة
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            schedule.map((item) => (
+                                                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                    <td className="px-4 py-3">{item.taskName}</td>
+                                                    <td className="px-4 py-3 text-sm">
+                                                        {item.boqItemIds.length > 0 ? (
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {item.boqItemIds.map(id => {
+                                                                    const boqItem = boqItems.find(b => b.id === id);
+                                                                    return boqItem ? (
+                                                                        <span key={id} className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs">
+                                                                            {boqItem.itemNo}
+                                                                        </span>
+                                                                    ) : null;
+                                                                })}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-gray-400">-</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3">{item.startDate}</td>
+                                                    <td className="px-4 py-3">{item.duration} يوم</td>
+                                                    <td className="px-4 py-3">{item.endDate}</td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                                                <div
+                                                                    className="bg-green-500 h-2 rounded-full"
+                                                                    style={{ width: `${item.progress}%` }}
+                                                                />
+                                                            </div>
+                                                            <span className="text-sm">{item.progress}%</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                            item.status === 'Done'
+                                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                                : item.status === 'In Progress'
+                                                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                        }`}>
+                                                            {item.status === 'Done' ? 'مكتمل' : item.status === 'In Progress' ? 'قيد التنفيذ' : 'لم يبدأ'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                            item.priority === 'High'
+                                                                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                                                : item.priority === 'Medium'
+                                                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                                                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                        }`}>
+                                                            {item.priority === 'High' ? 'عالية' : item.priority === 'Medium' ? 'متوسطة' : 'منخفضة'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleDeleteScheduleItem(item.id)}
+                                                                className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

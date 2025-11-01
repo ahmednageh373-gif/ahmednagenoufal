@@ -215,6 +215,8 @@ const App: React.FC = () => {
                 return <RecoveryPlanner project={activeProject} onUpdateSchedule={handleUpdateSchedule} />;
             case 'financials':
                 return <FinancialManager project={activeProject} onUpdatePurchaseOrders={handleUpdatePurchaseOrders} />;
+            case 'boq-manual':
+                return <BOQManualManager project={activeProject} />;
             case 'risks':
                 return <RiskManager project={activeProject} onUpdateRisks={handleUpdateRisks} />;
             case 'site':
@@ -243,8 +245,6 @@ const App: React.FC = () => {
                 return <OKRManager project={activeProject} onUpdateObjectives={handleUpdateObjectives} onUpdateKeyResults={handleUpdateKeyResults} />;
             case 'workflow':
                 return <WorkflowArchitect project={activeProject} onUpdateWorkflow={handleUpdateWorkflow} />;
-            case 'boq-manual':
-                return <BOQManualManager project={activeProject} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} />;
             case 'analysis':
                 return <AnalysisCenter project={activeProject} onUpdateBoqReconciliation={handleUpdateBoqReconciliation} onUpdateComparativeAnalysis={handleUpdateComparativeAnalysis} onUpdateFinancials={handleUpdateFinancials} />;
             case 'advanced-reporting':

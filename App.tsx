@@ -30,6 +30,7 @@ const ProjectMembers = React.lazy(() => import('./components/ProjectMembers').th
 const BOQManualManager = React.lazy(() => import('./BOQManualManager').then(module => ({ default: module.BOQManualManager })));
 const EngineeringKnowledge = React.lazy(() => import('./EngineeringKnowledge').then(module => ({ default: module.EngineeringKnowledge })));
 const KnowledgeDatabase = React.lazy(() => import('./KnowledgeDatabase'));
+const ProjectScheduleViewer = React.lazy(() => import('./ProjectScheduleViewer'));
 
 
 const LoadingSpinner = () => (
@@ -265,6 +266,8 @@ const App: React.FC = () => {
                 return <EngineeringKnowledge project={activeProject} />;
             case 'knowledge-database':
                 return <KnowledgeDatabase project={activeProject} />;
+            case 'project-schedule-viewer':
+                return <ProjectScheduleViewer project={activeProject} onUpdateSchedule={handleUpdateSchedule} />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

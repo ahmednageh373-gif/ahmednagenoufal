@@ -2,6 +2,8 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, AdvancedScheduleActivity, WBSItem } from './types';
 import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search } from 'lucide-react';
 import { SmartScheduleGenerator, AdvancedScheduleViewer } from './components/NOUFALScheduling';
+import { AdvancedBOQScheduler } from './components/AdvancedBOQScheduler';
+import { ParsedBOQItem } from './services/ExcelParser';
 
 declare var XLSX: any;
 declare var pdfjsLib: any;
@@ -723,6 +725,7 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
     // NOUFAL Advanced Scheduling System State
     const [advancedActivities, setAdvancedActivities] = useState<AdvancedScheduleActivity[]>([]);
     const [wbsStructure, setWBSStructure] = useState<WBSItem[]>([]);
+    const [parsedBOQData, setParsedBOQData] = useState<ParsedBOQItem[]>([]);
 
     useEffect(() => {
         setCurrentFinancials(project.data.financials || []);
@@ -745,15 +748,31 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
         onUpdateSchedule(project.id, tasks);
     };
 
-    // NOUFAL: Handle schedule generation from BOQ
-    const handleScheduleGenerated = (activities: AdvancedScheduleActivity[], wbs: WBSItem[]) => {
+    // NOUFAL: Handle schedule generation from BOQ with Specifications Analysis
+    const handleScheduleGenerated = (
+        activities: AdvancedScheduleActivity[], 
+        wbs: WBSItem[], 
+        parsedItems: ParsedBOQItem[]
+    ) => {
         setAdvancedActivities(activities);
         setWBSStructure(wbs);
+        setParsedBOQData(parsedItems);
         
         // Auto-switch to viewer after generation
         setActiveTab('noufal-view');
         
-        alert(`تم توليد الجدول الزمني بنجاح!\n- ${activities.length} نشاط\n- ${activities.filter(a => a.isCritical).length} نشاط حرج\n- ${wbs.length} قسم WBS`);
+        const criticalCount = activities.filter(a => a.isCritical).length;
+        const expansionRatio = parsedItems.length > 0 ? (activities.length / parsedItems.length).toFixed(1) : '0';
+        
+        alert(
+            `✅ تم توليد الجدول الزمني بنجاح!\n\n` +
+            `📊 البنود الأصلية: ${parsedItems.length} بند\n` +
+            `🔧 الأنشطة المستخرجة: ${activities.length} نشاط\n` +
+            `📈 معدل التوسع: ${expansionRatio}x\n` +
+            `⚠️ الأنشطة الحرجة: ${criticalCount} نشاط\n` +
+            `📁 أقسام WBS: ${wbs.length} قسم\n\n` +
+            `تم تحليل مواصفات البنود وتقسيمها إلى أنشطة متعددة!`
+        );
     };
 
     return (
@@ -808,8 +827,7 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
                 {activeTab === 'analysis' && <BOQAnalysis financials={currentFinancials} />}
                 {activeTab === 'schedule' && <ManualScheduleManager schedule={currentSchedule} financials={currentFinancials} onUpdateSchedule={handleUpdateSchedule} />}
                 {activeTab === 'noufal-generate' && (
-                    <SmartScheduleGenerator 
-                        boqItems={currentFinancials}
+                    <AdvancedBOQScheduler 
                         onScheduleGenerated={handleScheduleGenerated}
                     />
                 )}

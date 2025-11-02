@@ -25,6 +25,8 @@ import {
     ScheduleExportService, 
     ScheduleImportService 
 } from '../services/ScheduleServices';
+import { ExcelExporter } from '../services/ExcelExporter';
+import { GanttChartViewer } from './GanttChartViewer';
 import { 
     Calendar, 
     Download, 
@@ -163,7 +165,7 @@ export const AdvancedScheduleViewer: React.FC<AdvancedScheduleViewerProps> = ({
     wbs,
     projectName
 }) => {
-    const [activeView, setActiveView] = useState<'activities' | 'wbs' | 'critical' | 'scurve' | 'compliance'>('activities');
+    const [activeView, setActiveView] = useState<'activities' | 'wbs' | 'critical' | 'scurve' | 'compliance' | 'gantt'>('activities');
     const [selectedActivity, setSelectedActivity] = useState<AdvancedScheduleActivity | null>(null);
 
     // Calculate CPM analysis
@@ -186,9 +188,21 @@ export const AdvancedScheduleViewer: React.FC<AdvancedScheduleViewerProps> = ({
         return SBCCompliance.generateComplianceReport(activities);
     }, [activities]);
 
+    // Calculate project dates for Gantt chart
+    const projectDates = useMemo(() => {
+        if (activities.length === 0) return { start: new Date(), end: new Date() };
+        const start = new Date(Math.min(...activities.map(a => new Date(a.startDate).getTime())));
+        const end = new Date(Math.max(...activities.map(a => new Date(a.endDate).getTime())));
+        return { start, end };
+    }, [activities]);
+
     // Export handlers
     const handleExportExcel = () => {
-        ScheduleExportService.exportToExcel(activities, wbs, projectName);
+        // Use new professional Excel exporter
+        ExcelExporter.exportSchedule(activities, projectName, {
+            includeResources: true,
+            includeProjectInfo: true
+        });
     };
 
     const handleExportPrimavera = () => {
@@ -269,6 +283,7 @@ export const AdvancedScheduleViewer: React.FC<AdvancedScheduleViewerProps> = ({
                         { key: 'activities', label: 'الأنشطة' },
                         { key: 'wbs', label: 'WBS' },
                         { key: 'critical', label: 'المسار الحرج' },
+                        { key: 'gantt', label: 'مخطط جانت' },
                         { key: 'scurve', label: 'منحنى S' },
                         { key: 'compliance', label: 'الامتثال SBC' }
                     ].map(tab => (
@@ -370,6 +385,16 @@ export const AdvancedScheduleViewer: React.FC<AdvancedScheduleViewerProps> = ({
                                 ))}
                             </div>
                         </div>
+                    )}
+
+                    {/* Gantt Chart View */}
+                    {activeView === 'gantt' && (
+                        <GanttChartViewer
+                            activities={activities}
+                            projectName={projectName}
+                            projectStart={projectDates.start}
+                            projectEnd={projectDates.end}
+                        />
                     )}
 
                     {/* S-Curve View */}

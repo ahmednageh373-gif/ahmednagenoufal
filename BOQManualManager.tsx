@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority } from './types';
+import { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, AdvancedScheduleActivity, WBSItem } from './types';
 import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search } from 'lucide-react';
+import { SmartScheduleGenerator, AdvancedScheduleViewer } from './components/NOUFALScheduling';
 
 declare var XLSX: any;
 declare var pdfjsLib: any;
@@ -717,7 +718,11 @@ interface BOQManualManagerProps {
 export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onUpdateFinancials, onUpdateSchedule }) => {
     const [currentFinancials, setCurrentFinancials] = useState<FinancialItem[]>(project.data.financials || []);
     const [currentSchedule, setCurrentSchedule] = useState<ScheduleTask[]>(project.data.schedule || []);
-    const [activeTab, setActiveTab] = useState<'import' | 'manage' | 'analysis' | 'schedule'>('import');
+    const [activeTab, setActiveTab] = useState<'import' | 'manage' | 'analysis' | 'schedule' | 'noufal-generate' | 'noufal-view'>('import');
+    
+    // NOUFAL Advanced Scheduling System State
+    const [advancedActivities, setAdvancedActivities] = useState<AdvancedScheduleActivity[]>([]);
+    const [wbsStructure, setWBSStructure] = useState<WBSItem[]>([]);
 
     useEffect(() => {
         setCurrentFinancials(project.data.financials || []);
@@ -740,35 +745,59 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
         onUpdateSchedule(project.id, tasks);
     };
 
+    // NOUFAL: Handle schedule generation from BOQ
+    const handleScheduleGenerated = (activities: AdvancedScheduleActivity[], wbs: WBSItem[]) => {
+        setAdvancedActivities(activities);
+        setWBSStructure(wbs);
+        
+        // Auto-switch to viewer after generation
+        setActiveTab('noufal-view');
+        
+        alert(`تم توليد الجدول الزمني بنجاح!\n- ${activities.length} نشاط\n- ${activities.filter(a => a.isCritical).length} نشاط حرج\n- ${wbs.length} قسم WBS`);
+    };
+
     return (
         <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6">إدارة المقايسات والجداول الزمنية (يدوي)</h1>
+            <h1 className="text-3xl font-bold mb-6">إدارة المقايسات والجداول الزمنية - نظام NOUFAL المتقدم</h1>
             
             <div className="mb-6">
-                <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700">
                     <button 
                         onClick={() => setActiveTab('import')} 
-                        className={`px-6 py-3 font-semibold ${activeTab === 'import' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
+                        className={`px-4 py-3 font-semibold ${activeTab === 'import' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
                     >
                         1. استيراد
                     </button>
                     <button 
                         onClick={() => setActiveTab('manage')} 
-                        className={`px-6 py-3 font-semibold ${activeTab === 'manage' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
+                        className={`px-4 py-3 font-semibold ${activeTab === 'manage' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
                     >
                         2. إدارة المقايسة
                     </button>
                     <button 
                         onClick={() => setActiveTab('analysis')} 
-                        className={`px-6 py-3 font-semibold ${activeTab === 'analysis' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
+                        className={`px-4 py-3 font-semibold ${activeTab === 'analysis' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
                     >
                         3. تحليل المقايسة
                     </button>
                     <button 
                         onClick={() => setActiveTab('schedule')} 
-                        className={`px-6 py-3 font-semibold ${activeTab === 'schedule' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
+                        className={`px-4 py-3 font-semibold ${activeTab === 'schedule' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
                     >
-                        4. إدارة الجدول الزمني
+                        4. جدول يدوي
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('noufal-generate')} 
+                        className={`px-4 py-3 font-semibold ${activeTab === 'noufal-generate' ? 'border-b-2 border-green-500 text-green-600' : 'text-gray-500'}`}
+                    >
+                        5. ★ توليد NOUFAL
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('noufal-view')} 
+                        className={`px-4 py-3 font-semibold ${activeTab === 'noufal-view' ? 'border-b-2 border-green-500 text-green-600' : 'text-gray-500'}`}
+                        disabled={advancedActivities.length === 0}
+                    >
+                        6. ★ عارض NOUFAL
                     </button>
                 </div>
             </div>
@@ -778,6 +807,19 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
                 {activeTab === 'manage' && <BOQManager financials={currentFinancials} schedule={currentSchedule} onUpdateFinancials={handleUpdateFinancials} />}
                 {activeTab === 'analysis' && <BOQAnalysis financials={currentFinancials} />}
                 {activeTab === 'schedule' && <ManualScheduleManager schedule={currentSchedule} financials={currentFinancials} onUpdateSchedule={handleUpdateSchedule} />}
+                {activeTab === 'noufal-generate' && (
+                    <SmartScheduleGenerator 
+                        boqItems={currentFinancials}
+                        onScheduleGenerated={handleScheduleGenerated}
+                    />
+                )}
+                {activeTab === 'noufal-view' && (
+                    <AdvancedScheduleViewer 
+                        activities={advancedActivities}
+                        wbs={wbsStructure}
+                        projectName={project.name}
+                    />
+                )}
             </div>
         </div>
     );

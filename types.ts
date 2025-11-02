@@ -549,3 +549,169 @@ export interface UserProgress {
     notes?: string;
     bookmarked?: boolean;
 }
+
+// --- NOUFAL Advanced Scheduling System ---
+
+export type DependencyType = 'FS' | 'SS' | 'FF' | 'SF'; // Finish-to-Start, Start-to-Start, Finish-to-Finish, Start-to-Finish
+export type ActivityStatus = 'Not Started' | 'In Progress' | 'Completed' | 'On Hold';
+
+export interface ActivityDependency {
+    predecessorId: number;
+    type: DependencyType;
+    lag: number; // in days (can be negative for lead time)
+}
+
+export interface ResourceRequirement {
+    resourceType: 'Labor' | 'Equipment' | 'Material';
+    resourceName: string;
+    quantity: number;
+    unit: string;
+    dailyRate?: number;
+}
+
+export interface AdvancedScheduleActivity {
+    id: number;
+    wbsCode: string;
+    name: string;
+    description: string;
+    category: string;
+    boqItemId?: string; // Link to BOQ item
+    
+    // Duration and dates
+    duration: number; // in days
+    startDate: string;
+    endDate: string;
+    
+    // CPM calculations
+    earlyStart: string;
+    earlyFinish: string;
+    lateStart: string;
+    lateFinish: string;
+    totalFloat: number;
+    freeFloat: number;
+    isCritical: boolean;
+    
+    // Dependencies and relationships
+    dependencies: ActivityDependency[];
+    successors: number[];
+    
+    // Resources
+    resources: ResourceRequirement[];
+    
+    // Progress and status
+    progress: number; // 0-100
+    status: ActivityStatus;
+    actualStart?: string;
+    actualFinish?: string;
+    
+    // SBC compliance
+    sbcRequirements?: SBCRequirement[];
+    
+    // Productivity
+    productivityRate?: number;
+    estimatedManHours?: number;
+}
+
+export interface SBCRequirement {
+    code: string; // e.g., 'SBC-301-7.1'
+    description: string;
+    minimumDuration?: number; // in days
+    requiredInspections?: string[];
+    complianceNotes?: string;
+    isCompliant: boolean;
+}
+
+export interface ProductivityRate {
+    activityType: string;
+    unit: string;
+    laborProductivity: number; // units per man-hour
+    equipmentProductivity?: number;
+    crewSize: number;
+    crewComposition: {
+        role: string;
+        count: number;
+    }[];
+    region: 'Riyadh' | 'Jeddah' | 'Dammam' | 'Other';
+}
+
+export interface WBSItem {
+    code: string;
+    level: number;
+    name: string;
+    parentCode?: string;
+    activities: AdvancedScheduleActivity[];
+    totalDuration: number;
+    totalCost: number;
+}
+
+export interface CPMAnalysisResult {
+    criticalPath: number[]; // Activity IDs
+    projectDuration: number;
+    projectStart: string;
+    projectFinish: string;
+    criticalActivities: AdvancedScheduleActivity[];
+    floatAnalysis: {
+        activityId: number;
+        totalFloat: number;
+        freeFloat: number;
+    }[];
+}
+
+export interface SCurveData {
+    date: string;
+    plannedProgress: number; // cumulative percentage
+    actualProgress: number; // cumulative percentage
+    plannedCost: number; // cumulative cost
+    actualCost: number; // cumulative cost
+    earnedValue: number;
+}
+
+export interface SchedulePerformanceMetrics {
+    spi: number; // Schedule Performance Index
+    cpi: number; // Cost Performance Index
+    sv: number; // Schedule Variance
+    cv: number; // Cost Variance
+    estimatedCompletion: string;
+    estimatedCost: number;
+}
+
+export interface ScheduleExportOptions {
+    format: 'Excel' | 'PDF' | 'Primavera' | 'MS Project';
+    includeGanttChart: boolean;
+    includeCPM: boolean;
+    includeSCurve: boolean;
+    includeResourceHistogram: boolean;
+    includeFloatAnalysis: boolean;
+}
+
+export interface PrimaveraActivity {
+    activityId: string;
+    activityName: string;
+    originalDuration: number;
+    remainingDuration: number;
+    percentComplete: number;
+    startDate: string;
+    finishDate: string;
+    calendarId: string;
+    wbsId: string;
+    predecessors: {
+        predecessorActivityId: string;
+        type: 'PR_FS' | 'PR_SS' | 'PR_FF' | 'PR_SF';
+        lag: number;
+    }[];
+}
+
+export interface ScheduleImportResult {
+    activities: AdvancedScheduleActivity[];
+    wbs: WBSItem[];
+    metadata: {
+        projectName: string;
+        projectStart: string;
+        projectFinish: string;
+        totalActivities: number;
+        importDate: string;
+        sourceFormat: 'Excel' | 'PDF' | 'Primavera';
+    };
+    warnings: string[];
+    errors: string[];
+}

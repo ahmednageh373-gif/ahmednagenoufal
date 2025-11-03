@@ -85,8 +85,19 @@ const parseExcel = (file: File): Promise<FinancialItem[]> => {
                     const unit = String(row[colMapping['unit']] || '').trim();
                     const quantity = Number(row[colMapping['quantity']]) || 0;
                     const unitPrice = Number(row[colMapping['unitPrice']]) || 0;
-                    const total = colMapping['total'] !== undefined ? Number(row[colMapping['total']]) || (quantity * unitPrice) : (quantity * unitPrice);
+                    let total = colMapping['total'] !== undefined ? Number(row[colMapping['total']]) || 0 : 0;
                     const id = colMapping['id'] !== undefined ? String(row[colMapping['id']] || '').trim() : `f-import-${itemIdCounter}`;
+
+                    // حساب الإجمالي بذكاء:
+                    // 1. إذا كان الإجمالي موجود في الملف، استخدمه
+                    // 2. إذا كان الإجمالي = 0، احسب من الكمية × سعر الوحدة
+                    // 3. إذا كان سعر الوحدة = 0 لكن الإجمالي > 0، احسب سعر الوحدة
+                    if (total === 0 && quantity > 0 && unitPrice > 0) {
+                        total = quantity * unitPrice;
+                    } else if (total > 0 && unitPrice === 0 && quantity > 0) {
+                        // في هذه الحالة، الإجمالي موجود لكن سعر الوحدة مفقود، احسبه
+                        // لا نعدل unitPrice لأن المستخدم ربما يريد أن يكون 0
+                    }
 
                     if (description && (quantity > 0 || total > 0)) {
                          items.push({
@@ -176,16 +187,32 @@ const BOQImport: React.FC<BOQImportProps> = ({ onImportSuccess }) => {
                 const lines = manualInput.split('\n').filter(line => line.trim() !== '');
                 items = lines.map((line, index) => {
                     const parts = line.split('|').map(p => p.trim());
-                    const [description, unit, quantityStr, unitPriceStr] = parts;
+                    const [description, unit, quantityStr, unitPriceStr, totalStr] = parts;
                     const quantity = Number(quantityStr) || 0;
                     const unitPrice = Number(unitPriceStr) || 0;
+                    const totalFromInput = Number(totalStr) || 0;
+                    
+                    // حساب الإجمالي بذكاء:
+                    // 1. إذا كان الإجمالي موجود في الإدخال، استخدمه
+                    // 2. إذا كان سعر الوحدة = 0 لكن الكمية موجودة، استخدم الرقم الثاني كإجمالي
+                    // 3. احسب تلقائيًا من الكمية × سعر الوحدة
+                    let calculatedTotal = 0;
+                    if (totalFromInput > 0) {
+                        calculatedTotal = totalFromInput;
+                    } else if (unitPrice === 0 && quantity > 0 && parts.length >= 4) {
+                        // الحالة المقلوبة: الرقم في عمود سعر الوحدة هو الإجمالي الحقيقي
+                        calculatedTotal = quantity * Number(parts[3]);
+                    } else {
+                        calculatedTotal = quantity * unitPrice;
+                    }
+                    
                     return { 
                         id: `f-manual-${index + 1}`, 
                         item: description, 
                         unit, 
                         quantity, 
                         unitPrice, 
-                        total: quantity * unitPrice 
+                        total: calculatedTotal
                     };
                 });
             }
@@ -244,12 +271,22 @@ const BOQImport: React.FC<BOQImportProps> = ({ onImportSuccess }) => {
                 ) : (
                     <div>
                         <label className="block text-sm font-medium mb-2">أدخل بنود المقايسة (كل بند في سطر)</label>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="font-semibold mb-1">📝 التنسيق:</p>
+                            <p>وصف البند | الوحدة | الكمية | سعر الوحدة | الإجمالي (اختياري)</p>
+                            <p className="mt-2 font-semibold">✅ مثال صحيح:</p>
+                            <p className="font-mono">خرسانة مسلحة | م3 | 100 | 500 | 50000</p>
+                            <p className="mt-1 font-mono">أعمال حفر | م3 | 200 | 50</p>
+                            <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                                💡 ملاحظة: إذا كان سعر الوحدة = 0، سيتم حساب الإجمالي تلقائياً من الأرقام المتاحة
+                            </p>
+                        </div>
                         <textarea 
                             value={manualInput} 
                             onChange={(e) => setManualInput(e.target.value)} 
-                            placeholder="وصف البند | الوحدة | الكمية | سعر الوحدة&#10;مثال: خرسانة مسلحة | م3 | 100 | 500"
-                            rows={6}
-                            className="w-full p-3 border rounded-lg dark:bg-slate-800 dark:border-slate-700"
+                            placeholder="وصف البند | الوحدة | الكمية | سعر الوحدة | الإجمالي&#10;مثال: خرسانة مسلحة | م3 | 100 | 500 | 50000&#10;مثال: أعمال حفر | م3 | 200 | 50"
+                            rows={8}
+                            className="w-full p-3 border rounded-lg dark:bg-slate-800 dark:border-slate-700 font-mono text-sm"
                         />
                     </div>
                 )}

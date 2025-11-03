@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run post-build",
+    "post-build": "node -e \"console.log('✅ Build completed!'); const fs = require('fs'); console.log('📁 Files in dist:', fs.readdirSync('dist')); console.log('📦 Files in dist/assets:', fs.readdirSync('dist/assets').length);\"",
     "preview": "vite preview"
   },
   "dependencies": {

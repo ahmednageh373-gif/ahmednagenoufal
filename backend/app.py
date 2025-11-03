@@ -23,6 +23,8 @@ from core.SBCComplianceChecker import SBCComplianceChecker
 from core.SCurveGenerator import SCurveGenerator
 from core.RequestParser import RequestParser
 from core.RequestExecutor import RequestExecutor
+from core.AutomationEngine import AutomationEngine
+from core.AutomationTemplates import AutomationTemplates
 
 # إنشاء التطبيق
 app = Flask(__name__)
@@ -46,6 +48,8 @@ compliance_checker = SBCComplianceChecker(db_path)
 s_curve_generator = SCurveGenerator(db_path)
 request_parser = RequestParser()
 request_executor = RequestExecutor(db_path)
+automation_engine = AutomationEngine(db_path)
+automation_templates = AutomationTemplates()
 
 print("\n" + "="*80)
 print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System - المتكامل")
@@ -60,6 +64,8 @@ print(f"✅ System 07: SBC Compliance Checker - Ready")
 print(f"✅ System 08: S-Curve Generator - Ready")
 print(f"✅ System 09: Request Parser - Ready")
 print(f"✅ System 10: Request Executor - Ready")
+print(f"✅ System 11: Automation Engine - Ready")
+print(f"✅ System 12: Automation Templates - Ready")
 print(f"📁 Database: {app.config['DATABASE']}")
 print("="*80 + "\n")
 
@@ -478,6 +484,150 @@ def get_suggestions():
         'status': 'success',
         'suggestions': suggestions
     })
+
+
+# ============================================
+# Automation APIs
+# ============================================
+
+@app.route('/api/automations', methods=['GET'])
+def get_automations():
+    """Get all automations"""
+    try:
+        board_id = request.args.get('board_id')
+        automations = automation_engine.get_all_automations(board_id)
+        
+        return jsonify({
+            'success': True,
+            'automations': automations,
+            'count': len(automations)
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automations', methods=['POST'])
+def create_automation():
+    """Create new automation"""
+    try:
+        automation_data = request.json
+        result = automation_engine.create_automation(automation_data)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automations/<int:automation_id>', methods=['PUT'])
+def toggle_automation(automation_id):
+    """Toggle automation on/off"""
+    try:
+        is_active = request.json.get('is_active', True)
+        result = automation_engine.toggle_automation(automation_id, is_active)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automations/<int:automation_id>', methods=['DELETE'])
+def delete_automation(automation_id):
+    """Delete automation"""
+    try:
+        result = automation_engine.delete_automation(automation_id)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automations/trigger', methods=['POST'])
+def trigger_automation():
+    """Manually trigger automation event"""
+    try:
+        event_type = request.json.get('event_type')
+        event_data = request.json.get('event_data', {})
+        
+        results = automation_engine.trigger_event(event_type, event_data)
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'triggered_count': len([r for r in results if r.get('triggered')])
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automations/stats', methods=['GET'])
+def get_automation_stats():
+    """Get automation statistics"""
+    try:
+        automation_id = request.args.get('automation_id', type=int)
+        stats = automation_engine.get_automation_stats(automation_id)
+        
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automation-templates', methods=['GET'])
+def get_automation_templates():
+    """Get all automation templates"""
+    try:
+        category = request.args.get('category')
+        
+        if category:
+            all_templates = automation_templates.get_all_templates()
+            templates = all_templates.get(category, [])
+        else:
+            templates = automation_templates.get_all_templates()
+        
+        return jsonify({
+            'success': True,
+            'templates': templates
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automation-templates/<template_id>', methods=['GET'])
+def get_template_by_id(template_id):
+    """Get specific template by ID"""
+    try:
+        template = automation_templates.get_template_by_id(template_id)
+        
+        if template:
+            return jsonify({
+                'success': True,
+                'template': template
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Template not found'
+            }), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/automation-templates/search', methods=['GET'])
+def search_templates():
+    """Search automation templates"""
+    try:
+        query = request.args.get('q', '')
+        templates = automation_templates.search_templates(query)
+        
+        return jsonify({
+            'success': True,
+            'templates': templates,
+            'count': len(templates)
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ============================================

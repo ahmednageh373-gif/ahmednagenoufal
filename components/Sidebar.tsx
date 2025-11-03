@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -110,6 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavItem icon={LayoutDashboard} label="لوحة التحكم" viewName="dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Server} label="🚀 نظام NOUFAL المتكامل" viewName="noufal-backend" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={BarChart3} label="📊 تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Upload} label="🚀 مركز رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Table} label="إدارة المقايسات (يدوي)" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Undo2} label="خطة التعافي" viewName="recovery-plan" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
@@ -132,6 +133,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavItem icon={GraduationCap} label="المعرفة الهندسية" viewName="engineering-knowledge" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Database} label="قاعدة البيانات المعرفية" viewName="knowledge-database" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Package} label="📦 مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Shield} label="🛡️ نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={History} label="سجل التدقيق" viewName="audit-log" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                 </nav>
 

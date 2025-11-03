@@ -38,6 +38,7 @@ const SBCComplianceChecker = React.lazy(() => import('./components/SBCCompliance
 const ScheduleAnalysis = React.lazy(() => import('./components/schedule/ScheduleAnalysis').then(module => ({ default: module.ScheduleAnalysis })));
 const NOUFALCommandCenter = React.lazy(() => import('./components/NOUFALCommandCenter').then(module => ({ default: module.default })));
 const LibraryShowcase = React.lazy(() => import('./components/LibraryShowcase').then(module => ({ default: module.default })));
+const ManualAnalysisMode = React.lazy(() => import('./components/ManualAnalysisMode').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -345,6 +346,8 @@ const App: React.FC = () => {
                 return <NOUFALCommandCenter />;
             case 'library-showcase':
                 return <LibraryShowcase />;
+            case 'manual-analysis':
+                return <ManualAnalysisMode />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

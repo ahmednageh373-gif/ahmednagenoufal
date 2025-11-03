@@ -1,276 +1,582 @@
-import React, { useState, useMemo } from 'react';
-import type { Project, Objective, KeyResult, KeyResultStatus } from '../types';
-import { v4 as uuidv4 } from 'uuid';
-import { Target, Plus, CheckCircle, AlertCircle, XCircle, Pencil, Trash2, X, File, Printer } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Target, Plus, Filter, Calendar, TrendingUp, CheckCircle,
+  Clock, Flag, Users, Edit, Trash2, Eye, BarChart2, Award,
+  AlertCircle, ArrowRight, ChevronDown, Search, X
+} from 'lucide-react';
 
-interface OKRManagerProps {
-  project: Project;
-  onUpdateObjectives: (projectId: string, objectives: Objective[]) => void;
-  onUpdateKeyResults: (projectId: string, keyResults: KeyResult[]) => void;
+interface KeyResult {
+  id: string;
+  description: string;
+  target: number;
+  current: number;
+  unit: string;
+  status: 'on-track' | 'at-risk' | 'off-track';
 }
 
-declare var XLSX: any;
+interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  type: 'short-term' | 'long-term' | 'quarterly' | 'annual';
+  priority: 'high' | 'medium' | 'low';
+  category: string;
+  status: 'not-started' | 'in-progress' | 'completed' | 'on-hold';
+  progress: number;
+  startDate: string;
+  endDate: string;
+  owner: string;
+  keyResults: KeyResult[];
+  tags: string[];
+}
 
-const statusMap: Record<KeyResultStatus, { icon: React.ElementType, color: string, label: string }> = {
-    'On Track': { icon: CheckCircle, color: 'text-green-500', label: 'في المسار الصحيح' },
-    'At Risk': { icon: AlertCircle, color: 'text-yellow-500', label: 'في خطر' },
-    'Off Track': { icon: XCircle, color: 'text-red-500', label: 'خارج المسار' },
-};
-
-// --- Modal Component ---
-const OKRModal: React.FC<{
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (data: any) => void;
-    itemType: 'objective' | 'keyResult';
-    itemData: Objective | KeyResult | null;
-    objectives: Objective[];
-    preselectedObjectiveId?: string | null;
-}> = ({ isOpen, onClose, onSave, itemType, itemData, objectives, preselectedObjectiveId }) => {
-    
-    const isObjective = itemType === 'objective';
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [objectiveId, setObjectiveId] = useState('');
-    const [currentValue, setCurrentValue] = useState(0);
-    const [targetValue, setTargetValue] = useState(100);
-    const [status, setStatus] = useState<KeyResultStatus>('On Track');
-
-    useMemo(() => {
-        if (itemData) {
-            setTitle(itemData.title);
-            if ('description' in itemData) setDescription(itemData.description);
-            if ('objectiveId' in itemData) {
-                setObjectiveId(itemData.objectiveId);
-                setCurrentValue(itemData.currentValue);
-                setTargetValue(itemData.targetValue);
-                setStatus(itemData.status);
-            }
-        } else {
-            setTitle('');
-            setDescription('');
-            setObjectiveId(preselectedObjectiveId || (objectives.length > 0 ? objectives[0].id : ''));
-            setCurrentValue(0);
-            setTargetValue(100);
-            setStatus('On Track');
-        }
-    }, [itemData, isOpen, objectives, preselectedObjectiveId]);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const commonData = { id: itemData?.id || uuidv4(), title };
-        if (isObjective) {
-            onSave({ ...commonData, description });
-        } else {
-            onSave({ ...commonData, objectiveId, currentValue, targetValue, status });
-        }
-        onClose();
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="modal" style={{ display: 'block' }} onClick={onClose}>
-            <div className="modal-content p-6 max-w-lg dark:bg-gray-800" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-bold">{itemData ? 'تعديل' : 'إضافة'} {isObjective ? 'هدف' : 'نتيجة رئيسية'}</h3>
-                    <button onClick={onClose}><X size={20}/></button>
-                </div>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input type="text" placeholder="العنوان" value={title} onChange={e => setTitle(e.target.value)} required className="w-full bg-gray-100 dark:bg-gray-700 p-2 rounded-lg" />
-                    {isObjective && (
-                        <textarea placeholder="الوصف" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full bg-gray-100 dark:bg-gray-700 p-2 rounded-lg"></textarea>
-                    )}
-                    {!isObjective && (
-                        <>
-                            <select value={objectiveId} onChange={e => setObjectiveId(e.target.value)} required className="w-full bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
-                                <option value="" disabled>-- ربط بهدف --</option>
-                                {objectives.map(obj => <option key={obj.id} value={obj.id}>{obj.title}</option>)}
-                            </select>
-                            <div className="grid grid-cols-2 gap-4">
-                                <input type="number" placeholder="القيمة الحالية" value={currentValue} onChange={e => setCurrentValue(Number(e.target.value))} required className="w-full bg-gray-100 dark:bg-gray-700 p-2 rounded-lg" />
-                                <input type="number" placeholder="القيمة المستهدفة" value={targetValue} onChange={e => setTargetValue(Number(e.target.value))} required className="w-full bg-gray-100 dark:bg-gray-700 p-2 rounded-lg" />
-                            </div>
-                             <select value={status} onChange={e => setStatus(e.target.value as KeyResultStatus)} className="w-full bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
-                                {(Object.keys(statusMap) as KeyResultStatus[]).map(s => <option key={s} value={s}>{statusMap[s].label}</option>)}
-                            </select>
-                        </>
-                    )}
-                    <div className="flex justify-end gap-2 pt-4">
-                        <button type="button" onClick={onClose} className="py-2 px-4 rounded-lg bg-gray-200 dark:bg-gray-600 font-semibold">إلغاء</button>
-                        <button type="submit" className="py-2 px-4 rounded-lg bg-indigo-600 text-white font-semibold">حفظ</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-
-export const OKRManager: React.FC<OKRManagerProps> = ({ project, onUpdateObjectives, onUpdateKeyResults }) => {
-    const objectives = project.data.objectives || [];
-    const keyResults = project.data.keyResults || [];
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<{ type: 'objective' | 'keyResult', data: Objective | KeyResult | null } | null>(null);
-    const [preselectedObjectiveId, setPreselectedObjectiveId] = useState<string | null>(null);
-
-    const objectivesWithProgress = useMemo(() => {
-        return objectives.map(obj => {
-            const relevantKRs = keyResults.filter(kr => kr.objectiveId === obj.id);
-            if (relevantKRs.length === 0) {
-                return { ...obj, progress: 0, keyResults: [] };
-            }
-            const totalProgress = relevantKRs.reduce((sum, kr) => {
-                const progress = kr.targetValue > 0 ? (kr.currentValue / kr.targetValue) * 100 : 0;
-                return sum + Math.min(100, progress);
-            }, 0);
-            const averageProgress = totalProgress / relevantKRs.length;
-
-            const krsWithProgress = relevantKRs.map(kr => ({
-                ...kr,
-                progress: kr.targetValue > 0 ? Math.min(100, (kr.currentValue / kr.targetValue) * 100) : 0,
-            }));
-
-            return { ...obj, progress: averageProgress, keyResults: krsWithProgress };
-        });
-    }, [objectives, keyResults]);
-
-    const handleSave = (data: Objective | KeyResult) => {
-        if ('description' in data) { // It's an Objective
-            const newObjectives = objectives.find(o => o.id === data.id)
-                ? objectives.map(o => o.id === data.id ? data : o)
-                : [...objectives, data];
-            onUpdateObjectives(project.id, newObjectives);
-        } else { // It's a KeyResult
-            const newKeyResults = keyResults.find(kr => kr.id === data.id)
-                ? keyResults.map(kr => kr.id === data.id ? data : kr)
-                : [...keyResults, data];
-            onUpdateKeyResults(project.id, newKeyResults);
-        }
-    };
-    
-    const handleDelete = (type: 'objective' | 'keyResult', id: string) => {
-        if (type === 'objective') {
-            if (window.confirm('هل أنت متأكد من حذف هذا الهدف؟ سيتم حذف جميع النتائج الرئيسية المرتبطة به.')) {
-                onUpdateObjectives(project.id, objectives.filter(o => o.id !== id));
-                onUpdateKeyResults(project.id, keyResults.filter(kr => kr.objectiveId !== id));
-            }
-        } else {
-             if (window.confirm('هل أنت متأكد من حذف هذه النتيجة الرئيسية؟')) {
-                onUpdateKeyResults(project.id, keyResults.filter(kr => kr.id !== id));
-            }
-        }
+export const OKRManager: React.FC = () => {
+  const [goals, setGoals] = useState<Goal[]>([
+    {
+      id: '1',
+      title: 'Weekly Progress Review',
+      description: 'Review project progress on a weekly basis',
+      type: 'short-term',
+      priority: 'high',
+      category: 'Project',
+      status: 'in-progress',
+      progress: 75,
+      startDate: '2025-01-01',
+      endDate: '2025-03-31',
+      owner: 'Ahmed Nageh',
+      keyResults: [
+        { id: 'kr1', description: 'Complete 4 reviews', target: 4, current: 3, unit: 'reviews', status: 'on-track' },
+        { id: 'kr2', description: 'Identify 10 issues', target: 10, current: 7, unit: 'issues', status: 'on-track' }
+      ],
+      tags: ['Review', 'Weekly']
+    },
+    {
+      id: '2',
+      title: 'Define Main Project Objectives',
+      description: 'Establish clear objectives for the project',
+      type: 'long-term',
+      priority: 'high',
+      category: 'Project',
+      status: 'in-progress',
+      progress: 60,
+      startDate: '2025-01-01',
+      endDate: '2025-12-31',
+      owner: 'Ahmed Nageh',
+      keyResults: [
+        { id: 'kr3', description: 'Define 5 main objectives', target: 5, current: 3, unit: 'objectives', status: 'on-track' },
+        { id: 'kr4', description: 'Get stakeholder approval', target: 1, current: 0, unit: 'approvals', status: 'at-risk' }
+      ],
+      tags: ['Planning', 'Strategy']
+    },
+    {
+      id: '3',
+      title: 'Improve Problem-Solving',
+      description: 'Enhance team problem-solving capabilities',
+      type: 'long-term',
+      priority: 'high',
+      category: 'Project',
+      status: 'in-progress',
+      progress: 45,
+      startDate: '2025-01-01',
+      endDate: '2025-12-31',
+      owner: 'Ahmed Nageh',
+      keyResults: [
+        { id: 'kr5', description: 'Conduct 6 training sessions', target: 6, current: 2, unit: 'sessions', status: 'on-track' },
+        { id: 'kr6', description: 'Reduce issues by 30%', target: 30, current: 15, unit: '%', status: 'on-track' }
+      ],
+      tags: ['Training', 'Quality']
+    },
+    {
+      id: '4',
+      title: 'Identify Key Engineering Results',
+      description: 'Identify and document key engineering metrics',
+      type: 'short-term',
+      priority: 'medium',
+      category: 'Project',
+      status: 'not-started',
+      progress: 0,
+      startDate: '2025-02-01',
+      endDate: '2025-04-30',
+      owner: 'Ahmed Nageh',
+      keyResults: [
+        { id: 'kr7', description: 'Define 10 KPIs', target: 10, current: 0, unit: 'KPIs', status: 'off-track' },
+        { id: 'kr8', description: 'Create dashboard', target: 1, current: 0, unit: 'dashboard', status: 'off-track' }
+      ],
+      tags: ['Metrics', 'KPI']
+    },
+    {
+      id: '5',
+      title: 'Document Achievements and Challenges',
+      description: 'Maintain comprehensive documentation',
+      type: 'short-term',
+      priority: 'low',
+      category: 'Project',
+      status: 'not-started',
+      progress: 0,
+      startDate: '2025-03-01',
+      endDate: '2025-05-31',
+      owner: 'Ahmed Nageh',
+      keyResults: [
+        { id: 'kr9', description: 'Write 20 reports', target: 20, current: 0, unit: 'reports', status: 'off-track' },
+        { id: 'kr10', description: 'Update wiki weekly', target: 12, current: 0, unit: 'updates', status: 'off-track' }
+      ],
+      tags: ['Documentation', 'Reports']
     }
-    
-    const handlePrint = () => {
-        window.print();
-    };
+  ]);
 
-    const handleExportXLSX = () => {
-        const data = objectivesWithProgress.flatMap(obj => [
-            { 'النوع': 'الهدف', 'العنوان': obj.title, 'الوصف/الحالة': obj.description, 'التقدم': `${Math.round(obj.progress)}%` },
-            ...obj.keyResults.map(kr => ({
-                'النوع': 'نتيجة رئيسية',
-                'العنوان': `  - ${kr.title}`,
-                'الوصف/الحالة': `الحالة: ${statusMap[kr.status].label}, القيمة: ${kr.currentValue}/${kr.targetValue}`,
-                'التقدم': `${Math.round(kr.progress)}%`
-            }))
-        ]);
+  const [view, setView] = useState<'kanban' | 'table' | 'calendar'>('kanban');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "OKRs");
-        XLSX.writeFile(workbook, `okrs_${project.name.replace(/\s/g, '_')}.xlsx`);
-    };
+  const columns = [
+    { id: 'not-started', title: 'لم يبدأ', color: 'bg-gray-100', count: 0 },
+    { id: 'short-term', title: 'قصير المدى', color: 'bg-blue-100', count: 1 },
+    { id: 'long-term', title: 'طويل المدى', color: 'bg-green-100', count: 3 },
+    { id: 'completed', title: 'مكتمل', color: 'bg-purple-100', count: 1 }
+  ];
 
-    return (
-        <div className="printable-area">
-            <header className="flex justify-between items-center mb-8 flex-wrap gap-4 no-print">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">الأهداف والنتائج الرئيسية (OKRs)</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">تتبع الأهداف الاستراتيجية لمشروع: {project.name}</p>
-                </div>
-                <div className="flex gap-2">
-                     <button onClick={handleExportXLSX} className="flex items-center gap-2 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700"><File size={18} /><span>تصدير Excel</span></button>
-                    <button onClick={handlePrint} className="flex items-center gap-2 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600"><Printer size={18} /><span>طباعة / PDF</span></button>
-                    <button onClick={() => { setEditingItem({ type: 'objective', data: null }); setIsModalOpen(true); }} className="flex items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700">
-                        <Plus size={18} /><span>هدف جديد</span>
-                    </button>
-                    <button onClick={() => { setEditingItem({ type: 'keyResult', data: null }); setPreselectedObjectiveId(null); setIsModalOpen(true); }} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-800">
-                        <Plus size={18} /><span>نتيجة رئيسية جديدة</span>
-                    </button>
-                </div>
-            </header>
-            
-            <div className="space-y-6">
-                {objectivesWithProgress.map(obj => (
-                    <div key={obj.id} className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm">
-                        <div className="flex justify-between items-start mb-3">
-                            <div>
-                                <h3 className="text-xl font-bold flex items-center gap-2"><Target className="text-indigo-500" /> {obj.title}</h3>
-                                <p className="text-sm text-slate-500 mt-1">{obj.description}</p>
-                            </div>
-                             <div className="flex items-center gap-2 no-print">
-                                <button onClick={() => { setEditingItem({ type: 'objective', data: obj }); setIsModalOpen(true); }} className="text-gray-400 hover:text-indigo-500"><Pencil size={16} /></button>
-                                <button onClick={() => handleDelete('objective', obj.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={16} /></button>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                <div className="bg-indigo-500 h-2.5 rounded-full" style={{ width: `${obj.progress}%` }}></div>
-                            </div>
-                            <span className="font-bold text-indigo-600">{Math.round(obj.progress)}%</span>
-                        </div>
-                        
-                        <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-                            {obj.keyResults.map(kr => {
-                                const StatusIcon = statusMap[kr.status].icon;
-                                return (
-                                    <div key={kr.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                                        <div className="flex justify-between items-center">
-                                            <p className="font-medium text-sm">{kr.title}</p>
-                                            <div className="flex items-center gap-2 no-print">
-                                                <button onClick={() => { setEditingItem({ type: 'keyResult', data: kr }); setIsModalOpen(true); }} className="text-gray-400 hover:text-indigo-500"><Pencil size={14} /></button>
-                                                <button onClick={() => handleDelete('keyResult', kr.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={14} /></button>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4 mt-2">
-                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                                <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${kr.progress}%` }}></div>
-                                            </div>
-                                            <span className="text-xs font-mono text-slate-500">{kr.currentValue}/{kr.targetValue}</span>
-                                            <div className="flex items-center gap-1" title={statusMap[kr.status].label}>
-                                                <StatusIcon size={14} className={statusMap[kr.status].color} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                             <button onClick={() => { setEditingItem({ type: 'keyResult', data: null }); setPreselectedObjectiveId(obj.id); setIsModalOpen(true); }} className="text-sm font-semibold text-indigo-600 hover:underline flex items-center gap-1 pt-2 no-print">
-                                <Plus size={14} /> أضف نتيجة رئيسية
-                            </button>
-                        </div>
-                    </div>
-                ))}
-                 {objectivesWithProgress.length === 0 && (
-                     <div className="text-center py-16 text-gray-500 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
-                        <Target size={48} className="mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold">لم يتم تحديد أهداف بعد</h3>
-                        <p className="mt-1">ابدأ بإضافة هدف استراتيجي لمشروعك.</p>
-                     </div>
-                 )}
+  const getGoalsByColumn = (columnId: string) => {
+    return goals.filter(goal => {
+      // Filter by column type
+      let matchesColumn = false;
+      if (columnId === 'not-started') matchesColumn = goal.status === 'not-started';
+      else if (columnId === 'short-term') matchesColumn = goal.type === 'short-term' && goal.status !== 'not-started';
+      else if (columnId === 'long-term') matchesColumn = goal.type === 'long-term' && goal.status !== 'not-started';
+      else if (columnId === 'completed') matchesColumn = goal.status === 'completed';
+
+      // Apply filters
+      const matchesType = filterType === 'all' || goal.type === filterType;
+      const matchesPriority = filterPriority === 'all' || goal.priority === filterPriority;
+      const matchesSearch = searchQuery === '' || 
+        goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        goal.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesColumn && matchesType && matchesPriority && matchesSearch;
+    });
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high': return '🔴';
+      case 'medium': return '🟡';
+      case 'low': return '🟢';
+      default: return '⚪';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'on-track': return 'text-green-600';
+      case 'at-risk': return 'text-yellow-600';
+      case 'off-track': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const calculateOverallStats = () => {
+    const total = goals.length;
+    const completed = goals.filter(g => g.status === 'completed').length;
+    const inProgress = goals.filter(g => g.status === 'in-progress').length;
+    const notStarted = goals.filter(g => g.status === 'not-started').length;
+    const avgProgress = goals.reduce((sum, g) => sum + g.progress, 0) / total;
+
+    return { total, completed, inProgress, notStarted, avgProgress };
+  };
+
+  const stats = calculateOverallStats();
+
+  return (
+    <div className="h-full bg-gray-50 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">🎯 إدارة الأهداف و OKRs</h1>
+        <p className="text-gray-600">حدد أهدافك وتتبع تقدمك بطريقة منظمة</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm">إجمالي الأهداف</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
             </div>
-
-            <OKRModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSave}
-                itemType={editingItem?.type || 'objective'}
-                itemData={editingItem?.data || null}
-                objectives={objectives}
-                preselectedObjectiveId={preselectedObjectiveId}
-            />
+            <Target className="text-blue-500" size={32} />
+          </div>
         </div>
-    );
+
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm">قيد التنفيذ</p>
+              <p className="text-2xl font-bold text-green-600">{stats.inProgress}</p>
+            </div>
+            <TrendingUp className="text-green-500" size={32} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm">مكتملة</p>
+              <p className="text-2xl font-bold text-purple-600">{stats.completed}</p>
+            </div>
+            <CheckCircle className="text-purple-500" size={32} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm">متوسط التقدم</p>
+              <p className="text-2xl font-bold text-orange-600">{stats.avgProgress.toFixed(0)}%</p>
+            </div>
+            <BarChart2 className="text-orange-500" size={32} />
+          </div>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Add Goal Button */}
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2"
+          >
+            <Plus size={20} />
+            إضافة هدف جديد
+          </button>
+
+          {/* Search */}
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="بحث عن الأهداف..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* View Switcher */}
+          <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setView('kanban')}
+              className={`px-4 py-2 rounded-lg transition ${
+                view === 'kanban' ? 'bg-white shadow' : 'hover:bg-gray-200'
+              }`}
+            >
+              📋 Kanban
+            </button>
+            <button
+              onClick={() => setView('table')}
+              className={`px-4 py-2 rounded-lg transition ${
+                view === 'table' ? 'bg-white shadow' : 'hover:bg-gray-200'
+              }`}
+            >
+              📊 جدول
+            </button>
+          </div>
+
+          {/* Filters */}
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">كل الأنواع</option>
+            <option value="short-term">قصير المدى</option>
+            <option value="long-term">طويل المدى</option>
+            <option value="quarterly">ربع سنوي</option>
+            <option value="annual">سنوي</option>
+          </select>
+
+          <select
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">كل الأولويات</option>
+            <option value="high">🔴 عالي</option>
+            <option value="medium">🟡 متوسط</option>
+            <option value="low">🟢 منخفض</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Kanban View */}
+      {view === 'kanban' && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {columns.map((column) => {
+            const columnGoals = getGoalsByColumn(column.id);
+            
+            return (
+              <div key={column.id} className="bg-gray-100 rounded-lg p-4">
+                {/* Column Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                    {column.title}
+                    <span className="bg-white px-2 py-1 rounded text-sm">
+                      {columnGoals.length}
+                    </span>
+                  </h3>
+                  <button className="text-gray-600 hover:text-gray-800">
+                    <Plus size={20} />
+                  </button>
+                </div>
+
+                {/* Goal Cards */}
+                <div className="space-y-3">
+                  {columnGoals.map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="bg-white rounded-lg p-4 shadow hover:shadow-lg transition cursor-pointer"
+                      onClick={() => setSelectedGoal(goal)}
+                    >
+                      {/* Goal Title */}
+                      <h4 className="font-semibold text-gray-800 mb-2">
+                        {goal.title}
+                      </h4>
+
+                      {/* Labels */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${column.color}`}>
+                          {goal.type === 'short-term' ? 'Short-term' : 'Long-term'}
+                        </span>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${getPriorityColor(goal.priority)}`}>
+                          {getPriorityIcon(goal.priority)} {goal.priority}
+                        </span>
+                        {goal.category && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                            {goal.category}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Progress Bar */}
+                      {goal.progress > 0 && (
+                        <div className="mb-3">
+                          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                            <span>التقدم</span>
+                            <span>{goal.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 rounded-full h-2 transition-all"
+                              style={{ width: `${goal.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Key Results Count */}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Target size={16} />
+                        <span>{goal.keyResults.length} نتائج رئيسية</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add Card Button */}
+                {columnGoals.length === 0 && (
+                  <div className="text-center text-gray-400 py-8">
+                    <Plus size={32} className="mx-auto mb-2" />
+                    <p className="text-sm">لا توجد أهداف هنا</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Table View */}
+      {view === 'table' && (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الهدف</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">النوع</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الأولوية</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التقدم</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المسؤول</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموعد</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {goals.map((goal) => (
+                <tr key={goal.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <div className="font-semibold text-gray-800">{goal.title}</div>
+                    <div className="text-sm text-gray-600">{goal.description}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                      {goal.type}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${getPriorityColor(goal.priority)}`}>
+                      {getPriorityIcon(goal.priority)} {goal.priority}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      goal.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      goal.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {goal.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 rounded-full h-2"
+                          style={{ width: `${goal.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-600">{goal.progress}%</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{goal.owner}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{goal.endDate}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedGoal(goal)}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="عرض"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button className="text-green-600 hover:text-green-800" title="تعديل">
+                        <Edit size={18} />
+                      </button>
+                      <button className="text-red-600 hover:text-red-800" title="حذف">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Goal Details Modal */}
+      {selectedGoal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Modal Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">{selectedGoal.title}</h2>
+                  <p className="text-gray-600">{selectedGoal.description}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedGoal(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Goal Info */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">النوع</p>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-semibold">
+                    {selectedGoal.type}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">الأولوية</p>
+                  <span className={`px-3 py-1 rounded text-sm font-semibold ${getPriorityColor(selectedGoal.priority)}`}>
+                    {getPriorityIcon(selectedGoal.priority)} {selectedGoal.priority}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">المسؤول</p>
+                  <p className="font-semibold">{selectedGoal.owner}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">الفترة الزمنية</p>
+                  <p className="font-semibold">{selectedGoal.startDate} - {selectedGoal.endDate}</p>
+                </div>
+              </div>
+
+              {/* Progress */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-semibold text-gray-800">التقدم الإجمالي</p>
+                  <span className="text-2xl font-bold text-blue-600">{selectedGoal.progress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-4">
+                  <div
+                    className="bg-blue-600 rounded-full h-4 transition-all"
+                    style={{ width: `${selectedGoal.progress}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Key Results */}
+              <div>
+                <h3 className="font-bold text-lg text-gray-800 mb-4">النتائج الرئيسية (KRs)</h3>
+                <div className="space-y-4">
+                  {selectedGoal.keyResults.map((kr) => (
+                    <div key={kr.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <p className="font-semibold text-gray-800">{kr.description}</p>
+                        <span className={`text-sm font-semibold ${getStatusColor(kr.status)}`}>
+                          {kr.status}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                        <span>الهدف: {kr.target} {kr.unit}</span>
+                        <span>الحالي: {kr.current} {kr.unit}</span>
+                      </div>
+                      
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`rounded-full h-2 transition-all ${
+                            kr.status === 'on-track' ? 'bg-green-600' :
+                            kr.status === 'at-risk' ? 'bg-yellow-600' :
+                            'bg-red-600'
+                          }`}
+                          style={{ width: `${(kr.current / kr.target) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };

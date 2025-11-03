@@ -5,6 +5,7 @@
 
 import type { FinancialItem } from '../types';
 import { constructionActivitiesDB, findMatchingActivity, type ActivityTemplate, type SubActivity } from '../data/construction-activities-db';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface AnalyzedItem extends FinancialItem {
   // التحليل الذكي
@@ -177,9 +178,170 @@ function analyzeWithTemplate(item: FinancialItem, template: ActivityTemplate): A
  * التحليل باستخدام AI (Gemini) للبنود غير المتطابقة
  */
 async function analyzeWithAI(item: FinancialItem): Promise<AnalyzedItem> {
-  // TODO: دمج مع Gemini AI في المستقبل
-  // حالياً نستخدم تحليل بسيط
-  
+  try {
+    // محاولة استخدام Gemini AI
+    const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    if (!geminiApiKey) {
+      console.warn('⚠️ Gemini API key not found, using fallback analysis');
+      return fallbackAnalysis(item);
+    }
+    
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    
+    const prompt = `
+أنت خبير في إدارة مشاريع الإنشاءات السعودية. حلل البند التالي من المقايسة:
+
+**البند**: ${item.description}
+**الكمية**: ${item.quantity} ${item.unit}
+**الفئة**: ${item.category || 'غير محدد'}
+
+المطلوب:
+1. تحديد نوع النشاط الإنشائي (حفر، خرسانة عادية، خرسانة مسلحة، مباني، تشطيبات، إلخ)
+2. تقسيم البند إلى أنشطة فرعية بالتسلسل (مثال: خرسانة مسلحة → نجارة، حدادة، صب، معالجة)
+3. تقدير عدد العمال المطلوبين لكل نشاط والتخصص (نجار، حداد، عامل عادي، إلخ)
+4. تقدير إنتاجية كل عامل باليوم
+5. تقدير مدة كل نشاط بالأيام
+6. تحديد المواد المطلوبة مع نسبة الهدر
+7. تحديد أكواد SBC السعودية المطبقة
+8. طريقة التنفيذ حسب الكود السعودي
+
+أعطني الإجابة بصيغة JSON مع المفاتيح التالية:
+{
+  "activityType": "نوع النشاط",
+  "activities": [
+    {
+      "name": "اسم النشاط الفرعي",
+      "sequence": 1,
+      "duration": عدد_الأيام,
+      "workers": [
+        {
+          "role": "التخصص",
+          "count": العدد,
+          "productivity": الإنتاجية_باليوم,
+          "dailyCost": التكلفة_اليومية
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "اسم المادة",
+      "quantityPer": الكمية_للوحدة,
+      "unit": "الوحدة",
+      "wastePercentage": نسبة_الهدر
+    }
+  ],
+  "sbcCodes": ["SBC-301", "SBC-302"],
+  "executionMethod": "طريقة التنفيذ باختصار",
+  "confidence": نسبة_الثقة_من_100
+}
+`;
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // محاولة استخراج JSON من الاستجابة
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('⚠️ Could not extract JSON from Gemini response, using fallback');
+      return fallbackAnalysis(item);
+    }
+    
+    const aiAnalysis = JSON.parse(jsonMatch[0]);
+    
+    // تحويل استجابة Gemini إلى التنسيق المطلوب
+    const breakdown: ItemBreakdown = {
+      activities: [],
+      totalDuration: 0,
+      criticalPath: []
+    };
+    
+    let currentOffset = 0;
+    for (const activity of aiAnalysis.activities || []) {
+      const activityId = `${item.id}-activity-${activity.sequence}`;
+      const workers = activity.workers.map((w: any) => ({
+        role: w.role,
+        count: w.count,
+        productivity: w.productivity,
+        dailyCost: w.dailyCost || 150,
+        totalCost: w.count * (w.dailyCost || 150) * activity.duration,
+        workingDays: activity.duration
+      }));
+      
+      breakdown.activities.push({
+        id: activityId,
+        name: activity.name,
+        description: `${activity.name} - ${item.description}`,
+        sequence: activity.sequence,
+        duration: activity.duration,
+        startOffset: currentOffset,
+        workers,
+        productivity: {
+          rate: activity.workers[0]?.productivity || 10,
+          unit: item.unit,
+          perDay: activity.workers[0]?.productivity || 10
+        },
+        dependencies: activity.sequence > 1 ? [`${item.id}-activity-${activity.sequence - 1}`] : [],
+        isCritical: activity.sequence === 1
+      });
+      
+      if (breakdown.activities[breakdown.activities.length - 1].isCritical) {
+        breakdown.criticalPath.push(activityId);
+      }
+      
+      currentOffset += activity.duration;
+    }
+    
+    breakdown.totalDuration = currentOffset;
+    
+    // تحليل العمالة
+    const labor = analyzeLaborRequirements(breakdown.activities);
+    
+    // تحليل المواد
+    const materials: MaterialAnalysis[] = (aiAnalysis.materials || []).map((material: any) => {
+      const baseQuantity = material.quantityPer * item.quantity;
+      const wastage = baseQuantity * (material.wastePercentage / 100);
+      return {
+        name: material.name,
+        quantity: baseQuantity,
+        unit: material.unit,
+        wastage,
+        totalRequired: baseQuantity + wastage
+      };
+    });
+    
+    // SBC Compliance
+    const sbcCompliance: SBCCheck = {
+      applicableCodes: aiAnalysis.sbcCodes || [],
+      requirements: [aiAnalysis.executionMethod || 'يجب مراجعة الكود السعودي'],
+      compliant: true,
+      notes: ['تم التحليل باستخدام Gemini AI']
+    };
+    
+    return {
+      ...item,
+      analysis: {
+        detectedActivity: null,
+        breakdown,
+        labor,
+        materials,
+        sbcCompliance,
+        confidence: aiAnalysis.confidence || 75
+      }
+    };
+  } catch (error) {
+    console.error('❌ Gemini AI error:', error);
+    return fallbackAnalysis(item);
+  }
+}
+
+/**
+ * تحليل احتياطي عند فشل Gemini
+ */
+function fallbackAnalysis(item: FinancialItem): AnalyzedItem {
   const simpleBreakdown: ItemBreakdown = {
     activities: [
       {
@@ -236,7 +398,7 @@ async function analyzeWithAI(item: FinancialItem): Promise<AnalyzedItem> {
         applicableCodes: [],
         requirements: [],
         compliant: true,
-        notes: ['يجب مراجعة الكود السعودي يدوياً']
+        notes: ['يجب مراجعة الكود السعودي يدوياً - تحليل بسيط']
       },
       confidence: 50 // ثقة متوسطة
     }

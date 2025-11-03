@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -130,6 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavItem icon={Mic} label="المساعد المباشر" viewName="assistant" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={GraduationCap} label="المعرفة الهندسية" viewName="engineering-knowledge" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Database} label="قاعدة البيانات المعرفية" viewName="knowledge-database" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Package} label="📦 مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={History} label="سجل التدقيق" viewName="audit-log" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                 </nav>
 

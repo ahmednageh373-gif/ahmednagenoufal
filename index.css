@@ -427,6 +427,39 @@
     transition: all 0.2s ease-out;
 }
 
+/* Loading Screen Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.loading-container {
+  animation: gradient-shift 10s ease infinite;
+  background-size: 200% 200%;
+}
+
+.loading-spinner-wrapper {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 /* Responsive Table Styles */
 @media (max-width: 767px) {
     .responsive-table thead {

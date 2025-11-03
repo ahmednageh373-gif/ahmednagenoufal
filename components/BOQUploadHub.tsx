@@ -134,6 +134,176 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
     }
   };
 
+  const renderStepResult = (stepId: string, result: any) => {
+    if (!result) return null;
+
+    switch (stepId) {
+      case 'upload':
+        return (
+          <div className="mt-4 grid grid-cols-1 gap-4">
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">عدد البنود</p>
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{result.itemsCount}</p>
+                </div>
+                <FileSpreadsheet className="text-indigo-600 dark:text-indigo-400" size={40} />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'schedule':
+        return (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">عدد المهام</p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{result.tasks}</p>
+            </div>
+            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">المدة الإجمالية</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{result.summary?.totalDuration} يوم</p>
+            </div>
+            <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">المهام الحرجة</p>
+              <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{result.summary?.numberOfCriticalActivities}</p>
+            </div>
+            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg col-span-full">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">تاريخ الإنجاز المتوقع</p>
+              <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{result.summary?.estimatedCompletionDate}</p>
+            </div>
+          </div>
+        );
+
+      case 'purchase':
+        return (
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">عدد الأوامر</p>
+                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{result.orders}</p>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">القيمة الإجمالية</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {result.summary?.totalValue?.toLocaleString('ar-SA')} ريال
+                </p>
+              </div>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">أولوية عالية</p>
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                  {result.summary?.byPriority?.high || 0}
+                </p>
+              </div>
+            </div>
+            {result.summary?.byCategory && (
+              <div className="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3">التوزيع حسب الفئة</h4>
+                <div className="space-y-2">
+                  {result.summary.byCategory.slice(0, 5).map((cat: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{cat.category}</span>
+                      <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                        {cat.value?.toLocaleString('ar-SA')} ريال
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'procurement':
+        return (
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">عدد المواد</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{result.summary?.totalItems}</p>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">القيمة الإجمالية</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {result.summary?.totalValue?.toLocaleString('ar-SA')} ريال
+                </p>
+              </div>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">المواد الحرجة</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{result.summary?.criticalItems}</p>
+              </div>
+            </div>
+            {result.milestones && (
+              <div className="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3">المعالم الرئيسية</h4>
+                <div className="space-y-3">
+                  {result.milestones.map((milestone: any, idx: number) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-600 rounded-lg">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{milestone.description}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{milestone.date}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                        {milestone.totalValue?.toLocaleString('ar-SA')} ريال
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'report':
+        return (
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">بنود المقايسة</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{result.summary?.totalBOQItems}</p>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">مدة المشروع</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{result.summary?.projectDuration} يوم</p>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">قيمة المشتريات</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {result.summary?.totalProcurementValue?.toLocaleString('ar-SA')} ريال
+                </p>
+              </div>
+            </div>
+            {result.sections?.recommendations && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 rounded-lg border-r-4 border-amber-500">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <span className="text-amber-600">💡</span>
+                  التوصيات
+                </h4>
+                <ul className="space-y-2">
+                  {result.sections.recommendations.map((rec: string, idx: number) => (
+                    <li key={idx} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2">
+                      <span className="text-amber-600 mt-1">•</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        );
+
+      default:
+        return (
+          <div className="mt-4 p-4 bg-white dark:bg-gray-700 rounded-lg">
+            <pre className="text-xs text-gray-700 dark:text-gray-300 overflow-auto max-h-48">
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8">
       <div className="max-w-6xl mx-auto">
@@ -250,13 +420,7 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
                   )}
                 </div>
                 
-                {step.status === 'completed' && step.result && (
-                  <div className="mt-4 p-4 bg-white dark:bg-gray-700 rounded-lg">
-                    <pre className="text-sm text-gray-700 dark:text-gray-300 overflow-auto">
-                      {JSON.stringify(step.result, null, 2)}
-                    </pre>
-                  </div>
-                )}
+                {step.status === 'completed' && step.result && renderStepResult(step.id, step.result)}
               </div>
             ))}
           </div>

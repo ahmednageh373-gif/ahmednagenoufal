@@ -1038,15 +1038,5 @@ export class IntegratedFileManager {
 }
 
 // ============================================================================
-// Export All Handlers
+// All Handlers Exported Above
 // ============================================================================
-
-export {
-  AutoCADHandler,
-  AdvancedExcelHandler,
-  AdvancedPDFHandler,
-  Visualization3DHandler,
-  ArabicTextHandler,
-  ProjectAnalyticsHandler,
-  IntegratedFileManager
-};

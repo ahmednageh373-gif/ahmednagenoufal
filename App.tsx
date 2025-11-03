@@ -36,6 +36,7 @@ const BlockLibrary = React.lazy(() => import('./components/BlockLibrary').then(m
 const BOQUploadHub = React.lazy(() => import('./components/BOQUploadHub').then(module => ({ default: module.default })));
 const SBCComplianceChecker = React.lazy(() => import('./components/SBCComplianceChecker').then(module => ({ default: module.SBCComplianceChecker })));
 const ScheduleAnalysis = React.lazy(() => import('./components/schedule/ScheduleAnalysis').then(module => ({ default: module.ScheduleAnalysis })));
+const NOUFALCommandCenter = React.lazy(() => import('./components/NOUFALCommandCenter').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -339,6 +340,8 @@ const App: React.FC = () => {
                 return <SBCComplianceChecker />;
             case 'schedule-analysis':
                 return <ScheduleAnalysis project={activeProject} />;
+            case 'noufal-command':
+                return <NOUFALCommandCenter />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

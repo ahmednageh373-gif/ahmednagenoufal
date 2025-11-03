@@ -102,20 +102,25 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
             return -1;
           };
           
-          const descCol = findColumnIndex(['وصف', 'بيان', 'description', 'item', 'البند']);
+          const itemNoCol = findColumnIndex(['رقم', 'no', 'number', '#', 'item no', 'رقم البند', 'م', 'تسلسلي', 'الرقم التسلسلي']);
+          const descCol = findColumnIndex(['وصف', 'بيان', 'description', 'item', 'البند', 'وصف البند', 'التفاصيل', 'المواصفات']);
           const qtyCol = findColumnIndex(['كمية', 'quantity', 'qty', 'الكمية']);
-          const unitCol = findColumnIndex(['وحدة', 'unit', 'الوحدة']);
-          const priceCol = findColumnIndex(['سعر', 'price', 'فئة', 'unit price', 'السعر']);
-          const totalCol = findColumnIndex(['إجمالي', 'total', 'amount', 'الإجمالي', 'المبلغ']);
-          const categoryCol = findColumnIndex(['فئة', 'category', 'type', 'التصنيف', 'النوع']);
+          const unitCol = findColumnIndex(['وحدة', 'unit', 'الوحدة', 'وحدة القياس', 'القياس']);
+          const priceCol = findColumnIndex(['سعر', 'price', 'unit price', 'السعر', 'سعر الوحدة', 'الفئة']);
+          const totalCol = findColumnIndex(['إجمالي', 'total', 'amount', 'الإجمالي', 'المبلغ', 'الاجمالي']);
+          const categoryCol = findColumnIndex(['فئة', 'category', 'type', 'التصنيف', 'النوع', 'الفئة']);
           
-          console.log('📊 Column mapping:', { descCol, qtyCol, unitCol, priceCol, totalCol, categoryCol });
+          console.log('📊 Column mapping:', { itemNoCol, descCol, qtyCol, unitCol, priceCol, totalCol, categoryCol });
           
           const boqItems: FinancialItem[] = [];
           
           for (let i = 0; i < dataRows.length; i++) {
             const row = dataRows[i];
             if (!row || row.length === 0) continue;
+            
+            // Extract item number from file or generate sequential
+            const itemNo = itemNoCol >= 0 ? String(row[itemNoCol] || '').trim() : '';
+            const itemId = itemNo || `${i + 1}`;
             
             const description = descCol >= 0 ? String(row[descCol] || '').trim() : '';
             if (!description || description.length < 3) continue; // Skip empty or very short descriptions
@@ -130,7 +135,7 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
             if (quantity <= 0) continue;
             
             boqItems.push({
-              id: `item-${i + 1}`,
+              id: itemId,
               description,
               quantity,
               unit,

@@ -16,6 +16,13 @@ sys.path.append(str(Path(__file__).parent))
 from core.ExcelIntelligence import ExcelIntelligence
 from core.ItemClassifier import ItemClassifier
 from core.ProductivityDatabase import ProductivityDatabase
+from core.ItemAnalyzer import ItemAnalyzer
+from core.RelationshipEngine import RelationshipEngine
+from core.ComprehensiveScheduler import ComprehensiveScheduler
+from core.SBCComplianceChecker import SBCComplianceChecker
+from core.SCurveGenerator import SCurveGenerator
+from core.RequestParser import RequestParser
+from core.RequestExecutor import RequestExecutor
 
 # إنشاء التطبيق
 app = Flask(__name__)
@@ -28,18 +35,33 @@ app.config['DATABASE'] = BASE_DIR / 'database' / 'noufal.db'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
 
 # تهيئة الأنظمة
+db_path = str(app.config['DATABASE'])
 excel_intel = ExcelIntelligence()
-classifier = ItemClassifier(str(app.config['DATABASE']))
-productivity_db = ProductivityDatabase(str(app.config['DATABASE']))
+classifier = ItemClassifier(db_path)
+productivity_db = ProductivityDatabase(db_path)
+item_analyzer = ItemAnalyzer(db_path)
+relationship_engine = RelationshipEngine(db_path)
+scheduler = ComprehensiveScheduler(db_path)
+compliance_checker = SBCComplianceChecker(db_path)
+s_curve_generator = SCurveGenerator(db_path)
+request_parser = RequestParser()
+request_executor = RequestExecutor(db_path)
 
-print("\n" + "="*60)
-print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System")
-print("="*60)
-print(f"✅ Excel Intelligence: Ready")
-print(f"✅ Item Classifier: Ready ({len(classifier.dictionary)} keywords)")
-print(f"✅ Productivity Database: Ready")
-print(f"✅ Database: {app.config['DATABASE']}")
-print("="*60 + "\n")
+print("\n" + "="*80)
+print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System - المتكامل")
+print("="*80)
+print(f"✅ System 01: Excel Intelligence - Ready")
+print(f"✅ System 02: Item Classifier - Ready ({len(classifier.dictionary)} keywords)")
+print(f"✅ System 03: Productivity Database - Ready")
+print(f"✅ System 04: Item Analyzer - Ready")
+print(f"✅ System 05: Relationship Engine - Ready")
+print(f"✅ System 06: Comprehensive Scheduler - Ready")
+print(f"✅ System 07: SBC Compliance Checker - Ready")
+print(f"✅ System 08: S-Curve Generator - Ready")
+print(f"✅ System 09: Request Parser - Ready")
+print(f"✅ System 10: Request Executor - Ready")
+print(f"📁 Database: {app.config['DATABASE']}")
+print("="*80 + "\n")
 
 
 # ============================================
@@ -56,7 +78,14 @@ def home():
         'systems': {
             'excel_intelligence': True,
             'item_classifier': True,
-            'productivity_database': True
+            'productivity_database': True,
+            'item_analyzer': True,
+            'relationship_engine': True,
+            'scheduler': True,
+            'compliance_checker': True,
+            's_curve_generator': True,
+            'request_parser': True,
+            'request_executor': True
         }
     })
 
@@ -70,7 +99,14 @@ def health_check():
         'systems': {
             'excel_intelligence': True,
             'item_classifier': True,
-            'productivity_database': True
+            'productivity_database': True,
+            'item_analyzer': True,
+            'relationship_engine': True,
+            'scheduler': True,
+            'compliance_checker': True,
+            's_curve_generator': True,
+            'request_parser': True,
+            'request_executor': True
         }
     })
 
@@ -218,6 +254,229 @@ def analyze_boq():
         'status': 'success',
         'analyzed_items': analyzed_items,
         'total': len(analyzed_items)
+    })
+
+
+# ============================================
+# الأنظمة الجديدة - API Endpoints
+# ============================================
+
+@app.route('/api/analyze-items', methods=['POST'])
+def analyze_items_deep():
+    """تحليل عميق للبنود"""
+    
+    data = request.json
+    items = data.get('items', [])
+    
+    if not items:
+        return jsonify({'error': 'لا توجد بنود للتحليل'}), 400
+    
+    # تحليل شامل
+    analysis = item_analyzer.analyze_batch(items)
+    
+    return jsonify({
+        'status': 'success',
+        'analysis': analysis
+    })
+
+
+@app.route('/api/build-relationships', methods=['POST'])
+def build_relationships():
+    """بناء شبكة التبعيات"""
+    
+    data = request.json
+    activities = data.get('activities', [])
+    
+    if not activities:
+        return jsonify({'error': 'لا توجد أنشطة'}), 400
+    
+    # بناء الشبكة
+    graph = relationship_engine.build_dependency_graph(activities)
+    critical_path = relationship_engine.get_critical_path()
+    
+    return jsonify({
+        'status': 'success',
+        'graph': {
+            activity_id: {
+                'description': node['activity'].get('description'),
+                'level': node['level'],
+                'critical': node.get('critical', False),
+                'early_start': node.get('early_start'),
+                'early_finish': node.get('early_finish')
+            }
+            for activity_id, node in graph.items()
+        },
+        'critical_path': critical_path
+    })
+
+
+@app.route('/api/generate-schedule', methods=['POST'])
+def generate_schedule():
+    """توليد جدول زمني شامل"""
+    
+    data = request.json
+    activities = data.get('activities', [])
+    start_date = data.get('start_date', '2025-01-01')
+    constraints = data.get('constraints', {})
+    
+    if not activities:
+        return jsonify({'error': 'لا توجد أنشطة'}), 400
+    
+    # توليد الجدول
+    schedule = scheduler.generate_schedule(activities, start_date, constraints)
+    
+    return jsonify({
+        'status': 'success',
+        'schedule': schedule
+    })
+
+
+@app.route('/api/gantt-data', methods=['POST'])
+def get_gantt_data():
+    """الحصول على بيانات Gantt Chart"""
+    
+    data = request.json
+    schedule = data.get('schedule', {})
+    
+    if not schedule:
+        return jsonify({'error': 'لا يوجد جدول'}), 400
+    
+    # تحويل إلى صيغة Gantt
+    gantt_data = scheduler.export_to_gantt_data(schedule)
+    
+    return jsonify({
+        'status': 'success',
+        'gantt_data': gantt_data
+    })
+
+
+@app.route('/api/check-sbc-compliance', methods=['POST'])
+def check_sbc_compliance():
+    """فحص الامتثال لكود البناء السعودي"""
+    
+    data = request.json
+    items = data.get('items', [])
+    category = data.get('category', 'all')
+    
+    if not items:
+        return jsonify({'error': 'لا توجد بنود للفحص'}), 400
+    
+    # فحص الامتثال
+    results = compliance_checker.check_batch(items, category)
+    report = compliance_checker.generate_compliance_report(results)
+    
+    return jsonify({
+        'status': 'success',
+        'results': results,
+        'report': report
+    })
+
+
+@app.route('/api/generate-s-curve', methods=['POST'])
+def generate_s_curve():
+    """توليد منحنى S"""
+    
+    data = request.json
+    schedule = data.get('schedule', {})
+    interval = data.get('interval', 'weekly')
+    
+    if not schedule:
+        return jsonify({'error': 'لا يوجد جدول'}), 400
+    
+    # توليد منحنى S
+    s_curve = s_curve_generator.generate_s_curve(schedule, interval)
+    
+    return jsonify({
+        'status': 'success',
+        's_curve': s_curve
+    })
+
+
+@app.route('/api/financial-s-curve', methods=['POST'])
+def generate_financial_s_curve():
+    """توليد منحنى S المالي"""
+    
+    data = request.json
+    schedule = data.get('schedule', {})
+    item_costs = data.get('item_costs', {})
+    interval = data.get('interval', 'monthly')
+    
+    if not schedule or not item_costs:
+        return jsonify({'error': 'بيانات غير كاملة'}), 400
+    
+    # توليد منحنى S المالي
+    financial_curve = s_curve_generator.generate_financial_s_curve(
+        schedule, item_costs, interval
+    )
+    
+    return jsonify({
+        'status': 'success',
+        'financial_curve': financial_curve
+    })
+
+
+@app.route('/api/parse-request', methods=['POST'])
+def parse_request():
+    """تحليل طلب لغوي"""
+    
+    data = request.json
+    request_text = data.get('request', '')
+    
+    if not request_text:
+        return jsonify({'error': 'لا يوجد طلب'}), 400
+    
+    # تحليل الطلب
+    parsed = request_parser.parse(request_text)
+    validation = request_parser.validate_command(parsed)
+    
+    return jsonify({
+        'status': 'success',
+        'parsed': parsed,
+        'validation': validation
+    })
+
+
+@app.route('/api/execute-request', methods=['POST'])
+def execute_request():
+    """تنفيذ طلب لغوي"""
+    
+    data = request.json
+    request_text = data.get('request', '')
+    context = data.get('context', {})
+    
+    if not request_text:
+        return jsonify({'error': 'لا يوجد طلب'}), 400
+    
+    # تنفيذ الطلب
+    result = request_executor.execute(request_text, context)
+    
+    return jsonify(result)
+
+
+@app.route('/api/system-status', methods=['GET'])
+def system_status():
+    """حالة جميع الأنظمة"""
+    
+    status = request_executor.get_system_status()
+    
+    return jsonify({
+        'status': 'success',
+        'system_status': status
+    })
+
+
+@app.route('/api/suggestions', methods=['POST'])
+def get_suggestions():
+    """الحصول على اقتراحات للطلبات"""
+    
+    data = request.json
+    partial_text = data.get('text', '')
+    
+    suggestions = request_parser.generate_suggestions(partial_text)
+    
+    return jsonify({
+        'status': 'success',
+        'suggestions': suggestions
     })
 
 

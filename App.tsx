@@ -30,6 +30,7 @@ const ProjectMembers = React.lazy(() => import('./components/ProjectMembers').th
 const BOQManualManager = React.lazy(() => import('./BOQManualManager').then(module => ({ default: module.BOQManualManager })));
 const EngineeringKnowledge = React.lazy(() => import('./EngineeringKnowledge').then(module => ({ default: module.EngineeringKnowledge })));
 const KnowledgeDatabase = React.lazy(() => import('./KnowledgeDatabase'));
+const NOUFALBackendHub = React.lazy(() => import('./components/NOUFALBackendHub').then(module => ({ default: module.NOUFALBackendHub })));
 
 
 const LoadingSpinner = () => (
@@ -211,6 +212,8 @@ const App: React.FC = () => {
         switch (activeView) {
             case 'dashboard':
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
+            case 'noufal-backend':
+                return <NOUFALBackendHub />;
             case 'schedule':
                 return <ScheduleManager project={activeProject} onUpdateSchedule={handleUpdateSchedule} />;
             case 'recovery-plan':

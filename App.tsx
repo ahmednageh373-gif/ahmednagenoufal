@@ -19,6 +19,7 @@ const SubcontractorManager = React.lazy(() => import('./components/Subcontractor
 const ProjectHub = React.lazy(() => import('./components/ProjectHub').then(module => ({ default: module.ProjectHub })));
 const OKRManager = React.lazy(() => import('./components/OKRManager').then(module => ({ default: module.OKRManager })));
 const WorkflowArchitect = React.lazy(() => import('./components/WorkflowArchitect').then(module => ({ default: module.WorkflowArchitect })));
+const AutomationCenter = React.lazy(() => import('./components/AutomationCenter').then(module => ({ default: module.AutomationCenter })));
 const AnalysisCenter = React.lazy(() => import('./components/AnalysisCenter').then(module => ({ default: module.AnalysisCenter })));
 const LiveAssistant = React.lazy(() => import('./components/LiveAssistant').then(module => ({ default: module.LiveAssistant })));
 const DocumentationViewer = React.lazy(() => import('./components/DocumentationViewer').then(module => ({ default: module.DocumentationViewer })));
@@ -248,6 +249,8 @@ const App: React.FC = () => {
                 return <OKRManager project={activeProject} onUpdateObjectives={handleUpdateObjectives} onUpdateKeyResults={handleUpdateKeyResults} />;
             case 'workflow':
                 return <WorkflowArchitect project={activeProject} onUpdateWorkflow={handleUpdateWorkflow} />;
+            case 'automation':
+                return <AutomationCenter />;
             case 'boq-manual':
                 return <BOQManualManager 
                     project={activeProject} 

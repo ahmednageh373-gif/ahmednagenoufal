@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import type { FinancialItem } from '../types';
 import { analyzeBOQ, type AnalyzedItem } from '../services/aiItemAnalyzer';
 import { parsePDFFile } from '../services/pdfParser';
+import { exportAndDownloadExcel, exportAndDownloadPDF } from '../services/exportService';
 
 type AnalysisMode = 'ai' | 'manual' | 'hybrid';
 type FileType = 'excel' | 'pdf' | 'manual';
@@ -182,6 +183,34 @@ export default function NOUFALCommandCenter() {
     totalCost: state.analyzedItems.reduce((sum, item) => sum + item.analysis.labor.totalCost, 0)
   };
 
+  // معالج تصدير Excel
+  const handleExportExcel = async () => {
+    if (state.analyzedItems.length === 0) {
+      alert('لا توجد بيانات للتصدير');
+      return;
+    }
+    try {
+      await exportAndDownloadExcel(state.analyzedItems, 'تحليل_المقايسة_NOUFAL');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      alert('حدث خطأ أثناء تصدير Excel');
+    }
+  };
+
+  // معالج تصدير PDF
+  const handleExportPDF = async () => {
+    if (state.analyzedItems.length === 0) {
+      alert('لا توجد بيانات للطباعة');
+      return;
+    }
+    try {
+      await exportAndDownloadPDF(state.analyzedItems, 'تحليل_المقايسة_NOUFAL');
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('حدث خطأ أثناء تصدير PDF');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-8">
       <div className="max-w-7xl mx-auto">
@@ -346,11 +375,19 @@ export default function NOUFALCommandCenter() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-white">نتائج التحليل</h2>
               <div className="flex gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all">
+                <button 
+                  onClick={handleExportExcel}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={state.analyzedItems.length === 0}
+                >
                   <Download className="w-4 h-4" />
                   تصدير Excel
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
+                <button 
+                  onClick={handleExportPDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={state.analyzedItems.length === 0}
+                >
                   <FileText className="w-4 h-4" />
                   طباعة PDF
                 </button>

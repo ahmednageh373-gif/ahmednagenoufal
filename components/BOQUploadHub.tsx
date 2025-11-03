@@ -5,6 +5,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, ArrowRight, Download, Eye, Loader } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { FinancialItem, ScheduleTask, PurchaseOrder } from '../types';
 import { generateScheduleFromBOQ, generateScheduleSummary } from '../services/scheduleGenerator';
 import { generatePurchaseOrders, generatePurchaseOrderSummary } from '../services/purchaseOrderGenerator';
@@ -59,6 +60,100 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
     }
   }, []);
 
+  const parseExcelFile = async (file: File): Promise<FinancialItem[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const data = e.target?.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as any[][];
+          
+          // Find header row (contains "الوصف" or "البيان" or "Description")
+          let headerRowIndex = -1;
+          for (let i = 0; i < Math.min(10, jsonData.length); i++) {
+            const row = jsonData[i];
+            const rowStr = row.join('|').toLowerCase();
+            if (rowStr.includes('وصف') || rowStr.includes('بيان') || rowStr.includes('description') || 
+                rowStr.includes('الكمية') || rowStr.includes('quantity')) {
+              headerRowIndex = i;
+              break;
+            }
+          }
+          
+          if (headerRowIndex === -1) {
+            console.warn('⚠️ لم يتم العثور على صف العناوين، سيتم استخدام الصف الأول');
+            headerRowIndex = 0;
+          }
+          
+          const headers = jsonData[headerRowIndex];
+          const dataRows = jsonData.slice(headerRowIndex + 1);
+          
+          // Map column names to indices
+          const findColumnIndex = (keywords: string[]): number => {
+            for (let i = 0; i < headers.length; i++) {
+              const header = String(headers[i] || '').toLowerCase();
+              for (const keyword of keywords) {
+                if (header.includes(keyword)) return i;
+              }
+            }
+            return -1;
+          };
+          
+          const descCol = findColumnIndex(['وصف', 'بيان', 'description', 'item', 'البند']);
+          const qtyCol = findColumnIndex(['كمية', 'quantity', 'qty', 'الكمية']);
+          const unitCol = findColumnIndex(['وحدة', 'unit', 'الوحدة']);
+          const priceCol = findColumnIndex(['سعر', 'price', 'فئة', 'unit price', 'السعر']);
+          const totalCol = findColumnIndex(['إجمالي', 'total', 'amount', 'الإجمالي', 'المبلغ']);
+          const categoryCol = findColumnIndex(['فئة', 'category', 'type', 'التصنيف', 'النوع']);
+          
+          console.log('📊 Column mapping:', { descCol, qtyCol, unitCol, priceCol, totalCol, categoryCol });
+          
+          const boqItems: FinancialItem[] = [];
+          
+          for (let i = 0; i < dataRows.length; i++) {
+            const row = dataRows[i];
+            if (!row || row.length === 0) continue;
+            
+            const description = descCol >= 0 ? String(row[descCol] || '').trim() : '';
+            if (!description || description.length < 3) continue; // Skip empty or very short descriptions
+            
+            const quantity = qtyCol >= 0 ? parseFloat(String(row[qtyCol] || '0').replace(/,/g, '')) : 0;
+            const unit = unitCol >= 0 ? String(row[unitCol] || 'وحدة').trim() : 'وحدة';
+            const unitPrice = priceCol >= 0 ? parseFloat(String(row[priceCol] || '0').replace(/,/g, '')) : 0;
+            const total = totalCol >= 0 ? parseFloat(String(row[totalCol] || '0').replace(/,/g, '')) : quantity * unitPrice;
+            const category = categoryCol >= 0 ? String(row[categoryCol] || 'عام').trim() : 'عام';
+            
+            // Skip rows with zero or invalid quantities
+            if (quantity <= 0) continue;
+            
+            boqItems.push({
+              id: `item-${i + 1}`,
+              description,
+              quantity,
+              unit,
+              unitPrice: unitPrice || (total / quantity),
+              total: total || (quantity * unitPrice),
+              category
+            });
+          }
+          
+          console.log(`✅ تم استخراج ${boqItems.length} بند من الملف`);
+          resolve(boqItems);
+          
+        } catch (error) {
+          console.error('❌ خطأ في قراءة الملف:', error);
+          reject(error);
+        }
+      };
+      
+      reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+      reader.readAsBinaryString(file);
+    });
+  };
+
   const processWorkflow = async () => {
     if (!file) {
       alert('الرجاء رفع ملف المقايسة أولاً');
@@ -68,25 +163,24 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
     setIsProcessing(true);
 
     try {
-      // Step 1: Parse BOQ (simplified - you'd use ExcelParser here)
+      // Step 1: Parse BOQ from Excel file
       updateStepStatus('upload', 'processing');
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock BOQ data for demo
-      const mockBOQ: FinancialItem[] = [
-        { id: '1', description: 'حفر وتسوية', quantity: 500, unit: 'م3', unitPrice: 15, total: 7500, category: 'أعمال حفر' },
-        { id: '2', description: 'خرسانة مسلحة للأساسات', quantity: 100, unit: 'م3', unitPrice: 350, total: 35000, category: 'خرسانة' },
-        { id: '3', description: 'حديد تسليح', quantity: 15, unit: 'طن', unitPrice: 2500, total: 37500, category: 'حديد' },
-        { id: '4', description: 'مباني طوب أحمر', quantity: 200, unit: 'م2', unitPrice: 80, total: 16000, category: 'مباني' },
-        { id: '5', description: 'بلاط أرضيات', quantity: 150, unit: 'م2', unitPrice: 120, total: 18000, category: 'تشطيبات' }
-      ];
+      const parsedBOQ = await parseExcelFile(file);
       
-      setBOQData(mockBOQ);
-      updateStepStatus('upload', 'completed', { itemsCount: mockBOQ.length });
+      if (parsedBOQ.length === 0) {
+        throw new Error('الملف لا يحتوي على بيانات صالحة');
+      }
+      
+      setBOQData(parsedBOQ);
+      updateStepStatus('upload', 'completed', { 
+        itemsCount: parsedBOQ.length,
+        totalValue: parsedBOQ.reduce((sum, item) => sum + item.total, 0)
+      });
 
       // Step 2: Generate Schedule
       updateStepStatus('schedule', 'processing');
-      const schedule = await generateScheduleFromBOQ(mockBOQ, {
+      const schedule = await generateScheduleFromBOQ(parsedBOQ, {
         projectStartDate: new Date(),
         workingDaysPerWeek: 6,
         workingHoursPerDay: 8
@@ -96,7 +190,7 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
 
       // Step 3: Generate Purchase Orders
       updateStepStatus('purchase', 'processing');
-      const purchaseOrders = await generatePurchaseOrders(mockBOQ, new Date(), { groupSimilar: true });
+      const purchaseOrders = await generatePurchaseOrders(parsedBOQ, new Date(), { groupSimilar: true });
       const poSummary = generatePurchaseOrderSummary(purchaseOrders);
       updateStepStatus('purchase', 'completed', { orders: purchaseOrders.length, summary: poSummary });
 
@@ -107,12 +201,12 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
 
       // Step 5: Generate Report
       updateStepStatus('report', 'processing');
-      const report = await generateComprehensiveReport(mockBOQ, schedule, purchaseOrders, projectName);
+      const report = await generateComprehensiveReport(parsedBOQ, schedule, purchaseOrders, projectName);
       updateStepStatus('report', 'completed', report);
 
       // Call completion callback
       if (onComplete) {
-        onComplete({ boq: mockBOQ, schedule, purchaseOrders });
+        onComplete({ boq: parsedBOQ, schedule, purchaseOrders });
       }
 
       console.log('✅ سير العمل المتكامل اكتمل بنجاح!');
@@ -140,7 +234,7 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
     switch (stepId) {
       case 'upload':
         return (
-          <div className="mt-4 grid grid-cols-1 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
@@ -150,6 +244,21 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
                 <FileSpreadsheet className="text-indigo-600 dark:text-indigo-400" size={40} />
               </div>
             </div>
+            {result.totalValue && (
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">القيمة الإجمالية</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {result.totalValue.toLocaleString('ar-SA')} ريال
+                    </p>
+                  </div>
+                  <svg className="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            )}
           </div>
         );
 

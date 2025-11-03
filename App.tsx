@@ -33,6 +33,7 @@ const EngineeringKnowledge = React.lazy(() => import('./EngineeringKnowledge').t
 const KnowledgeDatabase = React.lazy(() => import('./KnowledgeDatabase'));
 const NOUFALBackendHub = React.lazy(() => import('./components/NOUFALBackendHub').then(module => ({ default: module.NOUFALBackendHub })));
 const BlockLibrary = React.lazy(() => import('./components/BlockLibrary').then(module => ({ default: module.BlockLibrary })));
+const BOQUploadHub = React.lazy(() => import('./components/BOQUploadHub').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -330,6 +331,8 @@ const App: React.FC = () => {
                 return <KnowledgeDatabase project={activeProject} />;
             case 'block-library':
                 return <BlockLibrary />;
+            case 'boq-upload-hub':
+                return <BOQUploadHub projectId={activeProject.id} projectName={activeProject.name} />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

@@ -1563,6 +1563,219 @@ def get_claude_templates():
 
 
 # ============================================
+# 11. Engineering Tools API
+# ============================================
+
+@app.route('/api/engineering-tools/list', methods=['GET'])
+def engineering_tools_list():
+    """Get list of all engineering tools"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        tools = EngineeringToolsService.get_all_tools()
+        
+        return jsonify({
+            'success': True,
+            'tools': tools,
+            'total_count': len(tools)
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/execute', methods=['POST'])
+def engineering_tools_execute():
+    """Execute an engineering tool"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        tool_id = data.get('tool_id')
+        inputs = data.get('inputs', {})
+        
+        if not tool_id:
+            return jsonify({'success': False, 'error': 'tool_id is required'}), 400
+        
+        result = EngineeringToolsService.execute_tool(tool_id, inputs)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'timestamp': result.timestamp,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/converter', methods=['POST'])
+def engineering_tools_converter():
+    """Unit converter tool"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        value = data.get('value')
+        from_unit = data.get('from_unit')
+        to_unit = data.get('to_unit')
+        
+        result = EngineeringToolsService.convert_units(value, from_unit, to_unit)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/load-calculator', methods=['POST'])
+def engineering_tools_load_calculator():
+    """Load calculator tool"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        
+        result = EngineeringToolsService.calculate_loads(
+            area=data.get('area'),
+            height=data.get('height'),
+            floor_count=data.get('floor_count'),
+            building_type=data.get('building_type'),
+            location=data.get('location'),
+            wind_speed=data.get('wind_speed'),
+            seismic_zone=data.get('seismic_zone')
+        )
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/steel-weight', methods=['POST'])
+def engineering_tools_steel_weight():
+    """Steel weight calculator"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        diameter = data.get('diameter')
+        length = data.get('length')
+        
+        result = EngineeringToolsService.calculate_steel_weight(diameter, length)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/cutting-length', methods=['POST'])
+def engineering_tools_cutting_length():
+    """Cutting length calculator"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        span_length = data.get('span_length')
+        cover = data.get('cover')
+        diameter = data.get('diameter')
+        
+        result = EngineeringToolsService.calculate_cutting_length(span_length, cover, diameter)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/rate-analysis', methods=['POST'])
+def engineering_tools_rate_analysis():
+    """Rate analysis tool"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        quantity = data.get('quantity')
+        unit_price = data.get('unit_price')
+        labor_pct = data.get('labor_pct', 0.15)
+        
+        result = EngineeringToolsService.analyze_rate(quantity, unit_price, labor_pct)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/building-estimator', methods=['POST'])
+def engineering_tools_building_estimator():
+    """Building cost estimator"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        area = data.get('area')
+        height = data.get('height')
+        quality = data.get('quality', 'standard')
+        
+        result = EngineeringToolsService.calculate_building_estimate(area, height, quality)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/engineering-tools/soil-mechanics', methods=['POST'])
+def engineering_tools_soil_mechanics():
+    """Soil mechanics analyzer"""
+    try:
+        from core.engineering_tools_service import EngineeringToolsService
+        
+        data = request.get_json()
+        unit_weight = data.get('unit_weight')
+        depth = data.get('depth')
+        friction_angle = data.get('friction_angle')
+        cohesion = data.get('cohesion')
+        
+        result = EngineeringToolsService.analyze_soil(unit_weight, depth, friction_angle, cohesion)
+        
+        return jsonify({
+            'success': result.success,
+            'data': result.data,
+            'error': result.error,
+            'execution_time': result.execution_time
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================
 # تشغيل التطبيق
 # ============================================
 

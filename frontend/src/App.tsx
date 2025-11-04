@@ -11,8 +11,9 @@ import React, { useState } from 'react';
 import UnifiedDashboard from './components/UnifiedDashboard';
 import { QuickTools } from './components/QuickTools';
 import { HousePlanExtractor } from './components/HousePlanExtractor';
+import ToolsPanel from './components/tools/ToolsPanel';
 
-type AppView = 'dashboard' | 'quick-tools' | 'house-plans';
+type AppView = 'dashboard' | 'quick-tools' | 'house-plans' | 'engineering-tools';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('dashboard');
@@ -25,6 +26,8 @@ export const App: React.FC = () => {
         return <QuickTools />;
       case 'house-plans':
         return <HousePlanExtractor />;
+      case 'engineering-tools':
+        return <ToolsPanel />;
       default:
         return <UnifiedDashboard />;
     }

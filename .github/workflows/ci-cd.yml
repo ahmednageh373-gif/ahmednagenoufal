@@ -1,0 +1,194 @@
+name: CI/CD Pipeline - NOUFAL Engineering System
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '20.x'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ============================================
+  # Backend Tests
+  # ============================================
+  backend-test:
+    name: 🐍 Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 📦 Install dependencies
+        run: |
+          cd backend
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+      
+      - name: 🧪 Run tests
+        run: |
+          cd backend
+          pytest tests/ -v --cov=core --cov-report=xml --cov-report=term
+      
+      - name: 📊 Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+  
+  # ============================================
+  # Frontend Build & Test
+  # ============================================
+  frontend-build:
+    name: ⚛️ Frontend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: npm ci
+      
+      - name: 🏗️ Build
+        run: npm run build
+      
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/
+          retention-days: 7
+  
+  # ============================================
+  # Code Quality Checks
+  # ============================================
+  code-quality:
+    name: 🔍 Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 📦 Install Python quality tools
+        run: |
+          pip install black flake8 pylint mypy
+      
+      - name: 🎨 Check Python formatting
+        run: |
+          cd backend
+          black --check --diff core/ tests/ || echo "::warning::Python formatting issues found"
+      
+      - name: 🔍 Run flake8
+        run: |
+          cd backend
+          flake8 core/ tests/ --max-line-length=120 --extend-ignore=E203,W503 || echo "::warning::Flake8 issues found"
+      
+      - name: 📦 Setup Node.js for linting
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: 📦 Install Node dependencies
+        run: npm ci
+      
+      - name: 🔍 TypeScript check
+        run: npx tsc --noEmit || echo "::warning::TypeScript errors found"
+  
+  # ============================================
+  # Docker Build Test
+  # ============================================
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: 🏗️ Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: noufal-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  
+  # ============================================
+  # Deploy to Vercel (Production)
+  # ============================================
+  deploy-vercel:
+    name: 🚀 Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build, code-quality]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/
+      
+      - name: 🚀 Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
+  
+  # ============================================
+  # Notification
+  # ============================================
+  notify:
+    name: 📢 Notify
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build, code-quality, docker-build]
+    if: always()
+    
+    steps:
+      - name: 📢 Send notification
+        run: |
+          if [ "${{ needs.backend-test.result }}" == "success" ] && \
+             [ "${{ needs.frontend-build.result }}" == "success" ] && \
+             [ "${{ needs.code-quality.result }}" == "success" ] && \
+             [ "${{ needs.docker-build.result }}" == "success" ]; then
+            echo "✅ All checks passed!"
+          else
+            echo "❌ Some checks failed!"
+            exit 1
+          fi

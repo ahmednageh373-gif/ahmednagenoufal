@@ -45,6 +45,7 @@ const SmartReportsSystem = React.lazy(() => import('./components/SmartReportsSys
 const AdvancedAIFeatures = React.lazy(() => import('./components/AdvancedAIFeatures').then(module => ({ default: module.default })));
 const ProEngineeringHub = React.lazy(() => import('./components/ProEngineeringHub').then(module => ({ default: module.default })));
 const RealAIProcessor = React.lazy(() => import('./components/RealAIProcessor').then(module => ({ default: module.default })));
+const NOUFALIntegratedSystem = React.lazy(() => import('./components/NOUFALIntegratedSystem').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -366,6 +367,8 @@ const App: React.FC = () => {
                 return <ProEngineeringHub projectId={activeProject.id} projectName={activeProject.name} />;
             case 'real-ai':
                 return <RealAIProcessor projectId={activeProject.id} projectName={activeProject.name} />;
+            case 'noufal-integrated':
+                return <NOUFALIntegratedSystem />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

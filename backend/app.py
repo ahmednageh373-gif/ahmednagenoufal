@@ -53,6 +53,8 @@ from core.house_plan_extractor import (
 from core.house_plan_integrator import HousePlanIntegrator
 # Dashboard Service
 from core.dashboard_service import DashboardService
+# Claude Prompts Service
+from core.claude_prompts_service import ClaudePromptsService, PromptType
 
 # إنشاء التطبيق
 app = Flask(__name__)
@@ -84,6 +86,7 @@ land_calculator = IrregularLandCalculator()
 house_plan_scraper = HousePlanScraper()
 house_plan_integrator = HousePlanIntegrator()
 dashboard_service = DashboardService(db_path)
+claude_prompts_service = ClaudePromptsService()
 
 print("\n" + "="*80)
 print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System - المتكامل")
@@ -106,6 +109,7 @@ print(f"✅ System 15: Land Calculator - Ready (Irregular plots)")
 print(f"✅ System 16: House Plan Scraper - Ready (Web extraction)")
 print(f"✅ System 17: House Plan Integrator - Ready (Auto BOQ from plans)")
 print(f"✅ System 18: Dashboard Service - Ready (Stats & Monitoring)")
+print(f"✅ System 19: Claude Prompts Service - Ready (9 prompt types)")
 print(f"📁 Database: {app.config['DATABASE']}")
 print("="*80 + "\n")
 
@@ -1425,6 +1429,134 @@ def get_usage_trend():
         return jsonify({
             'success': True,
             'trend': trend
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================
+# Claude Prompts API Endpoints
+# ============================================
+
+@app.route('/api/claude-prompts/list', methods=['GET'])
+def list_claude_prompts():
+    """
+    List all available Claude prompts
+    
+    Returns:
+        List of all 9 prompt types with descriptions
+    """
+    try:
+        prompts = claude_prompts_service.list_all_prompts()
+        
+        return jsonify({
+            'success': True,
+            'prompts': prompts,
+            'total_count': len(prompts)
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/claude-prompts/info/<prompt_type>', methods=['GET'])
+def get_claude_prompt_info(prompt_type: str):
+    """
+    Get information about specific prompt type
+    
+    Path params:
+        prompt_type (str): Type of prompt (basic_quantity, advanced_quantity, etc.)
+    """
+    try:
+        prompt_type_enum = PromptType(prompt_type)
+        info = claude_prompts_service.get_prompt_info(prompt_type_enum)
+        
+        if not info:
+            return jsonify({'success': False, 'error': 'Prompt type not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'prompt_info': info
+        })
+    except ValueError:
+        return jsonify({'success': False, 'error': f'Invalid prompt type: {prompt_type}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/claude-prompts/format', methods=['POST'])
+def format_claude_prompt():
+    """
+    Format a Claude prompt with variables
+    
+    Body params:
+        prompt_type (str): Type of prompt
+        variables (dict): Variables to fill in the prompt
+    
+    Example:
+        {
+          "prompt_type": "basic_quantity",
+          "variables": {
+            "document_text": "..."
+          }
+        }
+    """
+    try:
+        data = request.json
+        prompt_type = PromptType(data['prompt_type'])
+        variables = data.get('variables', {})
+        
+        formatted_prompt = claude_prompts_service.format_prompt(prompt_type, **variables)
+        
+        # Log usage
+        dashboard_service.log_tool_usage(
+            tool_id=f'claude_prompt_{prompt_type.value}',
+            tool_name=f'Claude {prompt_type.value.replace("_", " ").title()}',
+            tool_name_ar=claude_prompts_service.get_template(prompt_type).name_ar,
+            category='claude_prompts',
+            status='success'
+        )
+        
+        return jsonify({
+            'success': True,
+            'prompt_type': prompt_type.value,
+            'formatted_prompt': formatted_prompt,
+            'character_count': len(formatted_prompt)
+        })
+    except KeyError as e:
+        return jsonify({'success': False, 'error': f'Missing required field: {str(e)}'}), 400
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/claude-prompts/templates', methods=['GET'])
+def get_claude_templates():
+    """
+    Get all Claude prompt templates
+    
+    Returns:
+        All 9 templates with full details
+    """
+    try:
+        templates = claude_prompts_service.get_all_templates()
+        
+        templates_dict = {}
+        for prompt_type, template in templates.items():
+            templates_dict[prompt_type.value] = {
+                'name': template.name,
+                'name_ar': template.name_ar,
+                'description': template.description,
+                'description_ar': template.description_ar,
+                'variables': template.variables,
+                'expected_output': template.expected_output,
+                'template_length': len(template.template)
+            }
+        
+        return jsonify({
+            'success': True,
+            'templates': templates_dict,
+            'total_count': len(templates_dict)
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

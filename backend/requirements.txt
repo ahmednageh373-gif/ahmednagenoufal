@@ -45,3 +45,14 @@ lxml==5.1.0
 
 # Additional Libraries
 xlsxwriter==3.1.9
+
+# ============================================
+# House Plan Extraction - استخراج المخططات
+# ============================================
+
+# Web Scraping
+beautifulsoup4==4.12.2
+requests==2.31.0
+
+# HTML/PDF Generation
+weasyprint==60.2

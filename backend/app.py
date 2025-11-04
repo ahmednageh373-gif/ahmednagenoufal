@@ -44,6 +44,13 @@ from core.unit_converter import (
     TemperatureUnit,
     IrregularLandCalculator
 )
+# House Plan Extraction
+from core.house_plan_extractor import (
+    HousePlanScraper,
+    HousePlanAnalyzer,
+    HousePlanData
+)
+from core.house_plan_integrator import HousePlanIntegrator
 
 # إنشاء التطبيق
 app = Flask(__name__)
@@ -72,6 +79,8 @@ automation_templates = AutomationTemplates()
 # New systems
 quick_estimator = QuickEstimator()
 land_calculator = IrregularLandCalculator()
+house_plan_scraper = HousePlanScraper()
+house_plan_integrator = HousePlanIntegrator()
 
 print("\n" + "="*80)
 print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System - المتكامل")
@@ -91,6 +100,8 @@ print(f"✅ System 12: Automation Templates - Ready")
 print(f"✅ System 13: Quick Estimator - Ready (CivilConcept Integration)")
 print(f"✅ System 14: Unit Converter - Ready (Metric ↔ Imperial)")
 print(f"✅ System 15: Land Calculator - Ready (Irregular plots)")
+print(f"✅ System 16: House Plan Scraper - Ready (Web extraction)")
+print(f"✅ System 17: House Plan Integrator - Ready (Auto BOQ from plans)")
 print(f"📁 Database: {app.config['DATABASE']}")
 print("="*80 + "\n")
 
@@ -903,6 +914,263 @@ def get_available_units():
         'temperature': [u.value for u in TemperatureUnit]
     }
     return jsonify({'success': True, 'units': units})
+
+
+# ============================================
+# House Plan APIs - واجهات استخراج المخططات
+# ============================================
+
+@app.route('/api/house-plan/scrape', methods=['POST'])
+def scrape_house_plan():
+    """
+    استخراج بيانات مخطط من رابط
+    
+    Body params:
+        url (str): URL of the house plan page
+    """
+    try:
+        data = request.json
+        url = data.get('url', '')
+        
+        if not url:
+            return jsonify({'success': False, 'error': 'URL is required'}), 400
+        
+        # Scrape the plan
+        plan = house_plan_scraper.scrape_plan(url)
+        
+        if not plan:
+            return jsonify({'success': False, 'error': 'Failed to extract plan data'}), 500
+        
+        # Convert to dict
+        plan_dict = HousePlanAnalyzer.to_dict(plan)
+        
+        return jsonify({
+            'success': True,
+            'plan': plan_dict
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/house-plan/scrape-list', methods=['POST'])
+def scrape_house_plan_list():
+    """
+    استخراج قائمة روابط المخططات
+    
+    Body params:
+        url (str): URL of the plans list page
+        limit (int, optional): Maximum number of URLs to return
+    """
+    try:
+        data = request.json
+        url = data.get('url', '')
+        limit = data.get('limit', 50)
+        
+        if not url:
+            return jsonify({'success': False, 'error': 'URL is required'}), 400
+        
+        # Scrape list
+        plan_urls = house_plan_scraper.scrape_plan_list(url)
+        
+        # Apply limit
+        if limit:
+            plan_urls = plan_urls[:limit]
+        
+        return jsonify({
+            'success': True,
+            'count': len(plan_urls),
+            'urls': plan_urls
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/house-plan/estimate', methods=['POST'])
+def estimate_from_house_plan():
+    """
+    إنشاء تقدير تلقائي من بيانات مخطط
+    
+    Body params:
+        url (str): URL to scrape, OR
+        plan (dict): Pre-extracted plan data
+        region (str, optional): Region code
+        finish_level (str, optional): Finish level
+        custom_contractor_rate (float, optional): Custom rate
+    """
+    try:
+        data = request.json
+        
+        # Get or scrape plan
+        if 'url' in data:
+            plan = house_plan_scraper.scrape_plan(data['url'])
+            if not plan:
+                return jsonify({'success': False, 'error': 'Failed to extract plan'}), 500
+        elif 'plan' in data:
+            # TODO: Reconstruct HousePlanData from dict
+            return jsonify({'success': False, 'error': 'Direct plan data not yet supported'}), 501
+        else:
+            return jsonify({'success': False, 'error': 'Either url or plan required'}), 400
+        
+        # Parse parameters
+        region = Region(data.get('region', 'saudi_arabia'))
+        finish_level = FinishLevel(data.get('finish_level', 'standard'))
+        custom_rate = data.get('custom_contractor_rate')
+        
+        # Generate estimate
+        estimate = house_plan_integrator.generate_estimate_from_plan(
+            plan,
+            region=region,
+            finish_level=finish_level,
+            custom_contractor_rate=custom_rate
+        )
+        
+        # Convert to dict
+        result = {
+            'plan_id': estimate.plan_id,
+            'plan_title': estimate.plan_title,
+            'plan_url': estimate.plan_url,
+            'land_area_sqm': estimate.land_area_sqm,
+            'building_area_sqm': estimate.building_area_sqm,
+            'room_count': estimate.room_count,
+            'bhk': estimate.bhk,
+            'quick_estimate': estimate.quick_estimate,
+            'room_breakdown': estimate.room_breakdown,
+            'confidence': estimate.confidence,
+            'notes': estimate.notes
+        }
+        
+        return jsonify({
+            'success': True,
+            'estimate': result
+        })
+        
+    except ValueError as e:
+        return jsonify({'success': False, 'error': f'Invalid input: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/house-plan/generate-boq', methods=['POST'])
+def generate_boq_from_plan():
+    """
+    إنشاء BOQ أولي من مخطط
+    
+    Body params:
+        url (str): URL to scrape
+    """
+    try:
+        data = request.json
+        url = data.get('url', '')
+        
+        if not url:
+            return jsonify({'success': False, 'error': 'URL is required'}), 400
+        
+        # Scrape plan
+        plan = house_plan_scraper.scrape_plan(url)
+        if not plan:
+            return jsonify({'success': False, 'error': 'Failed to extract plan'}), 500
+        
+        # Generate BOQ
+        boq = house_plan_integrator.generate_boq_from_plan(plan)
+        
+        return jsonify({
+            'success': True,
+            'boq': boq
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/house-plan/compare', methods=['POST'])
+def compare_house_plans():
+    """
+    مقارنة مخططين
+    
+    Body params:
+        url1 (str): First plan URL
+        url2 (str): Second plan URL
+        region (str, optional): Region for estimates
+    """
+    try:
+        data = request.json
+        url1 = data.get('url1', '')
+        url2 = data.get('url2', '')
+        
+        if not url1 or not url2:
+            return jsonify({'success': False, 'error': 'Both url1 and url2 required'}), 400
+        
+        # Scrape both plans
+        plan1 = house_plan_scraper.scrape_plan(url1)
+        plan2 = house_plan_scraper.scrape_plan(url2)
+        
+        if not plan1 or not plan2:
+            return jsonify({'success': False, 'error': 'Failed to extract one or both plans'}), 500
+        
+        # Parse region
+        region = Region(data.get('region', 'saudi_arabia'))
+        
+        # Compare with estimates
+        comparison = house_plan_integrator.compare_plans_with_estimates(plan1, plan2, region)
+        
+        # Convert estimates to serializable format
+        comparison['estimates']['plan1'] = {
+            'plan_id': comparison['estimates']['plan1'].plan_id,
+            'plan_title': comparison['estimates']['plan1'].plan_title,
+            'quick_estimate': comparison['estimates']['plan1'].quick_estimate,
+            'confidence': comparison['estimates']['plan1'].confidence
+        }
+        comparison['estimates']['plan2'] = {
+            'plan_id': comparison['estimates']['plan2'].plan_id,
+            'plan_title': comparison['estimates']['plan2'].plan_title,
+            'quick_estimate': comparison['estimates']['plan2'].quick_estimate,
+            'confidence': comparison['estimates']['plan2'].confidence
+        }
+        
+        return jsonify({
+            'success': True,
+            'comparison': comparison
+        })
+        
+    except ValueError as e:
+        return jsonify({'success': False, 'error': f'Invalid input: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/house-plan/analyze', methods=['POST'])
+def analyze_house_plan():
+    """
+    تحليل مخطط واحد
+    
+    Body params:
+        url (str): Plan URL
+    """
+    try:
+        data = request.json
+        url = data.get('url', '')
+        
+        if not url:
+            return jsonify({'success': False, 'error': 'URL is required'}), 400
+        
+        # Scrape plan
+        plan = house_plan_scraper.scrape_plan(url)
+        if not plan:
+            return jsonify({'success': False, 'error': 'Failed to extract plan'}), 500
+        
+        # Calculate statistics
+        stats = HousePlanAnalyzer.calculate_statistics(plan)
+        
+        return jsonify({
+            'success': True,
+            'plan': HousePlanAnalyzer.to_dict(plan),
+            'statistics': stats
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ============================================

@@ -1,14 +1,19 @@
+// CRITICAL: This must be the very first code that runs
+// Fix for React Scheduler error BEFORE any imports
+if (typeof window !== 'undefined') {
+  if (!window.performance) {
+    window.performance = {} as any;
+  }
+  if (!window.performance.now) {
+    const startTime = Date.now();
+    window.performance.now = () => Date.now() - startTime;
+  }
+}
+
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { SimpleApp } from './SimpleApp';
 import './index.css';
-
-// Fix for React Scheduler error
-if (typeof window !== 'undefined' && !window.performance) {
-  window.performance = {
-    now: () => Date.now(),
-  } as any;
-}
 
 // Lazy load the full app with error boundary
 const App = React.lazy(() => 
@@ -71,18 +76,18 @@ if (rootElement) {
       </React.StrictMode>
     );
     
-    // Timeout fallback
+    // Aggressive timeout fallback - switch to SimpleApp if still loading after 5 seconds
     setTimeout(() => {
       const appContent = document.getElementById('root');
       if (appContent && appContent.innerHTML.includes('جاري التحميل')) {
-        console.warn('App loading timeout, switching to SimpleApp');
+        console.warn('⚠️ App loading timeout after 5s, switching to SimpleApp');
         root.render(
           <React.StrictMode>
             <SimpleApp />
           </React.StrictMode>
         );
       }
-    }, 15000);
+    }, 5000);
   } catch (error) {
     console.error('Failed to initialize app:', error);
     // Fallback to direct render

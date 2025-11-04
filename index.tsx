@@ -1,101 +1,36 @@
-// CRITICAL: This must be the very first code that runs
-// Fix for React Scheduler error BEFORE any imports
-if (typeof window !== 'undefined') {
-  if (!window.performance) {
-    window.performance = {} as any;
-  }
-  if (!window.performance.now) {
-    const startTime = Date.now();
-    window.performance.now = () => Date.now() - startTime;
-  }
-}
-
-import React, { Suspense } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 
-// Import SimpleApp directly (no lazy loading to avoid issues)
+// Use SimpleApp directly - NO LAZY LOADING
 import { SimpleApp } from './SimpleApp';
 
-// Try to lazy load the full app, but use SimpleApp as default if it fails
-const App = React.lazy(() => 
-  import('./App')
-    .then(module => {
-      console.log('✅ Full App loaded successfully');
-      return { default: module.default };
-    })
-    .catch(error => {
-      console.error('❌ Failed to load full App, using SimpleApp:', error);
-      return { default: SimpleApp };
-    })
-);
-
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div className="text-center">
-      <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">جاري التحميل...</h2>
-      <p className="text-gray-600 dark:text-gray-400">نظام إدارة المشاريع NOUFAL</p>
-    </div>
-  </div>
-);
-
-// Error Boundary Component
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('App Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <SimpleApp />;
-    }
-    return this.props.children;
-  }
-}
+console.log('🚀 Starting application...');
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
   try {
     const root = ReactDOM.createRoot(rootElement);
     
-    root.render(
-      <React.StrictMode>
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingFallback />}>
-            <App />
-          </Suspense>
-        </ErrorBoundary>
-      </React.StrictMode>
-    );
+    // Render SimpleApp directly without StrictMode or Suspense
+    root.render(<SimpleApp />);
     
-    // Aggressive timeout fallback - switch to SimpleApp if still loading after 5 seconds
-    setTimeout(() => {
-      const appContent = document.getElementById('root');
-      if (appContent && appContent.innerHTML.includes('جاري التحميل')) {
-        console.warn('⚠️ App loading timeout after 5s, switching to SimpleApp');
-        root.render(
-          <React.StrictMode>
-            <SimpleApp />
-          </React.StrictMode>
-        );
-      }
-    }, 5000);
+    console.log('✅ SimpleApp rendered successfully');
   } catch (error) {
-    console.error('Failed to initialize app:', error);
-    // Fallback to direct render
-    rootElement.innerHTML = '<div style="padding: 40px; text-align: center; font-family: Tajawal, sans-serif;"><h2 style="color: #e74c3c; margin-bottom: 20px;">حدث خطأ في تحميل التطبيق</h2><p style="color: #666;">يرجى تحديث الصفحة أو مسح الذاكرة المؤقتة للمتصفح.</p><button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">تحديث الصفحة</button></div>';
+    console.error('❌ Failed to render SimpleApp:', error);
+    // Ultimate fallback
+    rootElement.innerHTML = `
+      <div style="padding: 40px; text-align: center; font-family: 'Tajawal', sans-serif; direction: rtl;">
+        <h2 style="color: #e74c3c; margin-bottom: 20px;">حدث خطأ في تحميل التطبيق</h2>
+        <p style="color: #666; margin-bottom: 20px;">يرجى تحديث الصفحة أو مسح الذاكرة المؤقتة للمتصفح.</p>
+        <button onclick="location.reload()" style="padding: 10px 30px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">تحديث الصفحة</button>
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: right;">
+          <h3 style="color: #666; margin-bottom: 10px;">الخطأ:</h3>
+          <pre style="color: #e74c3c; font-size: 12px; text-align: left;">${error}</pre>
+        </div>
+      </div>
+    `;
   }
+} else {
+  console.error('❌ Root element not found');
 }

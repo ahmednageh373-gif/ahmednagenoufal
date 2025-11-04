@@ -1,0 +1,253 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+
+<!-- Executive Summary -->
+<div class="section">
+    <h2 class="section-title">📊 الملخص التنفيذي</h2>
+    
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-icon">📋</div>
+            <div class="card-title">إجمالي البنود</div>
+            <div class="card-value">{{ total_items }}</div>
+            <div class="card-unit">بند</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">📏</div>
+            <div class="card-title">إجمالي الكميات</div>
+            <div class="card-value">{{ total_quantity|round(2) }}</div>
+            <div class="card-unit">{{ total_unit }}</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">✅</div>
+            <div class="card-title">بنود متوافقة SBC</div>
+            <div class="card-value">{{ compliant_items }}</div>
+            <div class="card-unit">بند</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">⚠️</div>
+            <div class="card-title">قضايا حرجة</div>
+            <div class="card-value">{{ critical_issues }}</div>
+            <div class="card-unit">قضية</div>
+        </div>
+    </div>
+</div>
+
+<!-- BOQ Items Table -->
+<div class="section">
+    <h2 class="section-title">📝 تفاصيل الكميات</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>رقم البند</th>
+                <th>الوصف</th>
+                <th>الوحدة</th>
+                <th>الكمية المحسوبة</th>
+                <th>صيغة الحساب</th>
+                <th>مرجع الرسم</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in boq_items %}
+            <tr>
+                <td>{{ item.item_number }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.unit }}</td>
+                <td><strong>{{ item.calculated_quantity|round(2) }}</strong></td>
+                <td style="font-family: monospace; font-size: 12px;">{{ item.calculation_formula }}</td>
+                <td>{{ item.drawing_ref or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- SBC Compliance -->
+{% if validation_results %}
+<div class="section">
+    <h2 class="section-title">⚖️ التحقق من الامتثال لكود البناء السعودي (SBC 303)</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>رقم البند</th>
+                <th>الوصف</th>
+                <th>المشكلة</th>
+                <th>الخطورة</th>
+                <th>كود SBC</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for validation in validation_results %}
+            <tr>
+                <td>{{ validation.item_number }}</td>
+                <td>{{ validation.description }}</td>
+                <td>{{ validation.issue }}</td>
+                <td>
+                    {% if validation.severity == 'critical' %}
+                    <span class="status-critical">حرج</span>
+                    {% elif validation.severity == 'warning' %}
+                    <span class="status-warning">تحذير</span>
+                    {% else %}
+                    <span class="status-info">معلومة</span>
+                    {% endif %}
+                </td>
+                <td>{{ validation.sbc_code }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Categories Breakdown -->
+<div class="section">
+    <h2 class="section-title">📂 توزيع الكميات حسب الفئة</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>الفئة</th>
+                <th>عدد البنود</th>
+                <th>إجمالي الكمية</th>
+                <th>النسبة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td><strong>{{ category.name }}</strong></td>
+                <td>{{ category.count }}</td>
+                <td>{{ category.total_quantity|round(2) }} {{ category.unit }}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="flex: 1; background: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
+                            <div style="width: {{ category.percentage }}%; background: linear-gradient(90deg, #366092, #4a7eb8); height: 100%;"></div>
+                        </div>
+                        <span>{{ category.percentage|round(1) }}%</span>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- SBC Standards Reference -->
+<div class="section">
+    <h2 class="section-title">📖 مرجع معايير كود البناء السعودي (SBC 303)</h2>
+    
+    <h3 class="section-subtitle">قوة الخرسانة الدنيا (MPa)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>العنصر الإنشائي</th>
+                <th>الحد الأدنى</th>
+                <th>الموصى به</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>الأساسات</td>
+                <td>25 MPa</td>
+                <td>30 MPa</td>
+            </tr>
+            <tr>
+                <td>الأعمدة</td>
+                <td>30 MPa</td>
+                <td>35 MPa</td>
+            </tr>
+            <tr>
+                <td>الكمرات</td>
+                <td>25 MPa</td>
+                <td>30 MPa</td>
+            </tr>
+            <tr>
+                <td>البلاطات</td>
+                <td>20 MPa</td>
+                <td>25 MPa</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 class="section-subtitle">الأبعاد الدنيا (mm)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>العنصر</th>
+                <th>البُعد الأدنى</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>سماكة البلاطات</td>
+                <td>150 mm</td>
+            </tr>
+            <tr>
+                <td>عرض الكمرات</td>
+                <td>200 mm</td>
+            </tr>
+            <tr>
+                <td>عمق الكمرات</td>
+                <td>300 mm</td>
+            </tr>
+            <tr>
+                <td>أبعاد الأعمدة</td>
+                <td>250 × 250 mm</td>
+            </tr>
+            <tr>
+                <td>سماكة الجدران</td>
+                <td>150 mm</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 class="section-subtitle">حديد التسليح</h3>
+    <ul class="info-list">
+        <li><strong>الحد الأدنى للقطر:</strong> 8 mm</li>
+        <li><strong>الحد الأقصى للقطر:</strong> 40 mm</li>
+        <li><strong>أقصى مسافة في البلاطات:</strong> 300 mm</li>
+        <li><strong>أقصى مسافة في الكمرات:</strong> 250 mm</li>
+        <li><strong>أقصى مسافة في الأعمدة:</strong> 200 mm</li>
+    </ul>
+</div>
+
+<!-- Recommendations -->
+<div class="section">
+    <h2 class="section-title">🎯 التوصيات</h2>
+    
+    <ul class="info-list">
+        {% if critical_issues > 0 %}
+        <li><strong>⚠️ حرج:</strong> معالجة {{ critical_issues }} قضية حرجة في الامتثال لكود البناء السعودي قبل بدء التنفيذ</li>
+        {% endif %}
+        
+        {% if warnings > 0 %}
+        <li><strong>ℹ️ تحذير:</strong> مراجعة {{ warnings }} تحذير والتأكد من مطابقتها للمعايير</li>
+        {% endif %}
+        
+        <li><strong>📋 التوثيق:</strong> التأكد من ربط جميع البنود بالرسومات الهندسية المرجعية</li>
+        <li><strong>🔍 المراجعة:</strong> مراجعة دورية للكميات مع تقدم العمل</li>
+        <li><strong>✅ الجودة:</strong> الالتزام بمعايير SBC 303 في جميع أعمال التنفيذ</li>
+        <li><strong>📊 التحديث:</strong> تحديث جداول الكميات عند أي تعديل في الرسومات</li>
+    </ul>
+</div>
+
+<!-- Notes -->
+<div class="section">
+    <h2 class="section-title">📌 ملاحظات</h2>
+    
+    <ul class="info-list">
+        <li><strong>المنهجية:</strong> تم حساب الكميات بناءً على الأبعاد المستخرجة من جداول الكميات الأولية</li>
+        <li><strong>الوحدات:</strong> جميع الأبعاد بالمتر (m) ما لم يذكر خلاف ذلك</li>
+        <li><strong>الدقة:</strong> تم استخدام رقمين عشريين للكميات النهائية</li>
+        <li><strong>التحقق:</strong> جميع البنود تم التحقق منها تلقائياً ضد كود البناء السعودي SBC 303</li>
+        <li><strong>المصدر:</strong> تم إنشاء هذا التقرير بواسطة NOUFAL Engineering System</li>
+    </ul>
+</div>
+
+{% endblock %}

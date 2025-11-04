@@ -40,6 +40,7 @@ const NOUFALCommandCenter = React.lazy(() => import('./components/NOUFALCommandC
 const LibraryShowcase = React.lazy(() => import('./components/LibraryShowcase').then(module => ({ default: module.default })));
 const ManualAnalysisMode = React.lazy(() => import('./components/ManualAnalysisMode').then(module => ({ default: module.default })));
 const QuantitiesExtractionPage = React.lazy(() => import('./components/QuantitiesExtractionPage').then(module => ({ default: module.default })));
+const NOUFALEnhanced = React.lazy(() => import('./components/NOUFALEnhanced').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -351,6 +352,8 @@ const App: React.FC = () => {
                 return <ManualAnalysisMode />;
             case 'quantities-extraction':
                 return <QuantitiesExtractionPage />;
+            case 'noufal-enhanced':
+                return <NOUFALEnhanced />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

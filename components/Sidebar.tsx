@@ -109,6 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                 <nav className="flex-grow space-y-1.5 overflow-y-auto overflow-x-hidden">
                     <NavItem icon={LayoutDashboard} label="لوحة التحكم" viewName="dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Server} label="🚀 نظام NOUFAL المتكامل" viewName="noufal-backend" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Zap} label="⚡ NOUFAL المطور 2.0" viewName="noufal-enhanced" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={BarChart3} label="📊 تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Upload} label="🚀 مركز رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />

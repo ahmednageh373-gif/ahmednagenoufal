@@ -51,6 +51,8 @@ from core.house_plan_extractor import (
     HousePlanData
 )
 from core.house_plan_integrator import HousePlanIntegrator
+# Dashboard Service
+from core.dashboard_service import DashboardService
 
 # إنشاء التطبيق
 app = Flask(__name__)
@@ -81,6 +83,7 @@ quick_estimator = QuickEstimator()
 land_calculator = IrregularLandCalculator()
 house_plan_scraper = HousePlanScraper()
 house_plan_integrator = HousePlanIntegrator()
+dashboard_service = DashboardService(db_path)
 
 print("\n" + "="*80)
 print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System - المتكامل")
@@ -102,6 +105,7 @@ print(f"✅ System 14: Unit Converter - Ready (Metric ↔ Imperial)")
 print(f"✅ System 15: Land Calculator - Ready (Irregular plots)")
 print(f"✅ System 16: House Plan Scraper - Ready (Web extraction)")
 print(f"✅ System 17: House Plan Integrator - Ready (Auto BOQ from plans)")
+print(f"✅ System 18: Dashboard Service - Ready (Stats & Monitoring)")
 print(f"📁 Database: {app.config['DATABASE']}")
 print("="*80 + "\n")
 
@@ -1169,6 +1173,259 @@ def analyze_house_plan():
             'statistics': stats
         })
         
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================
+# Dashboard API Endpoints
+# ============================================
+
+@app.route('/api/dashboard/stats', methods=['GET'])
+def get_dashboard_stats():
+    """
+    Get dashboard statistics
+    
+    Returns:
+        Dashboard statistics including:
+        - Total projects
+        - Active tools
+        - Completed calculations
+        - System health
+    """
+    try:
+        stats = dashboard_service.get_dashboard_stats()
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_projects': stats.total_projects,
+                'active_tools': stats.active_tools,
+                'completed_calculations': stats.completed_calculations,
+                'system_health': stats.system_health,
+                'last_update': stats.last_update
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/tool-usage', methods=['GET'])
+def get_tool_usage_stats():
+    """
+    Get tool usage statistics
+    
+    Query params:
+        limit (int): Maximum number of tools to return (default: 30)
+    """
+    try:
+        limit = int(request.args.get('limit', 30))
+        usage_stats = dashboard_service.get_tool_usage_stats(limit)
+        
+        return jsonify({
+            'success': True,
+            'tools': [
+                {
+                    'tool_id': tool.tool_id,
+                    'tool_name': tool.tool_name,
+                    'tool_name_ar': tool.tool_name_ar,
+                    'category': tool.category,
+                    'usage_count': tool.usage_count,
+                    'last_used': tool.last_used,
+                    'avg_execution_time': tool.avg_execution_time
+                }
+                for tool in usage_stats
+            ]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/recent-activities', methods=['GET'])
+def get_recent_activities():
+    """
+    Get recent activities
+    
+    Query params:
+        limit (int): Maximum number of activities to return (default: 20)
+    """
+    try:
+        limit = int(request.args.get('limit', 20))
+        activities = dashboard_service.get_recent_activities(limit)
+        
+        return jsonify({
+            'success': True,
+            'activities': [
+                {
+                    'id': activity.id,
+                    'tool_id': activity.tool_id,
+                    'tool_name': activity.tool_name,
+                    'action': activity.action,
+                    'action_ar': activity.action_ar,
+                    'timestamp': activity.timestamp,
+                    'user': activity.user,
+                    'status': activity.status,
+                    'execution_time': activity.execution_time,
+                    'details': activity.details
+                }
+                for activity in activities
+            ]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/system-health', methods=['GET'])
+def check_system_health():
+    """
+    Check system health
+    
+    Returns:
+        System health metrics:
+        - Overall health percentage
+        - Database health
+        - API health
+        - Tools health
+        - Issues list
+    """
+    try:
+        health = dashboard_service.check_system_health()
+        
+        return jsonify({
+            'success': True,
+            'health': {
+                'overall_health': health.overall_health,
+                'database_health': health.database_health,
+                'api_health': health.api_health,
+                'tools_health': health.tools_health,
+                'last_check': health.last_check,
+                'issues': health.issues
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/log-usage', methods=['POST'])
+def log_tool_usage():
+    """
+    Log tool usage
+    
+    Body params:
+        tool_id (str): Tool identifier
+        tool_name (str): Tool name in English
+        tool_name_ar (str): Tool name in Arabic
+        category (str): Tool category
+        user (str, optional): User who used the tool
+        execution_time (float, optional): Execution time in seconds
+        status (str, optional): Status (success, warning, error)
+        details (dict, optional): Additional details
+    """
+    try:
+        data = request.json
+        
+        dashboard_service.log_tool_usage(
+            tool_id=data['tool_id'],
+            tool_name=data['tool_name'],
+            tool_name_ar=data['tool_name_ar'],
+            category=data['category'],
+            user=data.get('user'),
+            execution_time=data.get('execution_time'),
+            status=data.get('status', 'success'),
+            details=data.get('details')
+        )
+        
+        return jsonify({'success': True, 'message': 'Usage logged successfully'})
+    except KeyError as e:
+        return jsonify({'success': False, 'error': f'Missing required field: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/projects', methods=['GET'])
+def get_projects():
+    """
+    Get projects
+    
+    Query params:
+        status (str, optional): Filter by status (active, completed, on-hold)
+    """
+    try:
+        status = request.args.get('status')
+        projects = dashboard_service.get_projects(status)
+        
+        return jsonify({
+            'success': True,
+            'projects': projects
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/projects', methods=['POST'])
+def create_project():
+    """
+    Create a new project
+    
+    Body params:
+        project_name (str): Project name in English
+        project_name_ar (str): Project name in Arabic
+        owner (str, optional): Project owner
+    """
+    try:
+        data = request.json
+        
+        project_id = dashboard_service.create_project(
+            project_name=data['project_name'],
+            project_name_ar=data['project_name_ar'],
+            owner=data.get('owner')
+        )
+        
+        return jsonify({
+            'success': True,
+            'project_id': project_id,
+            'message': 'Project created successfully'
+        })
+    except KeyError as e:
+        return jsonify({'success': False, 'error': f'Missing required field: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/category-stats', methods=['GET'])
+def get_category_stats():
+    """
+    Get usage statistics by category
+    
+    Returns:
+        Dictionary of category: usage_count
+    """
+    try:
+        stats = dashboard_service.get_tool_categories_stats()
+        
+        return jsonify({
+            'success': True,
+            'category_stats': stats
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/dashboard/usage-trend', methods=['GET'])
+def get_usage_trend():
+    """
+    Get usage trend over time
+    
+    Query params:
+        days (int): Number of days to analyze (default: 30)
+    """
+    try:
+        days = int(request.args.get('days', 30))
+        trend = dashboard_service.get_usage_trend(days)
+        
+        return jsonify({
+            'success': True,
+            'trend': trend
+        })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

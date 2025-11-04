@@ -43,6 +43,8 @@ const QuantitiesExtractionPage = React.lazy(() => import('./components/Quantitie
 const NOUFALEnhanced = React.lazy(() => import('./components/NOUFALEnhanced').then(module => ({ default: module.default })));
 const SmartReportsSystem = React.lazy(() => import('./components/SmartReportsSystem').then(module => ({ default: module.default })));
 const AdvancedAIFeatures = React.lazy(() => import('./components/AdvancedAIFeatures').then(module => ({ default: module.default })));
+const ProEngineeringHub = React.lazy(() => import('./components/ProEngineeringHub').then(module => ({ default: module.default })));
+const RealAIProcessor = React.lazy(() => import('./components/RealAIProcessor').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -360,6 +362,10 @@ const App: React.FC = () => {
                 return <SmartReportsSystem />;
             case 'ai-features':
                 return <AdvancedAIFeatures />;
+            case 'pro-engineering':
+                return <ProEngineeringHub projectId={activeProject.id} projectName={activeProject.name} />;
+            case 'real-ai':
+                return <RealAIProcessor projectId={activeProject.id} projectName={activeProject.name} />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

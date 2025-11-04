@@ -41,6 +41,8 @@ const LibraryShowcase = React.lazy(() => import('./components/LibraryShowcase').
 const ManualAnalysisMode = React.lazy(() => import('./components/ManualAnalysisMode').then(module => ({ default: module.default })));
 const QuantitiesExtractionPage = React.lazy(() => import('./components/QuantitiesExtractionPage').then(module => ({ default: module.default })));
 const NOUFALEnhanced = React.lazy(() => import('./components/NOUFALEnhanced').then(module => ({ default: module.default })));
+const SmartReportsSystem = React.lazy(() => import('./components/SmartReportsSystem').then(module => ({ default: module.default })));
+const AdvancedAIFeatures = React.lazy(() => import('./components/AdvancedAIFeatures').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -354,6 +356,10 @@ const App: React.FC = () => {
                 return <QuantitiesExtractionPage />;
             case 'noufal-enhanced':
                 return <NOUFALEnhanced />;
+            case 'smart-reports':
+                return <SmartReportsSystem />;
+            case 'ai-features':
+                return <AdvancedAIFeatures />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

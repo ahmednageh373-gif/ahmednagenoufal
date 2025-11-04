@@ -11,7 +11,7 @@ Version: 1.0
 """
 
 from typing import Dict, List, Optional
-from dataclasses import dataclass, as dict
+from dataclasses import dataclass, asdict
 import json
 
 # Import من الوحدات الأخرى

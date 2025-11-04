@@ -12,15 +12,20 @@ if (typeof window !== 'undefined') {
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { SimpleApp } from './SimpleApp';
 import './index.css';
 
-// Lazy load the full app with error boundary
+// Import SimpleApp directly (no lazy loading to avoid issues)
+import { SimpleApp } from './SimpleApp';
+
+// Try to lazy load the full app, but use SimpleApp as default if it fails
 const App = React.lazy(() => 
   import('./App')
-    .then(module => ({ default: module.default }))
+    .then(module => {
+      console.log('✅ Full App loaded successfully');
+      return { default: module.default };
+    })
     .catch(error => {
-      console.error('Failed to load App:', error);
+      console.error('❌ Failed to load full App, using SimpleApp:', error);
       return { default: SimpleApp };
     })
 );

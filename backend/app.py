@@ -25,6 +25,25 @@ from core.RequestParser import RequestParser
 from core.RequestExecutor import RequestExecutor
 from core.AutomationEngine import AutomationEngine
 from core.AutomationTemplates import AutomationTemplates
+# New integrations from CivilConcept
+from core.quick_estimator import (
+    QuickEstimator, 
+    EstimateInput, 
+    Region, 
+    BuildingType, 
+    FinishLevel
+)
+from core.unit_converter import (
+    UnitConverter,
+    LengthUnit,
+    AreaUnit,
+    VolumeUnit,
+    WeightUnit,
+    PressureUnit,
+    ForceUnit,
+    TemperatureUnit,
+    IrregularLandCalculator
+)
 
 # إنشاء التطبيق
 app = Flask(__name__)
@@ -50,6 +69,9 @@ request_parser = RequestParser()
 request_executor = RequestExecutor(db_path)
 automation_engine = AutomationEngine(db_path)
 automation_templates = AutomationTemplates()
+# New systems
+quick_estimator = QuickEstimator()
+land_calculator = IrregularLandCalculator()
 
 print("\n" + "="*80)
 print("🚀 نظام نوفل الهندسي - NOUFAL Engineering System - المتكامل")
@@ -66,6 +88,9 @@ print(f"✅ System 09: Request Parser - Ready")
 print(f"✅ System 10: Request Executor - Ready")
 print(f"✅ System 11: Automation Engine - Ready")
 print(f"✅ System 12: Automation Templates - Ready")
+print(f"✅ System 13: Quick Estimator - Ready (CivilConcept Integration)")
+print(f"✅ System 14: Unit Converter - Ready (Metric ↔ Imperial)")
+print(f"✅ System 15: Land Calculator - Ready (Irregular plots)")
 print(f"📁 Database: {app.config['DATABASE']}")
 print("="*80 + "\n")
 
@@ -628,6 +653,256 @@ def search_templates():
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================
+# Quick Tools APIs - أدوات سريعة (CivilConcept Integration)
+# ============================================
+
+@app.route('/api/quick-estimate', methods=['POST'])
+def quick_estimate():
+    """
+    تقدير سريع للمشروع - Quick preliminary project estimate
+    
+    Body params:
+        total_area_sqm (float): Total area in square meters
+        number_of_storeys (int): Number of storeys
+        region (str): Region code (saudi_arabia, uae, egypt, etc.)
+        building_type (str): Type (residential, villa, commercial, etc.)
+        finish_level (str): Finish quality (basic, standard, luxury, super_luxury)
+        custom_contractor_rate (float, optional): Custom rate per m²
+    """
+    try:
+        data = request.json
+        
+        # Parse input
+        input_data = EstimateInput(
+            total_area_sqm=float(data.get('total_area_sqm', 0)),
+            number_of_storeys=int(data.get('number_of_storeys', 1)),
+            region=Region(data.get('region', 'saudi_arabia')),
+            building_type=BuildingType(data.get('building_type', 'residential')),
+            finish_level=FinishLevel(data.get('finish_level', 'standard')),
+            custom_contractor_rate=data.get('custom_contractor_rate')
+        )
+        
+        # Generate estimate
+        result = quick_estimator.estimate(input_data)
+        
+        # Convert dataclass to dict
+        result_dict = {
+            'region': result.region,
+            'building_type': result.building_type,
+            'finish_level': result.finish_level,
+            'total_area_sqm': result.total_area_sqm,
+            'number_of_storeys': result.number_of_storeys,
+            'currency': result.currency,
+            'materials': {
+                'steel_kg': result.steel_kg,
+                'concrete_m3': result.concrete_m3,
+                'blocks_nos': result.blocks_nos,
+                'cement_bags_50kg': result.cement_bags_50kg,
+                'sand_m3': result.sand_m3,
+                'aggregate_m3': result.aggregate_m3
+            },
+            'costs': {
+                'structure_cost': result.structure_cost,
+                'finishing_cost': result.finishing_cost,
+                'mep_cost': result.mep_cost,
+                'total_estimated_cost': result.total_estimated_cost,
+                'cost_per_sqm': result.cost_per_sqm
+            },
+            'factors': {
+                'storey_multiplier': result.storey_multiplier,
+                'building_type_multiplier': result.building_type_multiplier,
+                'finish_multiplier': result.finish_multiplier
+            },
+            'warnings': result.warnings,
+            'confidence_level': result.confidence_level
+        }
+        
+        return jsonify({
+            'success': True,
+            'estimate': result_dict
+        })
+        
+    except ValueError as e:
+        return jsonify({'success': False, 'error': f'Invalid input: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/quick-estimate/regions', methods=['GET'])
+def get_regions():
+    """Get list of supported regions"""
+    regions = [
+        {'code': 'saudi_arabia', 'name_ar': 'السعودية', 'name_en': 'Saudi Arabia', 'currency': 'SAR'},
+        {'code': 'uae', 'name_ar': 'الإمارات', 'name_en': 'UAE', 'currency': 'AED'},
+        {'code': 'qatar', 'name_ar': 'قطر', 'name_en': 'Qatar', 'currency': 'QAR'},
+        {'code': 'kuwait', 'name_ar': 'الكويت', 'name_en': 'Kuwait', 'currency': 'KWD'},
+        {'code': 'oman', 'name_ar': 'عمان', 'name_en': 'Oman', 'currency': 'OMR'},
+        {'code': 'bahrain', 'name_ar': 'البحرين', 'name_en': 'Bahrain', 'currency': 'BHD'},
+        {'code': 'egypt', 'name_ar': 'مصر', 'name_en': 'Egypt', 'currency': 'EGP'},
+        {'code': 'jordan', 'name_ar': 'الأردن', 'name_en': 'Jordan', 'currency': 'JOD'}
+    ]
+    return jsonify({'success': True, 'regions': regions})
+
+
+@app.route('/api/unit-convert', methods=['POST'])
+def convert_units():
+    """
+    تحويل الوحدات - Convert units
+    
+    Body params:
+        value (float): Value to convert
+        from_unit (str): Source unit
+        to_unit (str): Target unit
+        unit_type (str): Type (length, area, volume, weight, pressure, force, temperature)
+    """
+    try:
+        data = request.json
+        value = float(data.get('value', 0))
+        from_unit = data.get('from_unit', '')
+        to_unit = data.get('to_unit', '')
+        unit_type = data.get('unit_type', 'length')
+        
+        # Convert based on type
+        if unit_type == 'length':
+            result = UnitConverter.convert_length(
+                value, 
+                LengthUnit(from_unit), 
+                LengthUnit(to_unit)
+            )
+        elif unit_type == 'area':
+            result = UnitConverter.convert_area(
+                value, 
+                AreaUnit(from_unit), 
+                AreaUnit(to_unit)
+            )
+        elif unit_type == 'volume':
+            result = UnitConverter.convert_volume(
+                value, 
+                VolumeUnit(from_unit), 
+                VolumeUnit(to_unit)
+            )
+        elif unit_type == 'weight':
+            result = UnitConverter.convert_weight(
+                value, 
+                WeightUnit(from_unit), 
+                WeightUnit(to_unit)
+            )
+        elif unit_type == 'pressure':
+            result = UnitConverter.convert_pressure(
+                value, 
+                PressureUnit(from_unit), 
+                PressureUnit(to_unit)
+            )
+        elif unit_type == 'force':
+            result = UnitConverter.convert_force(
+                value, 
+                ForceUnit(from_unit), 
+                ForceUnit(to_unit)
+            )
+        elif unit_type == 'temperature':
+            result = UnitConverter.convert_temperature(
+                value, 
+                TemperatureUnit(from_unit), 
+                TemperatureUnit(to_unit)
+            )
+        else:
+            return jsonify({'success': False, 'error': 'Invalid unit type'}), 400
+        
+        return jsonify({
+            'success': True,
+            'original': {
+                'value': value,
+                'unit': from_unit
+            },
+            'converted': {
+                'value': round(result, 6),
+                'unit': to_unit
+            }
+        })
+        
+    except ValueError as e:
+        return jsonify({'success': False, 'error': f'Invalid unit: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/land-area/irregular', methods=['POST'])
+def calculate_irregular_land_area():
+    """
+    حساب مساحة قطعة أرض غير منتظمة - Calculate irregular land area
+    
+    Body params:
+        method (str): 'diagonal' or 'coordinates'
+        
+        For diagonal method:
+            side_a, side_b, side_c, side_d (float): Four sides
+            diagonal_ac (float): One diagonal
+            unit (str): Unit of measurement
+        
+        For coordinates method:
+            coordinates (list): List of [x, y] pairs
+            unit (str): Unit of coordinates
+    """
+    try:
+        data = request.json
+        method = data.get('method', 'diagonal')
+        unit_str = data.get('unit', 'm')
+        unit = LengthUnit(unit_str)
+        
+        if method == 'diagonal':
+            result = land_calculator.calculate_area_with_diagonal(
+                side_a=float(data.get('side_a', 0)),
+                side_b=float(data.get('side_b', 0)),
+                side_c=float(data.get('side_c', 0)),
+                side_d=float(data.get('side_d', 0)),
+                diagonal_ac=float(data.get('diagonal_ac', 0)),
+                unit=unit
+            )
+        elif method == 'coordinates':
+            coords = data.get('coordinates', [])
+            if len(coords) != 4:
+                return jsonify({
+                    'success': False, 
+                    'error': 'Exactly 4 coordinates required'
+                }), 400
+            
+            # Convert to tuples
+            coord_tuples = [(float(c[0]), float(c[1])) for c in coords]
+            
+            result = land_calculator.calculate_area_with_coordinates(
+                coordinates=coord_tuples,
+                unit=unit
+            )
+        else:
+            return jsonify({'success': False, 'error': 'Invalid method'}), 400
+        
+        return jsonify({
+            'success': True,
+            'area': result
+        })
+        
+    except ValueError as e:
+        return jsonify({'success': False, 'error': f'Invalid input: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/unit-convert/available-units', methods=['GET'])
+def get_available_units():
+    """Get list of available units by type"""
+    units = {
+        'length': [u.value for u in LengthUnit],
+        'area': [u.value for u in AreaUnit],
+        'volume': [u.value for u in VolumeUnit],
+        'weight': [u.value for u in WeightUnit],
+        'pressure': [u.value for u in PressureUnit],
+        'force': [u.value for u in ForceUnit],
+        'temperature': [u.value for u in TemperatureUnit]
+    }
+    return jsonify({'success': True, 'units': units})
 
 
 # ============================================

@@ -90,23 +90,26 @@ class ErrorBoundary extends React.Component<
 const rootElement = document.getElementById('root');
 if (rootElement) {
   try {
-    const root = ReactDOM.createRoot(rootElement);
-    
     console.log('🎨 بدء رندر التطبيق...');
     
-    // Direct render without Suspense (no lazy loading)
+    const root = ReactDOM.createRoot(rootElement);
+    
+    // Render the full app
     root.render(
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
+      <React.StrictMode>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </React.StrictMode>
     );
     
     console.log('✅ تم رندر التطبيق بنجاح');
     
   } catch (error) {
-    console.error('❌ خطأ حرج:', error);
+    console.error('❌ خطأ حرج في رندر التطبيق:', error);
     // Try SimpleApp as fallback
     try {
+      console.log('⚠️ محاولة استخدام SimpleApp...');
       const root = ReactDOM.createRoot(rootElement);
       root.render(<SimpleApp />);
       console.log('⚠️ تم استخدام SimpleApp كبديل');
@@ -124,6 +127,9 @@ if (rootElement) {
           <button onclick="location.reload()" style="padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">
             تحديث الصفحة
           </button>
+          <pre style="text-align: left; background: #f5f5f5; padding: 15px; margin-top: 20px; overflow: auto; direction: ltr;">
+${String(error)}
+          </pre>
         </div>
       `;
     }

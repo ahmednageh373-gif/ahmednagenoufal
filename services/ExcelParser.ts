@@ -43,10 +43,13 @@ export class ExcelParser {
                         const row = json[i];
                         const rowText = row.join(' ').toLowerCase();
                         
-                        if (rowText.includes('الرقم') && 
-                            rowText.includes('البند') && 
-                            rowText.includes('المواصفات')) {
+                        // البحث عن العناوين الأساسية
+                        // يجب أن يحتوي الصف على "رقم" أو "تسلسل" AND "بند"
+                        if ((rowText.includes('رقم') || rowText.includes('تسلسل')) && 
+                            rowText.includes('بند')) {
                             headerRow = i;
+                            console.log(`✓ وجدت صف العناوين في السطر ${i + 1}`);
+                            console.log(`محتوى الصف:`, row.filter((c: any) => c).slice(0, 10));
                             break;
                         }
                     }
@@ -64,34 +67,51 @@ export class ExcelParser {
                     for (let col = 0; col < headers.length; col++) {
                         const header = String(headers[col]).toLowerCase().trim();
                         
-                        if (header.includes('رقم') || header.includes('تسلسل')) {
+                        // تحسين البحث عن الأعمدة
+                        if ((header.includes('رقم') && header.includes('تسلسل')) || header === 'الرقم التسلسلي') {
                             columnMap['serialNumber'] = col;
                         } else if (header.includes('فئة') || header.includes('category')) {
                             columnMap['category'] = col;
-                        } else if (header === 'البند' || header === 'item') {
+                        } else if (header === 'البند' || header.includes('item name') || header === 'item') {
                             columnMap['itemName'] = col;
-                        } else if (header.includes('وصف') || header.includes('description')) {
+                        } else if (header.includes('وصف البند') || header.includes('وصف') || header.includes('description')) {
                             columnMap['description'] = col;
-                        } else if (header.includes('مواصفات') || header.includes('specification')) {
+                        } else if (header === 'المواصفات' || header.includes('مواصفات') || header.includes('specification')) {
                             columnMap['specifications'] = col;
                         } else if (header.includes('وحدة') || header.includes('unit')) {
                             columnMap['unit'] = col;
                         } else if (header.includes('كمية') || header.includes('quantity')) {
                             columnMap['quantity'] = col;
-                        } else if (header.includes('سعر') && header.includes('وحدة')) {
-                            columnMap['unitPrice'] = col;
+                        } else if (header.includes('سعر') || header === 'سعر الوحدة' || header.includes('unit price')) {
+                            // تحقق من أنه ليس "سعر الوحدة" المكرر في عمود مختلف
+                            if (columnMap['unitPrice'] === undefined) {
+                                columnMap['unitPrice'] = col;
+                            }
                         } else if (header.includes('إجمالي') || header.includes('total')) {
-                            if (!columnMap['total']) {  // first total column
+                            if (columnMap['total'] === undefined) {  // first total column
                                 columnMap['total'] = col;
                             }
                         }
                     }
 
-                    console.log('خريطة الأعمدة:', columnMap);
+                    console.log('✅ خريطة الأعمدة:', columnMap);
+                    console.log('📊 العناوين المكتشفة:', {
+                        serialNumber: columnMap['serialNumber'] !== undefined ? `العمود ${columnMap['serialNumber'] + 1}` : 'غير موجود',
+                        category: columnMap['category'] !== undefined ? `العمود ${columnMap['category'] + 1}` : 'غير موجود',
+                        itemName: columnMap['itemName'] !== undefined ? `العمود ${columnMap['itemName'] + 1}` : 'غير موجود',
+                        description: columnMap['description'] !== undefined ? `العمود ${columnMap['description'] + 1}` : 'غير موجود',
+                        specifications: columnMap['specifications'] !== undefined ? `العمود ${columnMap['specifications'] + 1}` : 'غير موجود',
+                        unit: columnMap['unit'] !== undefined ? `العمود ${columnMap['unit'] + 1}` : 'غير موجود',
+                        quantity: columnMap['quantity'] !== undefined ? `العمود ${columnMap['quantity'] + 1}` : 'غير موجود',
+                        unitPrice: columnMap['unitPrice'] !== undefined ? `العمود ${columnMap['unitPrice'] + 1}` : 'غير موجود'
+                    });
 
                     // التحقق من وجود الأعمدة الأساسية
-                    if (!columnMap['serialNumber'] || !columnMap['itemName']) {
-                        throw new Error('لم يتم العثور على الأعمدة الأساسية (الرقم التسلسلي، البند)');
+                    if (columnMap['serialNumber'] === undefined || columnMap['itemName'] === undefined) {
+                        const missing = [];
+                        if (columnMap['serialNumber'] === undefined) missing.push('الرقم التسلسلي');
+                        if (columnMap['itemName'] === undefined) missing.push('البند');
+                        throw new Error(`لم يتم العثور على الأعمدة الأساسية: ${missing.join(', ')}\n\nالعناوين الموجودة: ${headers.filter((h: any) => h).join(', ')}`);
                     }
 
                     // قراءة البيانات
@@ -109,12 +129,24 @@ export class ExcelParser {
                         }
 
                         const category = String(row[columnMap['category']] || '').trim();
-                        const description = String(row[columnMap['description']] || '').trim();
-                        const specifications = String(row[columnMap['specifications']] || '').trim();
-                        const unit = String(row[columnMap['unit']] || '').trim();
-                        const quantity = this.parseNumber(row[columnMap['quantity']]);
-                        const unitPrice = this.parseNumber(row[columnMap['unitPrice']]);
-                        const total = this.parseNumber(row[columnMap['total']]) || (quantity * unitPrice);
+                        const description = columnMap['description'] !== undefined 
+                            ? String(row[columnMap['description']] || '').trim() 
+                            : '';
+                        const specifications = columnMap['specifications'] !== undefined 
+                            ? String(row[columnMap['specifications']] || '').trim() 
+                            : '';
+                        const unit = columnMap['unit'] !== undefined 
+                            ? String(row[columnMap['unit']] || '').trim() 
+                            : '';
+                        const quantity = columnMap['quantity'] !== undefined 
+                            ? this.parseNumber(row[columnMap['quantity']]) 
+                            : 0;
+                        const unitPrice = columnMap['unitPrice'] !== undefined 
+                            ? this.parseNumber(row[columnMap['unitPrice']]) 
+                            : 0;
+                        const total = columnMap['total'] !== undefined 
+                            ? this.parseNumber(row[columnMap['total']]) || (quantity * unitPrice)
+                            : (quantity * unitPrice);
 
                         if (itemName && quantity > 0) {
                             items.push({
@@ -122,7 +154,8 @@ export class ExcelParser {
                                 category,
                                 itemName,
                                 description,
-                                specifications: specifications || description,  // إذا لم توجد مواصفات نستخدم الوصف
+                                // استخدام المواصفات إذا كانت موجودة، وإلا الوصف، وإلا اسم البند
+                                specifications: specifications || description || itemName,
                                 unit,
                                 quantity,
                                 unitPrice,

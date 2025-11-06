@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -108,7 +108,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
 
                 <nav className="flex-grow space-y-1.5 overflow-y-auto overflow-x-hidden">
                     <NavItem icon={LayoutDashboard} label="لوحة التحكم" viewName="dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Server} label="🚀 نظام NOUFAL المتكامل" viewName="noufal-backend" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Zap} label="⚡ NOUFAL المطور 2.0" viewName="noufal-enhanced" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={BarChart3} label="📊 تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Upload} label="🚀 مركز رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={BrainCircuit} label="🧠 مركز قيادة نوفل" viewName="noufal-command" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Edit3} label="⚙️ التحليل اليدوي" viewName="manual-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Layers} label="📐 استخراج الكميات" viewName="quantities-extraction" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={FileText} label="📊 التقارير الذكية" viewName="smart-reports" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Brain} label="🤖 مميزات AI المتقدمة" viewName="ai-features" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Building2} label="🏗️ مركز الهندسة الاحترافي" viewName="pro-engineering" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Zap} label="⚡ معالج AI الحقيقي" viewName="real-ai" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Server} label="🔗 NOUFAL المتكامل (Backend)" viewName="noufal-integrated" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Package} label="📚 عرض المكتبات" viewName="library-showcase" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Table} label="إدارة المقايسات (يدوي)" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Undo2} label="خطة التعافي" viewName="recovery-plan" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={DollarSign} label="الإدارة المالية" viewName="financials" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
@@ -123,11 +136,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavItem icon={LayoutGrid} label="مركز المشروع" viewName="hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Target} label="الأهداف (OKRs)" viewName="okrs" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Pyramid} label="هيكلة العمل" viewName="workflow" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Zap} label="⚡ مركز الأتمتة" viewName="automation" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={BrainCircuit} label="مركز التحليل (AI)" viewName="analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={BarChart3} label="التقارير المتقدمة" viewName="advanced-reporting" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Mic} label="المساعد المباشر" viewName="assistant" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={GraduationCap} label="المعرفة الهندسية" viewName="engineering-knowledge" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Database} label="قاعدة البيانات المعرفية" viewName="knowledge-database" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Package} label="📦 مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Shield} label="🛡️ نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={History} label="سجل التدقيق" viewName="audit-log" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                 </nav>
 

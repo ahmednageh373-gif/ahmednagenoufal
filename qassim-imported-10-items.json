@@ -1,0 +1,776 @@
+{
+  "projectInfo": {
+    "name": "انشاء وتجهيز مجمع المزارع النموذجية للإنتاج الحيواني بالقصيم",
+    "duration": "15 شهر ",
+    "budget": 12800000.25,
+    "totalCost": 11130435
+  },
+  "projectId": "qassim-project-001",
+  "items": [
+    {
+      "id": "BOQ-0001",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام اعمال حفر",
+      "description": "اعمال اعتيادية مباني معمارية 1",
+      "quantity": 26000,
+      "unit": "م2",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0001",
+        "productivityRate": 15,
+        "calculatedDuration": 1734,
+        "resources": {
+          "labor": {
+            "skilled": 174,
+            "unskilled": 87,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 50,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 650000,
+            "laborCost": 390000,
+            "equipmentCost": 260000,
+            "totalCost": 1300000
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0002",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام اعمال مدقات",
+      "description": "اعمال اعتيادية مباني معمارية 2",
+      "quantity": 8500,
+      "unit": "م2",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0002",
+        "productivityRate": 15,
+        "calculatedDuration": 567,
+        "resources": {
+          "labor": {
+            "skilled": 57,
+            "unskilled": 29,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 60,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 255000,
+            "laborCost": 153000,
+            "equipmentCost": 102000,
+            "totalCost": 510000
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0003",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب سور خارجي",
+      "description": "اعمال اعتيادية مباني معمارية 3",
+      "quantity": 180,
+      "unit": "مط",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0003",
+        "productivityRate": 10,
+        "calculatedDuration": 18,
+        "resources": {
+          "labor": {
+            "skilled": 2,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 1300,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 117000,
+            "laborCost": 70200,
+            "equipmentCost": 46800,
+            "totalCost": 234000
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0004",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب سياج",
+      "description": "اعمال اعتيادية مباني معمارية 4",
+      "quantity": 700,
+      "unit": "مط",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0004",
+        "productivityRate": 10,
+        "calculatedDuration": 70,
+        "resources": {
+          "labor": {
+            "skilled": 7,
+            "unskilled": 4,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 210,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 73500,
+            "laborCost": 44100,
+            "equipmentCost": 29400,
+            "totalCost": 147000
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0005",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب بوابه رئيسية",
+      "description": "اعمال اعتيادية مباني معمارية 5",
+      "quantity": 2,
+      "unit": "عدد",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0005",
+        "productivityRate": 10,
+        "calculatedDuration": 1,
+        "resources": {
+          "labor": {
+            "skilled": 1,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 4200,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 4200,
+            "laborCost": 2520,
+            "equipmentCost": 1680,
+            "totalCost": 8400
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0006",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب بوابه خروج",
+      "description": "اعمال اعتيادية مباني معمارية 6",
+      "quantity": 1,
+      "unit": "عدد",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0006",
+        "productivityRate": 10,
+        "calculatedDuration": 1,
+        "resources": {
+          "labor": {
+            "skilled": 1,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 4200,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 2100,
+            "laborCost": 1260,
+            "equipmentCost": 840,
+            "totalCost": 4200
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0007",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب لوحة ارشادية",
+      "description": "اعمال اعتيادية مباني معمارية 7",
+      "quantity": 1,
+      "unit": "عدد",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0007",
+        "productivityRate": 10,
+        "calculatedDuration": 1,
+        "resources": {
+          "labor": {
+            "skilled": 1,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 12600,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 6300,
+            "laborCost": 3780,
+            "equipmentCost": 2520,
+            "totalCost": 12600
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0008",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب ذراع تحكم",
+      "description": "اعمال اعتيادية مباني معمارية 8",
+      "quantity": 3,
+      "unit": "عدد",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0008",
+        "productivityRate": 10,
+        "calculatedDuration": 1,
+        "resources": {
+          "labor": {
+            "skilled": 1,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 12600,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 18900,
+            "laborCost": 11340,
+            "equipmentCost": 7560,
+            "totalCost": 37800
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0009",
+      "projectId": "qassim-project-001",
+      "code": "الموقع العام تركيب مظلات للسيارات",
+      "description": "اعمال اعتيادية مباني معمارية 9",
+      "quantity": 175,
+      "unit": "م2",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0009",
+        "productivityRate": 15,
+        "calculatedDuration": 12,
+        "resources": {
+          "labor": {
+            "skilled": 2,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 200,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 17500,
+            "laborCost": 10500,
+            "equipmentCost": 7000,
+            "totalCost": 35000
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    },
+    {
+      "id": "BOQ-0010",
+      "projectId": "qassim-project-001",
+      "code": "غرف الكهرباء أعمال دهان ايبوكسى",
+      "description": "اعمال اعتيادية مباني معمارية 10",
+      "quantity": 95,
+      "unit": "م2",
+      "category": "blockwork",
+      "scheduleIntegration": {
+        "linkedTaskId": "TASK-0010",
+        "productivityRate": 15,
+        "calculatedDuration": 7,
+        "resources": {
+          "labor": {
+            "skilled": 1,
+            "unskilled": 1,
+            "supervisor": 1,
+            "totalCost": 0,
+            "dailyCost": 0
+          },
+          "equipment": [],
+          "materials": []
+        },
+        "syncStatus": "pending",
+        "lastSyncDate": "2025-11-06T05:09:03.251Z"
+      },
+      "financialIntegration": {
+        "pricing": {
+          "unitPrice": 90,
+          "currency": "SAR",
+          "priceDate": "2025-11-06T05:09:03.251Z"
+        },
+        "comparison": {
+          "estimated": {
+            "materialCost": 4275,
+            "laborCost": 2565,
+            "equipmentCost": 1710,
+            "totalCost": 8550
+          },
+          "actual": {
+            "materialCost": 0,
+            "laborCost": 0,
+            "equipmentCost": 0,
+            "totalCost": 0
+          },
+          "variance": {
+            "materialVariance": 0,
+            "laborVariance": 0,
+            "equipmentVariance": 0,
+            "totalVariance": 0,
+            "percentageVariance": 0
+          }
+        },
+        "suppliers": [],
+        "paymentStatus": "pending"
+      },
+      "engineeringStandards": {
+        "applicableCode": "SBC",
+        "codeReference": "SBC 304-2018",
+        "allowance": 5,
+        "safetyFactor": 1.15,
+        "qualityRequirements": [],
+        "testingRequirements": [],
+        "complianceStatus": true
+      },
+      "actualProgress": {
+        "completedQuantity": 0,
+        "percentageComplete": 0,
+        "completionDate": null,
+        "siteUpdates": []
+      },
+      "createdDate": "2025-11-06T05:09:03.251Z",
+      "lastModifiedDate": "2025-11-06T05:09:03.251Z",
+      "createdBy": "Import Script",
+      "notes": "Imported from Qassim project - أعمال المباني"
+    }
+  ],
+  "summary": {
+    "totalItems": 10,
+    "totalValue": 2297550,
+    "totalDuration": 2412
+  }
+}

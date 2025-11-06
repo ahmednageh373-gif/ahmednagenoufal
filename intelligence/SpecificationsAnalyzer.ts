@@ -26,7 +26,8 @@ export interface ExtractedActivity {
     keywords: string[];
     estimatedQuantity: number;
     unit: string;
-    sequence: number;  // ترتيب التنفيذ
+    sequence: number;  // ترتيب التنفيذ (10=حفر, 20=خرسانة عادية, 30=تسليح, إلخ)
+    parentItemName: string;  // اسم البند الأصلي
 }
 
 /**
@@ -36,79 +37,106 @@ export interface ExtractedActivity {
 export class SpecificationsAnalyzer {
     /**
      * أنماط البحث عن الأنشطة في المواصفات
+     * مرتبة حسب تسلسل التنفيذ الطبيعي
      */
     private static activityPatterns = [
-        // أعمال الحفر
+        // 1. أعمال الحفر (أولاً)
         {
-            keywords: ['حفر', 'حفريات', 'excavation', 'حفر بعمق', 'الحفر للأساسات'],
+            keywords: ['حفر', 'حفريات', 'excavation', 'حفر بعمق', 'الحفر للأساسات', 'حفر أساسات'],
             type: 'excavation' as const,
-            activityName: 'أعمال الحفر'
+            activityName: 'أعمال الحفر',
+            sequence: 10
         },
-        // الخرسانة العادية
+        // 2. الخرسانة العادية (بعد الحفر)
         {
-            keywords: ['خرسانة عادية', 'plain concrete', 'صب قواعد', 'خرسانه عاديه'],
+            keywords: ['خرسانة عادية', 'plain concrete', 'صب قواعد', 'خرسانه عاديه', 'خرسانة نظافة'],
             type: 'concrete' as const,
-            activityName: 'صب خرسانة عادية'
+            activityName: 'صب خرسانة عادية',
+            sequence: 20
         },
-        // الخرسانة المسلحة
+        // 3. حديد التسليح (قبل الخرسانة المسلحة)
         {
-            keywords: ['خرسانة مسلحة', 'reinforced concrete', 'خرسانه مسلحه', 'قواعد مسلحة'],
-            type: 'concrete' as const,
-            activityName: 'صب خرسانة مسلحة'
-        },
-        // حديد التسليح
-        {
-            keywords: ['حديد التسليح', 'reinforcement', 'تسليح', 'التسليح'],
+            keywords: ['حديد التسليح', 'reinforcement', 'تسليح', 'التسليح', 'حديد مسلح'],
             type: 'reinforcement' as const,
-            activityName: 'تركيب حديد التسليح'
+            activityName: 'تركيب حديد التسليح',
+            sequence: 30
         },
-        // النجارة / الشدات
+        // 4. النجارة / الشدات (مع التسليح)
         {
-            keywords: ['نجارة', 'formwork', 'شدات', 'قوالب'],
+            keywords: ['نجارة', 'formwork', 'شدات', 'قوالب', 'شدة خشبية'],
             type: 'formwork' as const,
-            activityName: 'أعمال النجارة'
+            activityName: 'أعمال النجارة والشدات',
+            sequence: 35
         },
-        // العزل
+        // 5. الخرسانة المسلحة (بعد التسليح والشدات)
         {
-            keywords: ['عزل', 'waterproofing', 'عزل الأساسات', 'دهان بيتوميني', 'عازل للرطوبة'],
+            keywords: ['خرسانة مسلحة', 'reinforced concrete', 'خرسانه مسلحه', 'قواعد مسلحة', 'صب مسلح'],
+            type: 'concrete' as const,
+            activityName: 'صب خرسانة مسلحة',
+            sequence: 40
+        },
+        // 6. الميدات (بعد الخرسانة المسلحة)
+        {
+            keywords: ['ميدات', 'ميده', 'grade beams', 'الميدات الأرضية'],
+            type: 'concrete' as const,
+            activityName: 'تنفيذ الميدات',
+            sequence: 45
+        },
+        // 7. العزل (بعد الخرسانة)
+        {
+            keywords: ['عزل', 'waterproofing', 'عزل الأساسات', 'دهان بيتوميني', 'عازل للرطوبة', 'عزل مائي'],
             type: 'waterproofing' as const,
-            activityName: 'أعمال العزل'
+            activityName: 'أعمال العزل',
+            sequence: 50
         },
-        // الردم
+        // 8. المبيدات (قبل الردم)
         {
-            keywords: ['ردم', 'backfill', 'الردم حول', 'رمال نظيفة', 'ناتج الحفر'],
+            keywords: ['مبيدات', 'النمل الأبيض', 'دودة الأرض', 'رش المبيدات'],
+            type: 'installation' as const,
+            activityName: 'رش المبيدات',
+            sequence: 55
+        },
+        // 9. الردم (بعد العزل)
+        {
+            keywords: ['ردم', 'backfill', 'الردم حول', 'رمال نظيفة', 'ناتج الحفر', 'ردم الأساسات'],
             type: 'backfill' as const,
-            activityName: 'أعمال الردم'
+            activityName: 'أعمال الردم',
+            sequence: 60
         },
-        // البناء
+        // 10. الأعمدة (بعد الأساسات)
         {
-            keywords: ['بناء', 'مباني', 'masonry', 'طوب', 'بلوك'],
-            type: 'masonry' as const,
-            activityName: 'أعمال البناء'
+            keywords: ['أعمدة', 'columns', 'عمود', 'أعمدة خرسانية', 'باكيات'],
+            type: 'concrete' as const,
+            activityName: 'تنفيذ الأعمدة',
+            sequence: 70
         },
-        // الدهان
+        // 11. البناء (بعد الهيكل)
+        {
+            keywords: ['بناء', 'مباني', 'masonry', 'طوب', 'بلوك', 'جدران'],
+            type: 'masonry' as const,
+            activityName: 'أعمال البناء',
+            sequence: 80
+        },
+        // 12. الدهان (أخيراً)
         {
             keywords: ['دهان', 'painting', 'طلاء', 'دهان ناري', 'وجه اساسي'],
             type: 'painting' as const,
-            activityName: 'أعمال الدهان'
+            activityName: 'أعمال الدهان',
+            sequence: 90
         },
         // التركيب
         {
             keywords: ['تركيب', 'installation', 'install', 'تثبيت'],
             type: 'installation' as const,
-            activityName: 'أعمال التركيب'
+            activityName: 'أعمال التركيب',
+            sequence: 85
         },
         // التوريد
         {
             keywords: ['توريد', 'supply', 'توريد وتركيب', 'توريد و تركيب'],
             type: 'supply' as const,
-            activityName: 'التوريد'
-        },
-        // المبيدات
-        {
-            keywords: ['مبيدات', 'النمل الأبيض', 'دودة الأرض', 'رش المبيدات'],
-            type: 'installation' as const,
-            activityName: 'رش المبيدات'
+            activityName: 'التوريد',
+            sequence: 5
         }
     ];
 
@@ -155,6 +183,7 @@ export class SpecificationsAnalyzer {
 
     /**
      * استخراج الأنشطة من المواصفات
+     * يرتب الأنشطة حسب تسلسل التنفيذ الطبيعي
      */
     private static extractActivitiesFromSpecs(
         specifications: string,
@@ -164,7 +193,6 @@ export class SpecificationsAnalyzer {
     ): ExtractedActivity[] {
         const activities: ExtractedActivity[] = [];
         const specsLower = specifications.toLowerCase();
-        let sequence = 1;
 
         // البحث عن كل نمط
         for (const pattern of this.activityPatterns) {
@@ -190,10 +218,14 @@ export class SpecificationsAnalyzer {
                         pattern.type
                     ),
                     unit: this.determineActivityUnit(unit, pattern.type),
-                    sequence: sequence++
+                    sequence: pattern.sequence,  // استخدام sequence من النمط
+                    parentItemName: itemName
                 });
             }
         }
+
+        // ترتيب الأنشطة حسب sequence (حفر أولاً، ثم خرسانة، إلخ)
+        activities.sort((a, b) => a.sequence - b.sequence);
 
         // إذا لم نجد أي أنشطة محددة، ننشئ نشاط عام
         if (activities.length === 0) {
@@ -204,7 +236,8 @@ export class SpecificationsAnalyzer {
                 keywords: [],
                 estimatedQuantity: quantity,
                 unit: unit,
-                sequence: 1
+                sequence: 50,  // وسط التسلسل
+                parentItemName: itemName
             });
         }
 

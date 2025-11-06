@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
-import { Menu } from 'lucide-react';
+import { Menu } from './lucide-icons';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
 // Fix: Correct import path for types.

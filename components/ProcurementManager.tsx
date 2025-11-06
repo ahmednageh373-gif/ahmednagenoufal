@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Project, PurchaseOrder, PurchaseOrderStatus } from '../types';
-import { Plus, Search, LayoutGrid, List, MoreHorizontal, Pencil, Trash2, File, Printer } from 'lucide-react';
+import { Plus, Search, LayoutGrid, List, MoreHorizontal, Pencil, Trash2, File, Printer } from '../lucide-icons';
 import { v4 as uuidv4 } from 'uuid';
 import { OrderModal } from './OrderModal';
 

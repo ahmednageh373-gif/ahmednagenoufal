@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ScheduleTask } from '../types';
-import { X, CheckCircle, AlertTriangle } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle } from '../lucide-icons';
 
 interface ScheduleImportModalProps {
   isOpen: boolean;

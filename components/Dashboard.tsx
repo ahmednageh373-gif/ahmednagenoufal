@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { Project, FinancialItem, ScheduleTask, ProjectWorkflow } from '../types';
-import { GanttChartSquare, DollarSign, ShieldAlert, Target, Upload, Pyramid, File, Printer } from 'lucide-react';
+import { GanttChartSquare, DollarSign, ShieldAlert, Target, Upload, Pyramid, File, Printer } from '../lucide-icons';
 import { BoqAnalysisModal } from './BoqAnalysisModal';
 // Fix: Correct import path for geminiService.
 import { extractFinancialItemsFromBOQ, processBoqToSchedule, generateWBS } from '../services/geminiService';

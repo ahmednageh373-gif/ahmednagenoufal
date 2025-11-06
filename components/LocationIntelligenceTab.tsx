@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { queryWithMaps } from '../services/geminiService';
-import { MapPin, Search, ExternalLink, File, Printer, Save } from 'lucide-react';
+import { MapPin, Search, ExternalLink, File, Printer, Save } from '../lucide-icons';
 import type { LocationContact } from '../types';
 
 declare var XLSX: any;

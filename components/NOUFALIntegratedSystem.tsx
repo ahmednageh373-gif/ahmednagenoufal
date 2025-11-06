@@ -16,7 +16,7 @@ import {
   Settings,
   Play,
   RefreshCw
-} from 'lucide-react';
+} from '../lucide-icons';
 
 /**
  * NOUFAL Integrated System

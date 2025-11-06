@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 // Fix: The 'LiveSession' type is not exported from the '@google/genai' package. It has been removed.
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from "@google/genai";
-import { Mic, Square, AlertTriangle, Wifi, WifiOff, Settings } from 'lucide-react';
+import { Mic, Square, AlertTriangle, Wifi, WifiOff, Settings } from '../lucide-icons';
 // Fix: Removed .ts extension from import path.
 import type { Project, AssistantSettings } from '../types';
 import { AssistantSettingsModal } from './AssistantSettingsModal';

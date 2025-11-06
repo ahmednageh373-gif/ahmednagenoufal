@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 // Fix: Import type from types.ts for better code organization.
 import { analyzeDrawingImage } from '../services/geminiService';
 import type { Project, DrawingAnalysisResult, FinancialItem } from '../types';
-import { UploadCloud, Bot, Download, FileText, ListChecks, MessageSquare, Printer, PlusCircle, Link2, X } from 'lucide-react';
+import { UploadCloud, Bot, Download, FileText, ListChecks, MessageSquare, Printer, PlusCircle, Link2, X } from '../lucide-icons';
 
 // Make XLSX library available
 declare var XLSX: any;

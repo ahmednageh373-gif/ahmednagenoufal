@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Project, Subcontractor, SubcontractorInvoice, SubcontractorInvoiceItem, SubcontractorInvoiceStatus, FinancialItem } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Users, Plus, Building, Mail, Phone, FileText, Printer, File, MoreVertical, Pencil, Trash2, X, Search } from 'lucide-react';
+import { Users, Plus, Building, Mail, Phone, FileText, Printer, File, MoreVertical, Pencil, Trash2, X, Search } from '../lucide-icons';
 
 // --- TYPE DEFINITIONS & MOCKS ---
 

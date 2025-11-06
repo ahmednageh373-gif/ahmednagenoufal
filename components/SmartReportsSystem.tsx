@@ -17,7 +17,7 @@ import {
   Share2,
   Eye,
   CheckCircle2
-} from 'lucide-react';
+} from '../lucide-icons';
 
 // TypeScript Interfaces
 interface Report {

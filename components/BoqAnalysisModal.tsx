@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { FinancialItem } from '../types';
-import { X, CheckCircle, AlertTriangle } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle } from '../lucide-icons';
 
 interface BoqAnalysisModalProps {
   isOpen: boolean;

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, LayoutGrid, BarChart3, Filter, Download, Search } from 'lucide-react';
+import { Calendar, LayoutGrid, BarChart3, Filter, Download, Search } from '../../lucide-icons';
 import type { Project } from '../../types';
 
 interface ScheduleAnalysisProps {

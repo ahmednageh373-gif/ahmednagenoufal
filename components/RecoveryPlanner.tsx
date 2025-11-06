@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Project, ScheduleTask } from '../types';
 import { generateRecoveryPlan } from '../services/geminiService';
-import { Bot, File, Printer, AlertTriangle, CheckCircle, Calendar } from 'lucide-react';
+import { Bot, File, Printer, AlertTriangle, CheckCircle, Calendar } from '../lucide-icons';
 import { marked } from 'marked';
 import { GanttChart } from './GanttChart';
 

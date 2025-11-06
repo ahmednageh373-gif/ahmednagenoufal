@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Project, ProjectMember, MemberRole } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Users, Plus, Trash2, Shield, HardHat, Eye } from 'lucide-react';
+import { Users, Plus, Trash2, Shield, HardHat, Eye } from '../lucide-icons';
 
 interface ProjectMembersProps {
     project: Project;

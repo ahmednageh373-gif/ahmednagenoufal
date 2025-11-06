@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { processComplexQuery } from '../services/geminiService';
 import { marked } from 'marked';
-import { BrainCircuit, Send } from 'lucide-react';
+import { BrainCircuit, Send } from '../lucide-icons';
 
 export const ComplexQueryTab: React.FC = () => {
     const [prompt, setPrompt] = useState('Provide a comprehensive risk assessment matrix for a high-rise building project in a seismic zone. Include financial, technical, and environmental risks, their probability, impact, and detailed mitigation strategies. The output should be a detailed markdown table.');

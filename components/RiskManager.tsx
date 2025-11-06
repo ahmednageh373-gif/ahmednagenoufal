@@ -5,7 +5,7 @@ import React, { useState, useCallback } from 'react';
 import type { Project, Risk } from '../types';
 // Fix: Correct import path for geminiService.
 import { suggestRisks } from '../services/geminiService';
-import { Plus, Bot, AlertTriangle, ChevronDown, Trash2, Pencil, Download, FileSpreadsheet, Printer } from 'lucide-react';
+import { Plus, Bot, AlertTriangle, ChevronDown, Trash2, Pencil, Download, FileSpreadsheet, Printer } from '../lucide-icons';
 import { RiskModal } from './RiskModal';
 
 interface RiskManagerProps {

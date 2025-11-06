@@ -13,7 +13,7 @@ import {
   CheckCircle, Clock, Zap, Target, Award, Activity, Download,
   MessageSquare, Shield, Briefcase, Database, ChevronRight,
   Star, ThumbsUp, Eye, ArrowUp, ArrowDown
-} from 'lucide-react';
+} from '../lucide-icons';
 
 interface Project {
   id: string;

@@ -6,7 +6,7 @@ import type { Project, ProjectTemplate } from '../types';
 import { projectTemplates } from '../data/templates';
 // Fix: Correct import path for geminiService.
 import { createProjectFromTenderText } from '../services/geminiService';
-import { X, Bot, UploadCloud } from 'lucide-react';
+import { X, Bot, UploadCloud } from '../lucide-icons';
 
 interface ProjectModalProps {
   isOpen: boolean;

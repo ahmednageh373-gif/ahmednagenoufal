@@ -22,7 +22,7 @@ import {
   Filter,
   Search,
   BarChart3
-} from 'lucide-react';
+} from '../lucide-icons';
 import type { Project, ScheduleTask, FinancialItem } from '../types';
 
 // ===== Types =====

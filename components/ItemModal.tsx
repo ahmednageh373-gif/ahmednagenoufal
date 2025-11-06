@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { ProjectItem } from '../types';
-import { X } from 'lucide-react';
+import { X } from '../lucide-icons';
 
 interface ItemModalProps {
   isOpen: boolean;

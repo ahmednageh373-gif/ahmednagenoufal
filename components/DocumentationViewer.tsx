@@ -2,7 +2,7 @@ import React from 'react';
 import { marked } from 'marked';
 // Fix: Removed .ts extension from import path.
 import { documentationContent } from '../data/documentation';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle } from '../lucide-icons';
 
 export const DocumentationViewer: React.FC = () => {
     // Parse the markdown content to HTML

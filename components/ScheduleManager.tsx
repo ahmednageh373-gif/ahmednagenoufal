@@ -7,7 +7,7 @@ import { SubTaskGeneratorModal } from './SubTaskGeneratorModal';
 import { ScheduleImportModal } from './ScheduleImportModal';
 import { WhatIfModal } from './WhatIfModal';
 import { performWhatIfAnalysis, calculateCriticalPath, extractTasksFromXER } from '../services/geminiService';
-import { Bot, Plus, Calendar, File, Printer, Upload, BarChart, CalendarDays, Hash, Network, FileCode } from 'lucide-react';
+import { Bot, Plus, Calendar, File, Printer, Upload, BarChart, CalendarDays, Hash, Network, FileCode } from '../lucide-icons';
 
 interface ScheduleManagerProps {
     project: Project;

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Project } from './types';
-import { Book, Search, FileText, GraduationCap, Building2, Calculator, Zap, BookOpen, ChevronRight, Download, Filter, Star } from 'lucide-react';
+import { Book, Search, FileText, GraduationCap, Building2, Calculator, Zap, BookOpen, ChevronRight, Download, Filter, Star } from './lucide-icons';
 import { marked } from 'marked';
 
 // Training modules data structure

@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Upload, Download, Loader, AlertCircle, CheckCircle, Eye, Edit2, FileText, Box, Layers } from 'lucide-react';
+import { Upload, Download, Loader, AlertCircle, CheckCircle, Eye, Edit2, FileText, Box, Layers } from '../lucide-icons';
 
 // ============================================================================
 // 1. مكون FileUploader - رفع الملفات

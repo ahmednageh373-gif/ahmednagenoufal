@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { analyzeBeam } from '../services/geminiService';
 import type { BeamSupport, BeamLoad, BeamAnalysisInput, BeamAnalysisResult } from '../types';
-import { Bot, Calculator, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Bot, Calculator, Plus, Trash2, Loader2 } from '../lucide-icons';
 import { marked } from 'marked';
 
 export const EngineeringCalcsTab: React.FC = () => {

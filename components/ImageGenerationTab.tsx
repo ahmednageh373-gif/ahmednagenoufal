@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { generateImage } from '../services/geminiService';
-import { Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Image as ImageIcon } from '../lucide-icons';
 
 type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
 

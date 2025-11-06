@@ -3,7 +3,7 @@ import {
   Target, Plus, Filter, Calendar, TrendingUp, CheckCircle,
   Clock, Flag, Users, Edit, Trash2, Eye, BarChart2, Award,
   AlertCircle, ArrowRight, ChevronDown, Search, X
-} from 'lucide-react';
+} from '../lucide-icons';
 
 interface KeyResult {
   id: string;

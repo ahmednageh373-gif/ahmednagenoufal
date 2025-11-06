@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 // Fix: Removed .ts extension from import path.
 import type { Drawing, DrawingVersion, ScheduleTask } from '../types';
-import { X, Upload, Download, File as FileIcon } from 'lucide-react';
+import { X, Upload, Download, File as FileIcon } from '../lucide-icons';
 
 interface DrawingDetailsModalProps {
   isOpen: boolean;

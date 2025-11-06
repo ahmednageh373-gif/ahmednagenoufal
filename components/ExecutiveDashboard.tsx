@@ -7,7 +7,7 @@ import {
     Users, DollarSign, Calendar, Target, Award, Clock, Activity,
     FileText, Zap, Shield, ArrowUp, ArrowDown, Minus, Download,
     Filter, RefreshCw, Bell, Settings, Eye, MapPin, Briefcase
-} from 'lucide-react';
+} from '../lucide-icons';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import type { ExecutiveReport, ProjectMetrics, ProjectKPI, Notification } from '../types-extended';
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 // Fix: Removed .ts extension from import path.
 import type { Project, BOQMatch } from '../types';
-import { Bot, UploadCloud, File, Printer } from 'lucide-react';
+import { Bot, UploadCloud, File, Printer } from '../lucide-icons';
 import { reconcileBOQWithTakeoff } from '../services/geminiService';
 
 interface BOQReconciliationTabProps {

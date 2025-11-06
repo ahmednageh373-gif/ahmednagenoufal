@@ -17,7 +17,7 @@ import {
   Building2,
   Calculator,
   BarChart3
-} from 'lucide-react';
+} from '../lucide-icons';
 
 // TypeScript Interfaces
 interface AnalysisResult {

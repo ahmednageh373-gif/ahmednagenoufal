@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { WhatIfAnalysisResult } from '../types';
-import { X, Bot, Loader2 } from 'lucide-react';
+import { X, Bot, Loader2 } from '../lucide-icons';
 import { marked } from 'marked';
 
 interface WhatIfModalProps {

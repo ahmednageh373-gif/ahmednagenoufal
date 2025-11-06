@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CostPredictionEngine, DurationPredictionEngine, ScheduleOptimizationEngine } from '../services/AIOptimizationEngine';
 import type { Project, ScheduleTask } from '../types';
-import { Bot, LineChart, Clock, ListTree, Loader2 } from 'lucide-react';
+import { Bot, LineChart, Clock, ListTree, Loader2 } from '../lucide-icons';
 import { mockProjects } from '../data/mockData'; // Using mock projects as historical data
 
 // Placeholder interfaces matching the engine's requirements

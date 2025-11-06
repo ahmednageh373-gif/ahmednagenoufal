@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { ProjectItem } from '../types';
-import { MoreHorizontal, CalendarDays } from 'lucide-react';
+import { MoreHorizontal, CalendarDays } from '../lucide-icons';
 
 interface KanbanBoardProps {
   items: ProjectItem[];

@@ -36,7 +36,7 @@ import {
     CheckCircle,
     FileText,
     BarChart3
-} from 'lucide-react';
+} from '../lucide-icons';
 
 // ==================== Smart Schedule Generator Component ====================
 

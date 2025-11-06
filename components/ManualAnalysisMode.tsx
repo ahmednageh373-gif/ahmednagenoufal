@@ -22,7 +22,7 @@ import {
   Copy,
   Download,
   Upload
-} from 'lucide-react';
+} from '../lucide-icons';
 import type { FinancialItem } from '../types';
 
 interface ManualActivity {

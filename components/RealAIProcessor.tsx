@@ -11,7 +11,7 @@ import {
   Download,
   Eye,
   Sparkles
-} from 'lucide-react';
+} from '../lucide-icons';
 
 /**
  * هذا المكون يستخدم الأدوات الحقيقية:

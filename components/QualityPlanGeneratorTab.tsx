@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Project, QualityPlanInput, QualityPlanResult } from '../types';
 import { generateQualityPlan } from '../services/geminiService';
-import { Bot, CheckSquare, Loader2 } from 'lucide-react';
+import { Bot, CheckSquare, Loader2 } from '../lucide-icons';
 import { marked } from 'marked';
 
 interface QualityPlanGeneratorTabProps {

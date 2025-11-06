@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { ScheduleTask, CriticalPathAnalysis, ProjectMember } from '../types';
-import { MoreHorizontal, User, Circle, CheckCircle, Clock } from 'lucide-react';
+import { MoreHorizontal, User, Circle, CheckCircle, Clock } from '../lucide-icons';
 import { TaskContextMenu } from './TaskContextMenu';
 
 // A type for tasks that have been processed to include calculated values

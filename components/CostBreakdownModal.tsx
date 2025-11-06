@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import type { FinancialItem, DetailedCostBreakdown, CostBreakdownItem } from '../types';
-import { X, Loader } from 'lucide-react';
+import { X, Loader } from '../lucide-icons';
 
 interface CostBreakdownModalProps {
   isOpen: boolean;

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Grid, List, Download, Eye, Filter, Tag, Package } from 'lucide-react';
+import { Search, Grid, List, Download, Eye, Filter, Tag, Package } from '../lucide-icons';
 import { 
   yqArchBlocks, 
   blockCategories, 

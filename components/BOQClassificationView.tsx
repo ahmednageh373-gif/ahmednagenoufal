@@ -16,7 +16,7 @@ import {
     DollarSign,
     Package,
     Percent
-} from 'lucide-react';
+} from '../lucide-icons';
 import type { ClassifiedFinancialItem, CategoryStatistics } from '../intelligence/ItemClassifier';
 import { getClassifier } from '../intelligence/ItemClassifier';
 

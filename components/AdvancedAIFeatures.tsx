@@ -21,7 +21,7 @@ import {
   Star,
   CheckCircle2,
   XCircle
-} from 'lucide-react';
+} from '../lucide-icons';
 
 // TypeScript Interfaces
 interface AIInsight {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { History, User, Bot } from 'lucide-react';
+import { History, User, Bot } from '../lucide-icons';
 
 export const AuditLogViewer: React.FC = () => {
     // This is a placeholder component. In a real application, you would fetch audit log data.

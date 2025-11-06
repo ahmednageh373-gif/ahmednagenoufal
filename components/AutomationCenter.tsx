@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Zap, Plus, Search, Filter, Play, Pause, Trash2, Edit, Copy,
   Calendar, Tag, CheckSquare, Bell, Mail, Users, FolderOpen,
-  Clock, Activity, TrendingUp, AlertCircle, CheckCircle
+  Clock, TrendingUp as Activity, TrendingUp, AlertCircle, CheckCircle
 } from '../lucide-icons';
 
 interface Automation {

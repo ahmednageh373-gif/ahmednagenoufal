@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -124,6 +124,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavItem icon={Package} label="📚 عرض المكتبات" viewName="library-showcase" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Table} label="إدارة المقايسات (يدوي)" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Undo2} label="خطة التعافي" viewName="recovery-plan" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={Hammer} label="🏗️ إدارة الموارد" viewName="resources-manager" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={TrendingUp} label="💰 نظام التكاليف" viewName="cost-control" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <NavItem icon={PieChart} label="📊 التحليلات المتكاملة" viewName="integrated-analytics" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={DollarSign} label="الإدارة المالية" viewName="financials" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={ShieldAlert} label="إدارة المخاطر" viewName="risks" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={Camera} label="متابعة الموقع" viewName="site" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />

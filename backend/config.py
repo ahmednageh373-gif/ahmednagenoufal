@@ -1,153 +1,140 @@
 """
-NOUFAL Engineering System - Configuration
-==========================================
-ملف التكوين المركزي للنظام
+NOUFAL ERP - Secure Configuration
+================================
+Production-ready configuration with security best practices
 """
 
 import os
 from datetime import timedelta
 from pathlib import Path
 
-# Base Directory
-BASE_DIR = Path(__file__).resolve().parent
+# Base directory
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 class Config:
     """Base configuration"""
     
-    # Application
-    APP_NAME = "NOUFAL Engineering Management System"
-    APP_VERSION = "2.0.0"
-    DEBUG = False
+    # ==================== Application ====================
+    APP_NAME = "NOUFAL ERP"
+    VERSION = "1.0.0"
+    
+    # Environment
+    ENV = os.getenv('FLASK_ENV', 'production')
+    DEBUG = False  # NEVER enable in production
     TESTING = False
     
-    # Secret Key
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{BASE_DIR / "noufal.db"}'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ECHO = False
-    
-    # MongoDB (Alternative)
-    MONGODB_URI = os.environ.get('MONGODB_URI') or 'mongodb://localhost:27017/noufal_db'
+    # ==================== Security ====================
+    # Secret key - MUST be set in environment
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable must be set!")
     
     # JWT Configuration
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key'
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
-    JWT_ALGORITHM = 'HS256'
     
-    # CORS
-    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*').split(',')
+    # Session Configuration
+    SESSION_COOKIE_SECURE = True  # Only send over HTTPS
+    SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access
+    SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
     
-    # File Upload
+    # CSRF Protection
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None
+    
+    # ==================== Database ====================
+    # PostgreSQL for production
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///noufal_erp.db')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False  # Disable SQL logging in production
+    
+    # Connection pool settings
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 10,
+        'pool_recycle': 3600,
+        'pool_pre_ping': True,
+    }
+    
+    # ==================== API Keys ====================
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    
+    # ==================== CORS ====================
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '').split(',')
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_MAX_AGE = 3600
+    
+    # ==================== Rate Limiting ====================
+    RATELIMIT_ENABLED = os.getenv('RATE_LIMIT_ENABLED', 'true').lower() == 'true'
+    RATELIMIT_DEFAULT = "100/minute"
+    RATELIMIT_STORAGE_URL = "memory://"
+    
+    # ==================== File Upload ====================
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50 MB max file size
     UPLOAD_FOLDER = BASE_DIR / 'uploads'
-    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
-    ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'pdf', 'dxf', 'dwg'}
+    ALLOWED_EXTENSIONS = {'pdf', 'xlsx', 'xls', 'doc', 'docx', 'png', 'jpg', 'jpeg'}
     
-    # Export
-    EXPORT_FOLDER = BASE_DIR / 'exports'
-    TEMPLATE_FOLDER = BASE_DIR / 'templates'
+    # ==================== Logging ====================
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+    LOG_FILE = BASE_DIR / 'logs' / 'app.log'
     
-    # Pagination
-    ITEMS_PER_PAGE = 50
-    MAX_ITEMS_PER_PAGE = 100
-    
-    # Productivity Database
-    PRODUCTIVITY_DATA_PATH = BASE_DIR / 'data' / 'productivity_rates.json'
-    
-    # SBC Standards
-    SBC_STANDARDS_PATH = BASE_DIR / 'data' / 'sbc_standards.json'
-    
-    # Logging
-    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
-    LOG_FILE = BASE_DIR / 'logs' / 'noufal.log'
-    
-    # Cache (Redis)
-    CACHE_TYPE = 'redis'
-    CACHE_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-    CACHE_DEFAULT_TIMEOUT = 300
-    
-    # Celery (Background Tasks)
-    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/1')
-    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/2')
-    
-    # Email (Optional)
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    
-    # API Rate Limiting
-    RATELIMIT_ENABLED = True
-    RATELIMIT_DEFAULT = "100 per hour"
-    RATELIMIT_STORAGE_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/3')
-    
-    # Sentry (Error Tracking)
-    SENTRY_DSN = os.environ.get('SENTRY_DSN')
-    
-    # Google Gemini AI
-    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
-    
-    @staticmethod
-    def init_app(app):
-        """Initialize application with config"""
-        # Create necessary directories
-        os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
-        os.makedirs(Config.EXPORT_FOLDER, exist_ok=True)
-        os.makedirs(Config.TEMPLATE_FOLDER, exist_ok=True)
-        os.makedirs(BASE_DIR / 'logs', exist_ok=True)
-        os.makedirs(BASE_DIR / 'data', exist_ok=True)
+    # ==================== Email ====================
+    MAIL_SERVER = os.getenv('SMTP_HOST', 'localhost')
+    MAIL_PORT = int(os.getenv('SMTP_PORT', 587))
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+    MAIL_USERNAME = os.getenv('SMTP_USER')
+    MAIL_PASSWORD = os.getenv('SMTP_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('SMTP_FROM', f'noreply@{APP_NAME.lower()}.com')
 
 
 class DevelopmentConfig(Config):
     """Development configuration"""
-    DEBUG = True
-    SQLALCHEMY_ECHO = True
-    LOG_LEVEL = 'DEBUG'
-
-
-class TestingConfig(Config):
-    """Testing configuration"""
-    TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-    WTF_CSRF_ENABLED = False
+    ENV = 'development'
+    DEBUG = True  # Only in development
+    SQLALCHEMY_ECHO = True  # Enable SQL logging
+    SESSION_COOKIE_SECURE = False  # Allow HTTP in development
+    RATELIMIT_ENABLED = False  # Disable rate limiting in dev
 
 
 class ProductionConfig(Config):
     """Production configuration"""
+    ENV = 'production'
     DEBUG = False
     TESTING = False
     
-    # Override with environment variables in production
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://user:password@localhost/noufal_production'
+    # Strict security in production
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Strict'
     
-    @classmethod
-    def init_app(cls, app):
-        Config.init_app(app)
-        
-        # Log to syslog in production
-        import logging
-        from logging.handlers import SysLogHandler
-        syslog_handler = SysLogHandler()
-        syslog_handler.setLevel(logging.WARNING)
-        app.logger.addHandler(syslog_handler)
+    # Force HTTPS
+    PREFERRED_URL_SCHEME = 'https'
+
+
+class TestingConfig(Config):
+    """Testing configuration"""
+    ENV = 'testing'
+    TESTING = True
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+    RATELIMIT_ENABLED = False
 
 
 # Configuration dictionary
 config = {
     'development': DevelopmentConfig,
-    'testing': TestingConfig,
     'production': ProductionConfig,
-    'default': DevelopmentConfig
+    'testing': TestingConfig,
+    'default': ProductionConfig
 }
 
 
-def get_config(env=None):
+def get_config():
     """Get configuration based on environment"""
-    if env is None:
-        env = os.environ.get('FLASK_ENV', 'development')
+    env = os.getenv('FLASK_ENV', 'production')
     return config.get(env, config['default'])

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { AdvancedScheduleTrendingUp as Activity, WBSItem } from '../types';
+import { AdvancedScheduleActivity, WBSItem } from '../types';
 import { ExcelParser, ParsedBOQItem } from '../services/ExcelParser';
 import { SpecificationsAnalyzer, DetailedSpecification } from '../intelligence/SpecificationsAnalyzer';
 import { CPMEngine } from '../intelligence/CPMEngine';

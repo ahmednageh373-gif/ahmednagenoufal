@@ -8,7 +8,7 @@ import {
   BarChart3,
   PieChart,
   LineChart,
-  Activity,
+  TrendingUp as Activity,
   TrendingUp,
   Download,
   Filter,

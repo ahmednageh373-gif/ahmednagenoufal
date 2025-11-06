@@ -12,7 +12,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
     FinancialItem, 
-    AdvancedScheduleActivity, 
+    AdvancedScheduleTrendingUp as Activity, 
     WBSItem,
     CPMAnalysisResult,
     SCurveData 

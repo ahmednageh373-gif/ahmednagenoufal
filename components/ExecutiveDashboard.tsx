@@ -4,7 +4,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     BarChart3, TrendingUp, TrendingDown, AlertCircle, CheckCircle,
-    Users, DollarSign, Calendar, Target, Award, Clock, Activity,
+    Users, DollarSign, Calendar, Target, Award, Clock, TrendingUp as Activity,
     FileText, Zap, Shield, ArrowUp, ArrowDown, Minus, Download,
     Filter, RefreshCw, Bell, Settings, Eye, MapPin, Briefcase
 } from 'lucide-react';

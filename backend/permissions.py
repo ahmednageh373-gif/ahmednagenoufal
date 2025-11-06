@@ -146,6 +146,49 @@ class Permission(Enum):
     RECEIVE_NOTIFICATIONS = "receive_notifications"
     SEND_NOTIFICATIONS = "send_notifications"
     MANAGE_NOTIFICATION_SETTINGS = "manage_notification_settings"
+    
+    # === Procurement ===
+    VIEW_PROCUREMENT = "view_procurement"
+    CREATE_PURCHASE_REQUEST = "create_purchase_request"
+    APPROVE_PURCHASE_REQUEST = "approve_purchase_request"
+    CREATE_PURCHASE_ORDER = "create_purchase_order"
+    APPROVE_PURCHASE_ORDER = "approve_purchase_order"
+    MANAGE_SUPPLIERS = "manage_suppliers"
+    TRACK_DELIVERIES = "track_deliveries"
+    VIEW_MATERIAL_STATUS = "view_material_status"
+    
+    # === Subcontractors ===
+    VIEW_SUBCONTRACTORS = "view_subcontractors"
+    CREATE_SUBCONTRACT = "create_subcontract"
+    APPROVE_SUBCONTRACT = "approve_subcontract"
+    TRACK_SUBCONTRACTOR_PROGRESS = "track_subcontractor_progress"
+    APPROVE_SUBCONTRACTOR_PAYMENT = "approve_subcontractor_payment"
+    EVALUATE_SUBCONTRACTOR = "evaluate_subcontractor"
+    
+    # === Design & Execution ===
+    VIEW_DESIGN_PACKAGES = "view_design_packages"
+    CREATE_DESIGN_PACKAGE = "create_design_package"
+    APPROVE_DESIGN_PACKAGE = "approve_design_package"
+    INITIATE_DESIGN_MODIFICATION = "initiate_design_modification"
+    APPROVE_DESIGN_MODIFICATION = "approve_design_modification"
+    PERFORM_COMPLIANCE_CHECK = "perform_compliance_check"
+    SUBMIT_VE_PROPOSAL = "submit_ve_proposal"
+    APPROVE_VE_PROPOSAL = "approve_ve_proposal"
+    
+    # === Advanced Analytics ===
+    VIEW_EVM_ANALYSIS = "view_evm_analysis"
+    VIEW_COST_FORECASTING = "view_cost_forecasting"
+    VIEW_SCHEDULE_ANALYTICS = "view_schedule_analytics"
+    VIEW_KPI_DASHBOARD = "view_kpi_dashboard"
+    
+    # === Interactive Reports ===
+    GENERATE_EXECUTIVE_REPORT = "generate_executive_report"
+    GENERATE_PROGRESS_REPORT = "generate_progress_report"
+    GENERATE_FINANCIAL_REPORT = "generate_financial_report"
+    GENERATE_MATERIAL_REPORT = "generate_material_report"
+    EXPORT_TO_PDF = "export_to_pdf"
+    EXPORT_TO_EXCEL = "export_to_excel"
+    EXPORT_TO_WORD = "export_to_word"
 
 
 # Role Permissions Mapping - تعيين الصلاحيات لكل دور

@@ -51,7 +51,6 @@ const ExecutiveDashboard = React.lazy(() => import('./components/ExecutiveDashbo
 const ResourceManagement = React.lazy(() => import('./components/ResourceManagement').then(module => ({ default: module.ResourceManagement })));
 const CostControlSystem = React.lazy(() => import('./components/CostControlSystem').then(module => ({ default: module.CostControlSystem })));
 const ResourcesManager = React.lazy(() => import('./components/ResourcesManager').then(module => ({ default: module.ResourcesManager })));
-const CostControlSystem = React.lazy(() => import('./components/CostControlSystem').then(module => ({ default: module.CostControlSystem })));
 const IntegratedAnalytics = React.lazy(() => import('./components/IntegratedAnalytics').then(module => ({ default: module.IntegratedAnalytics })));
 
 

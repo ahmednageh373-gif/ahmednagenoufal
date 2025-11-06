@@ -118,7 +118,7 @@ export const ResourcesManager: React.FC<ResourcesManagerProps> = ({ project, onU
   // Save to localStorage
   const saveResources = (newResources: Resource[]) => {
     setResources(newResources);
-    localStorage.setItem(`resources_${project.id}`، JSON.stringify(newResources));
+    localStorage.setItem(`resources_${project.id}`, JSON.stringify(newResources));
   };
 
   // Filter resources

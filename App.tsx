@@ -46,8 +46,10 @@ const AdvancedAIFeatures = React.lazy(() => import('./components/AdvancedAIFeatu
 const ProEngineeringHub = React.lazy(() => import('./components/ProEngineeringHub').then(module => ({ default: module.default })));
 const RealAIProcessor = React.lazy(() => import('./components/RealAIProcessor').then(module => ({ default: module.default })));
 const NOUFALIntegratedSystem = React.lazy(() => import('./components/NOUFALIntegratedSystem').then(module => ({ default: module.default })));
-// New Integrated Systems
+// New Integrated ERP Systems - نظام التكامل الشامل
 const ExecutiveDashboard = React.lazy(() => import('./components/ExecutiveDashboard').then(module => ({ default: module.ExecutiveDashboard })));
+const ResourceManagement = React.lazy(() => import('./components/ResourceManagement').then(module => ({ default: module.ResourceManagement })));
+const CostControlSystem = React.lazy(() => import('./components/CostControlSystem').then(module => ({ default: module.CostControlSystem })));
 const ResourcesManager = React.lazy(() => import('./components/ResourcesManager').then(module => ({ default: module.ResourcesManager })));
 const CostControlSystem = React.lazy(() => import('./components/CostControlSystem').then(module => ({ default: module.CostControlSystem })));
 const IntegratedAnalytics = React.lazy(() => import('./components/IntegratedAnalytics').then(module => ({ default: module.IntegratedAnalytics })));
@@ -375,17 +377,11 @@ const App: React.FC = () => {
             case 'noufal-integrated':
                 return <NOUFALIntegratedSystem />;
             case 'executive-dashboard':
-                return <ExecutiveDashboard projects={projects} onSelectProject={setActiveProjectId} />;
+                return <ExecutiveDashboard projectId={activeProject.id} projectName={activeProject.name} />;
             case 'resources-manager':
-                return <ResourcesManager project={activeProject} onUpdateProject={(projectId, updates) => {
-                    setProjects(projects.map(p => p.id === projectId ? { ...p, ...updates } : p));
-                }} />;
+                return <ResourceManagement projectId={activeProject.id} />;
             case 'cost-control':
-                return <CostControlSystem project={activeProject} onUpdateProject={(projectId, updates) => {
-                    setProjects(projects.map(p => p.id === projectId ? { ...p, ...updates } : p));
-                }} />;
-            case 'integrated-analytics':
-                return <IntegratedAnalytics projects={projects} currentProject={activeProject} />;
+                return <CostControlSystem projectId={activeProject.id} totalBudget={activeProject.data.financials.reduce((sum, item) => sum + item.total, 0)} />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

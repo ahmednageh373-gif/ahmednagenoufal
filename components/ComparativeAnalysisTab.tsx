@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 // Fix: Removed .ts extension from import path.
 import type { Project } from '../types';
-import { Bot, UploadCloud } from '../lucide-icons';
+import { Bot, UploadCloud } from 'lucide-react';
 import { runComparativeAnalysis } from '../services/geminiService';
 import { marked } from 'marked';
 

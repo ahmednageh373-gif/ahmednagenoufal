@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Upload, Brain, Edit3, FileText, Download, Save, PlayCircle, Loader2, CheckCircle2, AlertCircle, TrendingUp, Users, Calendar, DollarSign } from '../lucide-icons';
+import { Upload, Brain, Edit3, FileText, Download, Save, PlayCircle, Loader2, CheckCircle2, AlertCircle, TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { FinancialItem } from '../types';
 import { analyzeBOQ, type AnalyzedItem } from '../services/aiItemAnalyzer';

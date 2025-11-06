@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { Project, DocumentCategory, EngineeringDocument, FinancialItem, ScheduleTask } from '../types';
-import { Folder, FileText, Plus, Upload, Bot, ChevronDown, Trash2, Pencil, FolderUp, Loader2, File, Printer } from '../lucide-icons';
+import { Folder, FileText, Plus, Upload, Bot, ChevronDown, Trash2, Pencil, FolderUp, Loader2, File, Printer } from 'lucide-react';
 // Fix: Correct import path for geminiService.
 import { extractFinancialItemsFromBOQ, generateDocumentDraft, processBoqToSchedule } from '../services/geminiService';
 import { BoqAnalysisModal } from './BoqAnalysisModal';

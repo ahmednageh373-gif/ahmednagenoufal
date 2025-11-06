@@ -27,7 +27,7 @@ import {
   Clock,
   PlayCircle,
   Loader2,
-} from '../lucide-icons';
+} from 'lucide-react';
 
 interface SystemCard {
   id: string;

@@ -4,7 +4,7 @@ import {
     FileText, Video, Image as ImageIcon, FileSpreadsheet, 
     Presentation, Upload, Bookmark, BookmarkCheck, X, 
     ChevronRight, TrendingUp, Award, Calendar, User
-} from './lucide-icons';
+} from 'lucide-react';
 import type { Project, KnowledgeDocument, KnowledgeModule, UserProgress } from './types';
 
 interface KnowledgeDatabaseProps {

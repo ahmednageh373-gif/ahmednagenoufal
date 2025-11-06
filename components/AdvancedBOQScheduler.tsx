@@ -9,7 +9,7 @@ import { ExcelParser, ParsedBOQItem } from '../services/ExcelParser';
 import { SpecificationsAnalyzer, DetailedSpecification } from '../intelligence/SpecificationsAnalyzer';
 import { CPMEngine } from '../intelligence/CPMEngine';
 import { SBCCompliance } from '../intelligence/SBCCompliance';
-import { Upload, FileSpreadsheet, Zap, CheckCircle2, AlertCircle } from '../lucide-icons';
+import { Upload, FileSpreadsheet, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface AdvancedBOQSchedulerProps {
     onScheduleGenerated: (activities: AdvancedScheduleActivity[], wbs: WBSItem[], parsedItems: ParsedBOQItem[]) => void;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Home, Calendar, DollarSign, AlertTriangle, MapPin, FileText, Settings } from './lucide-icons';
+import { Menu, X, Home, Calendar, DollarSign, AlertTriangle, MapPin, FileText, Settings } from 'lucide-react';
 
 // Simple fallback app that works without lazy loading
 export const SimpleApp: React.FC = () => {

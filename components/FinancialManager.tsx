@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import type { Project, FinancialItem, CostBreakdownItem, BOQItemSentiment, PurchaseOrder, DetailedCostBreakdown } from '../types';
 // Fix: Correct import path for geminiService.
 import { getCostBreakdown, analyzeFinancials, analyzeBOQForCodeCompliance, analyzeBOQSentiments, analyzeBOQPrices, generatePurchaseOrderFromBOQItem } from '../services/geminiService';
-import { DollarSign, Search, FileText, Bot, BarChart, File, Printer, Smile, Frown, Meh, AlertTriangle, ShoppingCart } from '../lucide-icons';
+import { DollarSign, Search, FileText, Bot, BarChart, File, Printer, Smile, Frown, Meh, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { CostBreakdownModal } from './CostBreakdownModal';
 import { OrderModal } from './OrderModal';
 import { marked } from 'marked';

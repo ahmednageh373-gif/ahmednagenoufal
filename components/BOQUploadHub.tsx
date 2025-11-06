@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, ArrowRight, Download, Eye, Loader } from '../lucide-icons';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, ArrowRight, Download, Eye, Loader } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { FinancialItem, ScheduleTask, PurchaseOrder } from '../types';
 import { generateScheduleFromBOQ, generateScheduleSummary } from '../services/scheduleGenerator';

@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { AdvancedScheduleActivity } from '../types';
-import { Calendar, Download, Filter, ZoomIn, ZoomOut, Eye } from '../lucide-icons';
+import { Calendar, Download, Filter, ZoomIn, ZoomOut, Eye } from 'lucide-react';
 
 interface GanttChartViewerProps {
     activities: AdvancedScheduleActivity[];

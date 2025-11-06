@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, ProjectMember } from '../types';
-import { X } from '../lucide-icons';
+import { X } from 'lucide-react';
 
 interface TaskModalProps {
   isOpen: boolean;

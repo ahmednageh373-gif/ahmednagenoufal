@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Project, StructuralAssessment, Defect, RetrofittingPlan } from '../types';
-import { ClipboardCheck, Bot, Building, Loader2, Plus, Wrench, Package, Clock, DollarSign, Check, AlertTriangle } from '../lucide-icons';
+import { ClipboardCheck, Bot, Building, Loader2, Plus, Wrench, Package, Clock, DollarSign, Check, AlertTriangle } from 'lucide-react';
 import { generateRetrofittingPlan } from '../services/geminiService';
 import { v4 as uuidv4 } from 'uuid';
 

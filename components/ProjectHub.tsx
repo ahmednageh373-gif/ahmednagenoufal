@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Project, ProjectItem } from '../types';
-import { Plus, Search, LayoutGrid, List, File, Printer, Grip, AlignJustify } from '../lucide-icons';
+import { Plus, Search, LayoutGrid, List, File, Printer, Grip, AlignJustify } from 'lucide-react';
 import { KanbanBoard } from './KanbanBoard';
 import { ItemModal } from './ItemModal';
 import { v4 as uuidv4 } from 'uuid';

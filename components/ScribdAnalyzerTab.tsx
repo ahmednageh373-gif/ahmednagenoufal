@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { analyzeScribdDocument } from '../services/geminiService';
 import { marked } from 'marked';
-import { Bot, Link, BookOpen } from '../lucide-icons';
+import { Bot, Link, BookOpen } from 'lucide-react';
 
 export const ScribdAnalyzerTab: React.FC = () => {
     const defaultEmbed = `<iframe class="scribd_iframe_embed" title="دراسة+اسعارب+بنود+المباني(2)" src="https://www.scribd.com/embeds/651362130/content?start_page=1&view_mode=scroll&access_key=key-Oxe0W4ixZdhkGR3fGSNn" tabindex="0" data-auto-height="true" data-aspect-ratio="1.414442700156986" scrolling="no" width="100%" height="600" frameborder="0" ></iframe>`;

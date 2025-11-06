@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from '../lucide-icons';
+import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;

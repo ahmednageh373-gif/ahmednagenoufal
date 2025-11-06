@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { analyzeImageWithPrompt } from '../services/geminiService';
 import { marked } from 'marked';
-import { UploadCloud, Bot, Image as ImageIcon } from '../lucide-icons';
+import { UploadCloud, Bot, Image as ImageIcon } from 'lucide-react';
 
 export const ImageAnalyzer: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);

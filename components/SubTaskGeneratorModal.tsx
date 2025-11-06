@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { generateSubTasksFromDescription } from '../services/geminiService';
-import { X, Bot, Plus } from '../lucide-icons';
+import { X, Bot, Plus } from 'lucide-react';
 
 interface GeneratedTask {
     name: string;

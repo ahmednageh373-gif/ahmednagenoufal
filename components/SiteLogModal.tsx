@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Camera, Send, MapPin, Loader, AlertTriangle } from '../lucide-icons';
+import { X, Camera, Send, MapPin, Loader, AlertTriangle } from 'lucide-react';
 // Fix: Removed .ts extension from import path.
 import type { Project, SiteLogEntry } from '../types';
 import { analyzeSitePhoto } from '../services/geminiService';

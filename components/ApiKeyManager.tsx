@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { KeyRound } from '../lucide-icons';
+import { KeyRound } from 'lucide-react';
 
 interface ApiKeyManagerProps {
   onKeySelected: () => void;

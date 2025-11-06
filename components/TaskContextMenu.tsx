@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Trash2 } from '../lucide-icons';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface TaskContextMenuProps {
   position: { top: number; right: number };

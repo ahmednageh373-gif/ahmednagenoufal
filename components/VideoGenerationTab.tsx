@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { generateVideos } from '../services/geminiService';
-import { Clapperboard, Video } from '../lucide-icons';
+import { Clapperboard, Video } from 'lucide-react';
 import { ApiKeyManager } from './ApiKeyManager';
 
 type AspectRatio = '16:9' | '9:16';

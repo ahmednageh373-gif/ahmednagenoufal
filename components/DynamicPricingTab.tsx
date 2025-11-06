@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Project, DynamicPriceAnalysisItem } from '../types';
 import { performDynamicPriceAnalysis } from '../services/geminiService';
-import { Bot, TrendingDown, TrendingUp } from '../lucide-icons';
+import { Bot, TrendingDown, TrendingUp } from 'lucide-react';
 
 interface DynamicPricingTabProps {
     project: Project;

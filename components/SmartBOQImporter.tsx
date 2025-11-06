@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Upload, AlertCircle, CheckCircle2, FileSpreadsheet, Sparkles } from '../lucide-icons';
+import { Upload, AlertCircle, CheckCircle2, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { classifyItems, type ClassifiedFinancialItem } from '../intelligence/ItemClassifier';
 import { BOQClassificationView } from './BOQClassificationView';
 import type { FinancialItem } from '../types';

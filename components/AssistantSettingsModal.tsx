@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { AssistantSettings } from '../types';
-import { X } from '../lucide-icons';
+import { X } from 'lucide-react';
 
 interface AssistantSettingsModalProps {
   isOpen: boolean;

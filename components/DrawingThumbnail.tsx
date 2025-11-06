@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Drawing } from '../types';
-import { FileText, Loader2 } from '../lucide-icons';
+import { FileText, Loader2 } from 'lucide-react';
 
 // pdf.js is loaded globally from index.html
 declare const pdfjsLib: any;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Bot } from '../lucide-icons';
+import { X, Bot } from 'lucide-react';
 
 interface GenerateDocModalProps {
   isOpen: boolean;

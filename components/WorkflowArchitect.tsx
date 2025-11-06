@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Project, ProjectWorkflow } from '../types';
 import { generateProjectCharter, generateWBS, generateWBSFromSchedule } from '../services/geminiService';
-import { Bot, Save, Pyramid, X, ChevronDown, ListChecks, Printer } from '../lucide-icons';
+import { Bot, Save, Pyramid, X, ChevronDown, ListChecks, Printer } from 'lucide-react';
 import { marked } from 'marked';
 
 interface WorkflowArchitectProps {

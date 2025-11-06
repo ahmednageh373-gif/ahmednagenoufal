@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Shield, CheckCircle, XCircle, AlertTriangle, FileCheck, Download } from '../lucide-icons';
+import { Shield, CheckCircle, XCircle, AlertTriangle, FileCheck, Download } from 'lucide-react';
 import { SBC_CATEGORIES, SBC_2024_REQUIREMENTS, ViolationSeverity, type SBCRequirement } from '../data/sbc2024-codes';
 
 export const SBCComplianceChecker: React.FC = () => {

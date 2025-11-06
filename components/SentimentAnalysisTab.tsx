@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { analyzeSentiment } from '../services/geminiService';
 import type { SentimentAnalysisResult } from '../types';
-import { Bot, Smile, Frown, Meh } from '../lucide-icons';
+import { Bot, Smile, Frown, Meh } from 'lucide-react';
 
 const SentimentResultDisplay: React.FC<{ result: SentimentAnalysisResult }> = ({ result }) => {
     const sentimentConfig = {

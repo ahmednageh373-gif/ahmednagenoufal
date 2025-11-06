@@ -7,7 +7,7 @@ import {
     FileText, Download, Upload, Plus, Calendar, Filter,
     PieChart, BarChart3, Activity, CheckCircle, XCircle,
     Clock, Target, Wallet, CreditCard, Receipt
-} from '../lucide-icons';
+} from 'lucide-react';
 import type {
     CostItem, BudgetAllocation, PaymentCertificate, 
     CashFlow, EVMData, CostType, CostStatus, PaymentStatus

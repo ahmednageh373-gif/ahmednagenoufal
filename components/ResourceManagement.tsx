@@ -6,7 +6,7 @@ import {
     Users, Wrench, Package, Calendar, DollarSign, TrendingUp, 
     AlertTriangle, CheckCircle, Clock, Filter, Plus, Search,
     Download, Upload, Edit2, Trash2, Eye, Settings
-} from '../lucide-icons';
+} from 'lucide-react';
 import type { 
     LaborResource, EquipmentResource, MaterialResource, 
     ResourceAllocation, ResourceType, ResourceStatus 

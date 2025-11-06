@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Project, FinancialItem } from '../types';
 import { getSaudiCodeAnalysis } from '../services/geminiService';
 import { marked } from 'marked';
-import { Bot, Scale } from '../lucide-icons';
+import { Bot, Scale } from 'lucide-react';
 
 interface SaudiCodeConsultantTabProps {
     project: Project;

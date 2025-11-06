@@ -3,7 +3,7 @@ import {
   Zap, Plus, Search, Filter, Play, Pause, Trash2, Edit, Copy,
   Calendar, Tag, CheckSquare, Bell, Mail, Users, FolderOpen,
   Clock, TrendingUp as Activity, TrendingUp, AlertCircle, CheckCircle
-} from '../lucide-icons';
+} from 'lucide-react';
 
 interface Automation {
   id: number;

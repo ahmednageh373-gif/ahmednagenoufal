@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { marked } from 'marked';
-import { Bot, Building, Loader2, BarChart3, Clock, Package } from '../lucide-icons';
+import { Bot, Building, Loader2, BarChart3, Clock, Package } from 'lucide-react';
 import type { Project, ConceptualEstimateInput, ConceptualEstimateResult } from '../types';
 import { getConceptualEstimate } from '../services/geminiService';
 

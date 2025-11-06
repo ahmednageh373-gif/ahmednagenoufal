@@ -19,7 +19,7 @@ import {
   Globe,
   Zap,
   CheckCircle2
-} from '../lucide-icons';
+} from 'lucide-react';
 
 import {
   AutoCADHandler,

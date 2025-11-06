@@ -23,7 +23,7 @@ import {
   Eye,
   Share2,
   Printer
-} from '../lucide-icons';
+} from 'lucide-react';
 import type { Project } from '../types';
 
 interface IntegratedAnalyticsProps {

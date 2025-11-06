@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { performCuringAnalysis } from '../services/geminiService';
 import type { CuringAnalysisInput, CuringAnalysisResult } from '../types';
-import { Bot, Thermometer, HardHat, Hourglass, Check, AlertTriangle, Loader2 } from '../lucide-icons';
+import { Bot, Thermometer, HardHat, Hourglass, Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { marked } from 'marked';
 
 export const CuringAnalysisTab: React.FC = () => {

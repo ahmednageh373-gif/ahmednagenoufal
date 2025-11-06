@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Project, FinancialItem, ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, AdvancedScheduleActivity, WBSItem } from './types';
-import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search } from './lucide-icons';
+import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash2, Search } from 'lucide-react';
 import { SmartScheduleGenerator, AdvancedScheduleViewer } from './components/NOUFALScheduling';
 import { AdvancedBOQScheduler } from './components/AdvancedBOQScheduler';
 import { ParsedBOQItem } from './services/ExcelParser';

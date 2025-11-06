@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { Project, Drawing, DrawingFolder, DrawingVersion, ScheduleTask } from '../types';
-import { Folder, FileText, Plus, Upload, Trash2, Home, X, Check, ChevronRight, UploadCloud, Loader2, File, Printer } from '../lucide-icons';
+import { Folder, FileText, Plus, Upload, Trash2, Home, X, Check, ChevronRight, UploadCloud, Loader2, File, Printer } from 'lucide-react';
 import { DrawingDetailsModal } from './DrawingDetailsModal';
 import { DrawingThumbnail } from './DrawingThumbnail';
 

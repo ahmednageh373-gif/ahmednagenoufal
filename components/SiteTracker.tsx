@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 // Fix: Correct import path for types.
 // Fix: Add `ScheduleTaskStatus` to the type import to resolve a TypeScript error where the type was not found.
 import type { Project, SiteLogEntry, WorkLogEntry, ChecklistItem, ScheduleTask, ChecklistItemCategory, ChecklistItemStatus, ScheduleTaskStatus } from '../types';
-import { Plus, Camera, LayoutGrid, Map as MapIcon, File, Printer, Bot, BookOpen, ClipboardList, Check, X, AlertTriangle } from '../lucide-icons';
+import { Plus, Camera, LayoutGrid, Map as MapIcon, File, Printer, Bot, BookOpen, ClipboardList, Check, X, AlertTriangle } from 'lucide-react';
 import { SiteLogModal } from './SiteLogModal';
 import { generateChecklist } from '../services/geminiService';
 import { marked } from 'marked';

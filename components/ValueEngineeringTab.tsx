@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { marked } from 'marked';
-import { Bot, AlertTriangle, DollarSign } from '../lucide-icons';
+import { Bot, AlertTriangle, DollarSign } from 'lucide-react';
 // Fix: Removed .ts extension from import path.
 import type { Project } from '../types';
 import { analyzeBOQForValueEngineering } from '../services/geminiService';

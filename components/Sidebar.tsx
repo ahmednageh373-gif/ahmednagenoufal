@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer } from '../lucide-icons';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];

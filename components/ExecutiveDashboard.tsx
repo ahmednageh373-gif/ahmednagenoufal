@@ -1,550 +1,661 @@
-/**
- * 👔 لوحة التحكم التنفيذية - Executive Dashboard
- * لوحة شاملة لصاحب الشركة ومدير المشاريع لمتابعة جميع المشاريع
- */
+// 🎯 لوحة التحكم التنفيذية - Executive Dashboard
+// نظرة شاملة لصاحب الشركة ومدير المشروع
 
 import React, { useState, useMemo } from 'react';
 import {
-  LayoutDashboard,
-  Building2,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Target,
-  BarChart3,
-  PieChart,
-  Activity,
-  Award,
-  Briefcase,
-  FileText,
-  Settings,
-  Download,
-  RefreshCcw
+    BarChart3, TrendingUp, TrendingDown, AlertCircle, CheckCircle,
+    Users, DollarSign, Calendar, Target, Award, Clock, Activity,
+    FileText, Zap, Shield, ArrowUp, ArrowDown, Minus, Download,
+    Filter, RefreshCw, Bell, Settings, Eye, MapPin, Briefcase
 } from 'lucide-react';
-import type { Project } from '../types';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import type { ExecutiveReport, ProjectMetrics, ProjectKPI, Notification } from '../types-extended';
 
 interface ExecutiveDashboardProps {
-  projects: Project[];
-  onSelectProject: (projectId: string) => void;
+    projectId: string;
+    projectName: string;
 }
 
-interface ProjectKPI {
-  id: string;
-  name: string;
-  progress: number;
-  health: 'excellent' | 'good' | 'warning' | 'critical';
-  scheduleVariance: number;
-  costVariance: number;
-  totalBudget: number;
-  spentBudget: number;
-  openRisks: number;
-  criticalRisks: number;
-  teamSize: number;
-  daysRemaining: number;
-  completionDate: string;
-  cpi: number; // Cost Performance Index
-  spi: number; // Schedule Performance Index
-}
+export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ projectId, projectName }) => {
+    const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly'>('weekly');
+    const [showNotifications, setShowNotifications] = useState(false);
 
-export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ projects, onSelectProject }) => {
-  const [selectedView, setSelectedView] = useState<'overview' | 'financial' | 'schedule' | 'risks' | 'resources'>('overview');
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'quarter' | 'year'>('month');
-  const [sortBy, setSortBy] = useState<'name' | 'progress' | 'budget' | 'health'>('health');
-
-  // Calculate KPIs for all projects
-  const projectsKPI = useMemo((): ProjectKPI[] => {
-    return projects.map(project => {
-      const totalTasks = project.data.schedule.length;
-      const completedTasks = project.data.schedule.filter(t => t.progress === 100).length;
-      const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-      
-      const totalBudget = project.data.financials.reduce((sum, item) => sum + item.total, 0);
-      const spentBudget = totalBudget * (progress / 100); // تقديري
-      
-      const openRisks = project.data.riskRegister.filter(r => r.status === 'Open').length;
-      const criticalRisks = project.data.riskRegister.filter(
-        r => r.status === 'Open' && r.probability === 'High' && r.impact === 'High'
-      ).length;
-      
-      const teamSize = project.data.members?.length || 0;
-      
-      const endDate = new Date(project.endDate || project.startDate);
-      const today = new Date();
-      const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      
-      // Calculate performance indices
-      const plannedProgress = getPlannedProgress(project);
-      const spi = plannedProgress > 0 ? progress / plannedProgress : 1;
-      const cpi = totalBudget > 0 ? totalBudget / (spentBudget || 1) : 1;
-      
-      const scheduleVariance = progress - plannedProgress;
-      const costVariance = totalBudget - spentBudget;
-      
-      // Determine project health
-      let health: 'excellent' | 'good' | 'warning' | 'critical' = 'good';
-      if (criticalRisks > 0 || cpi < 0.8 || spi < 0.8) {
-        health = 'critical';
-      } else if (openRisks > 5 || cpi < 0.9 || spi < 0.9) {
-        health = 'warning';
-      } else if (cpi >= 1 && spi >= 1) {
-        health = 'excellent';
-      }
-      
-      return {
-        id: project.id,
-        name: project.name,
-        progress,
-        health,
-        scheduleVariance,
-        costVariance,
-        totalBudget,
-        spentBudget,
-        openRisks,
-        criticalRisks,
-        teamSize,
-        daysRemaining,
-        completionDate: project.endDate || 'غير محدد',
-        cpi,
-        spi
-      };
-    });
-  }, [projects]);
-
-  // Calculate portfolio statistics
-  const portfolioStats = useMemo(() => {
-    const totalProjects = projectsKPI.length;
-    const activeProjects = projectsKPI.filter(p => p.progress < 100 && p.progress > 0).length;
-    const completedProjects = projectsKPI.filter(p => p.progress === 100).length;
-    const notStartedProjects = projectsKPI.filter(p => p.progress === 0).length;
-    
-    const totalBudget = projectsKPI.reduce((sum, p) => sum + p.totalBudget, 0);
-    const totalSpent = projectsKPI.reduce((sum, p) => sum + p.spentBudget, 0);
-    const budgetUtilization = (totalSpent / totalBudget) * 100;
-    
-    const avgProgress = projectsKPI.reduce((sum, p) => sum + p.progress, 0) / totalProjects;
-    
-    const healthyProjects = projectsKPI.filter(p => p.health === 'excellent' || p.health === 'good').length;
-    const atRiskProjects = projectsKPI.filter(p => p.health === 'warning' || p.health === 'critical').length;
-    
-    const totalRisks = projectsKPI.reduce((sum, p) => sum + p.openRisks, 0);
-    const criticalRisks = projectsKPI.reduce((sum, p) => sum + p.criticalRisks, 0);
-    
-    const totalTeamMembers = projectsKPI.reduce((sum, p) => sum + p.teamSize, 0);
-    
-    const avgCPI = projectsKPI.reduce((sum, p) => sum + p.cpi, 0) / totalProjects;
-    const avgSPI = projectsKPI.reduce((sum, p) => sum + p.spi, 0) / totalProjects;
-    
-    return {
-      totalProjects,
-      activeProjects,
-      completedProjects,
-      notStartedProjects,
-      totalBudget,
-      totalSpent,
-      budgetUtilization,
-      avgProgress,
-      healthyProjects,
-      atRiskProjects,
-      totalRisks,
-      criticalRisks,
-      totalTeamMembers,
-      avgCPI,
-      avgSPI
+    // Sample Executive Report Data
+    const executiveReport: ExecutiveReport = {
+        id: 'ER-001',
+        projectId,
+        reportDate: '2024-11-06',
+        reportPeriod: 'Weekly',
+        overallStatus: 'Yellow',
+        scheduleStatus: 'Slight Delay',
+        costStatus: 'On Budget',
+        qualityStatus: 'Good',
+        majorAccomplishments: [
+            'إنجاز أعمال الخرسانة للأساسات بنسبة 100%',
+            'استلام 80% من الحديد المطلوب',
+            'اعتماد المخططات المعمارية النهائية'
+        ],
+        criticalIssues: [
+            'تأخر تسليم بعض المعدات بسبب ظروف الشحن',
+            'نقص في العمالة المتخصصة لأعمال الكهرباء',
+            'حاجة لتعديل بعض المخططات الإنشائية'
+        ],
+        upcomingMilestones: [
+            'بداية أعمال الهيكل الخرساني - 2024-11-10',
+            'استلام معدات التكييف - 2024-11-15',
+            'المراجعة الفنية الشهرية - 2024-11-20'
+        ],
+        decisionsRequired: [
+            'الموافقة على تغيير في نوع البلاط المستخدم',
+            'اعتماد ميزانية إضافية للعمالة',
+            'اتخاذ قرار بشأن مقاول الكهرباء البديل'
+        ],
+        contractValue: 5000000,
+        valuePaid: 1500000,
+        valueEarned: 1100000,
+        costToDate: 1150000,
+        projectedFinalCost: 5100000,
+        profitMargin: -2,
+        physicalProgress: 22,
+        plannedProgress: 24,
+        scheduleDeviation: -2,
+        currentManpower: 45,
+        peakManpower: 80,
+        activeEquipment: 12,
+        progressTrend: 'Stable',
+        costTrend: 'Stable',
+        productivityTrend: 'Improving'
     };
-  }, [projectsKPI]);
 
-  // Sort projects
-  const sortedProjects = useMemo(() => {
-    return [...projectsKPI].sort((a, b) => {
-      switch (sortBy) {
-        case 'name': return a.name.localeCompare(b.name, 'ar');
-        case 'progress': return b.progress - a.progress;
-        case 'budget': return b.totalBudget - a.totalBudget;
-        case 'health':
-          const healthOrder = { excellent: 4, good: 3, warning: 2, critical: 1 };
-          return healthOrder[b.health] - healthOrder[a.health];
-        default: return 0;
-      }
-    });
-  }, [projectsKPI, sortBy]);
-
-  const exportPortfolioReport = () => {
-    const report = {
-      generatedDate: new Date().toLocaleString('ar-SA'),
-      portfolioStats,
-      projects: projectsKPI
+    // Project Metrics
+    const projectMetrics: ProjectMetrics = {
+        projectId,
+        date: '2024-11-06',
+        totalTasks: 150,
+        completedTasks: 33,
+        inProgressTasks: 25,
+        delayedTasks: 8,
+        scheduleProgress: 22,
+        criticalPathDuration: 180,
+        projectDuration: 240,
+        daysRemaining: 186,
+        scheduleHealth: 'At Risk',
+        totalBudget: 5000000,
+        committedCost: 2000000,
+        actualCost: 1150000,
+        remainingBudget: 3850000,
+        budgetUtilization: 23,
+        financialHealth: 'Healthy',
+        totalLabor: 60,
+        activeLabor: 45,
+        laborUtilization: 75,
+        totalEquipment: 18,
+        activeEquipment: 12,
+        equipmentUtilization: 67,
+        totalRisks: 12,
+        openRisks: 5,
+        highPriorityRisks: 2,
+        qualityIssues: 3,
+        safetyIncidents: 0,
+        totalPurchaseOrders: 45,
+        pendingPurchaseOrders: 12,
+        deliveredPurchaseOrders: 28,
+        procurementEfficiency: 82
     };
-    
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `تقرير_محفظة_المشاريع_${Date.now()}.json`;
-    a.click();
-  };
 
-  return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-purple-900/20">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <LayoutDashboard className="text-purple-600" />
-              لوحة التحكم التنفيذية
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              نظرة شاملة على جميع المشاريع والأداء العام للمحفظة
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-            >
-              <RefreshCcw size={20} />
-              تحديث
-            </button>
-            <button
-              onClick={exportPortfolioReport}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-            >
-              <Download size={20} />
-              تصدير التقرير
-            </button>
-          </div>
-        </div>
+    // KPIs Data
+    const kpis: ProjectKPI[] = [
+        {
+            id: 'KPI-001',
+            name: 'نسبة الإنجاز الفعلي',
+            category: 'Schedule',
+            currentValue: 22,
+            targetValue: 24,
+            unit: '%',
+            trend: 'Declining',
+            status: 'Warning',
+            lastUpdated: '2024-11-06',
+            description: 'نسبة الإنجاز الفعلية مقارنة بالمخطط'
+        },
+        {
+            id: 'KPI-002',
+            name: 'مؤشر أداء التكلفة (CPI)',
+            category: 'Cost',
+            currentValue: 0.96,
+            targetValue: 1.0,
+            unit: '',
+            trend: 'Stable',
+            status: 'Warning',
+            lastUpdated: '2024-11-06',
+            description: 'كفاءة استخدام الميزانية'
+        },
+        {
+            id: 'KPI-003',
+            name: 'مؤشر أداء الجدول (SPI)',
+            category: 'Schedule',
+            currentValue: 0.92,
+            targetValue: 1.0,
+            unit: '',
+            trend: 'Stable',
+            status: 'Warning',
+            lastUpdated: '2024-11-06',
+            description: 'الالتزام بالجدول الزمني'
+        },
+        {
+            id: 'KPI-004',
+            name: 'معدل استخدام العمالة',
+            category: 'Resource',
+            currentValue: 75,
+            targetValue: 80,
+            unit: '%',
+            trend: 'Improving',
+            status: 'Good',
+            lastUpdated: '2024-11-06',
+            description: 'كفاءة استخدام العمالة'
+        },
+        {
+            id: 'KPI-005',
+            name: 'معدل الجودة',
+            category: 'Quality',
+            currentValue: 92,
+            targetValue: 95,
+            unit: '%',
+            trend: 'Improving',
+            status: 'Good',
+            lastUpdated: '2024-11-06',
+            description: 'نسبة الأعمال المقبولة من المرة الأولى'
+        },
+        {
+            id: 'KPI-006',
+            name: 'معدل السلامة',
+            category: 'Safety',
+            currentValue: 100,
+            targetValue: 100,
+            unit: '%',
+            trend: 'Stable',
+            status: 'Good',
+            lastUpdated: '2024-11-06',
+            description: 'أيام بدون حوادث'
+        }
+    ];
 
-        {/* View Tabs */}
-        <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
-          {[
-            { key: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
-            { key: 'financial', label: 'الأداء المالي', icon: DollarSign },
-            { key: 'schedule', label: 'الجداول الزمنية', icon: Calendar },
-            { key: 'risks', label: 'المخاطر', icon: AlertTriangle },
-            { key: 'resources', label: 'الموارد', icon: Users }
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setSelectedView(tab.key as any)}
-              className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
-                selectedView === tab.key
-                  ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <tab.icon size={18} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    // Notifications
+    const notifications: Notification[] = [
+        {
+            id: 'N001',
+            type: 'Critical',
+            category: 'Schedule',
+            title: 'تأخير محتمل في المسار الحرج',
+            message: 'مهمة "صب الخرسانة للأساسات" متأخرة 3 أيام وتؤثر على المسار الحرج',
+            date: '2024-11-06 09:30',
+            read: false,
+            actionRequired: true,
+            actionLink: '/schedule',
+            relatedEntityId: 'T-005',
+            priority: 'Urgent'
+        },
+        {
+            id: 'N002',
+            type: 'Warning',
+            category: 'Cost',
+            title: 'اقتراب من حد الميزانية',
+            message: 'بند "العمالة المباشرة" استخدم 85% من الميزانية المخصصة',
+            date: '2024-11-06 10:15',
+            read: false,
+            actionRequired: true,
+            actionLink: '/cost-control',
+            relatedEntityId: 'BA-001',
+            priority: 'High'
+        },
+        {
+            id: 'N003',
+            type: 'Info',
+            category: 'Procurement',
+            title: 'استلام أمر شراء',
+            message: 'تم استلام شحنة الحديد - أمر شراء PO-012',
+            date: '2024-11-06 11:45',
+            read: true,
+            actionRequired: false,
+            relatedEntityId: 'PO-012',
+            priority: 'Medium'
+        }
+    ];
 
-      {/* Overview View */}
-      {selectedView === 'overview' && (
-        <div className="flex-1 overflow-auto p-6">
-          {/* Executive KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <ExecutiveKPI
-              title="إجمالي المشاريع"
-              value={portfolioStats.totalProjects}
-              subtitle={`${portfolioStats.activeProjects} نشط | ${portfolioStats.completedProjects} مكتمل`}
-              icon={Building2}
-              color="bg-blue-600"
-              trend="neutral"
-            />
-            <ExecutiveKPI
-              title="الميزانية الإجمالية"
-              value={`${(portfolioStats.totalBudget / 1000000).toFixed(1)}M`}
-              subtitle={`${portfolioStats.budgetUtilization.toFixed(1)}% مستخدم`}
-              icon={DollarSign}
-              color="bg-green-600"
-              trend={portfolioStats.budgetUtilization < 90 ? 'positive' : 'warning'}
-            />
-            <ExecutiveKPI
-              title="متوسط التقدم"
-              value={`${portfolioStats.avgProgress.toFixed(1)}%`}
-              subtitle={`CPI: ${portfolioStats.avgCPI.toFixed(2)} | SPI: ${portfolioStats.avgSPI.toFixed(2)}`}
-              icon={Activity}
-              color="bg-purple-600"
-              trend={portfolioStats.avgSPI >= 1 ? 'positive' : 'negative'}
-            />
-            <ExecutiveKPI
-              title="المشاريع المعرضة للخطر"
-              value={portfolioStats.atRiskProjects}
-              subtitle={`${portfolioStats.criticalRisks} مخاطر حرجة`}
-              icon={AlertTriangle}
-              color="bg-red-600"
-              trend={portfolioStats.atRiskProjects === 0 ? 'positive' : 'negative'}
-            />
-          </div>
+    // Chart Data
+    const progressTrendData = [
+        { month: 'يونيو', مخطط: 10, فعلي: 9 },
+        { month: 'يوليو', مخطط: 20, فعلي: 18 },
+        { month: 'أغسطس', مخطط: 30, فعلي: 27 },
+        { month: 'سبتمبر', مخطط: 40, فعلي: 36 },
+        { month: 'أكتوبر', مخطط: 50, فعلي: 44 },
+        { month: 'نوفمبر (حتى الآن)', مخطط: 60, فعلي: 52 }
+    ];
 
-          {/* Portfolio Health Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Health Distribution */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <PieChart size={20} />
-                توزيع صحة المشاريع
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { status: 'excellent', label: 'ممتاز', color: 'bg-emerald-500', count: projectsKPI.filter(p => p.health === 'excellent').length },
-                  { status: 'good', label: 'جيد', color: 'bg-blue-500', count: projectsKPI.filter(p => p.health === 'good').length },
-                  { status: 'warning', label: 'تحذير', color: 'bg-yellow-500', count: projectsKPI.filter(p => p.health === 'warning').length },
-                  { status: 'critical', label: 'حرج', color: 'bg-red-500', count: projectsKPI.filter(p => p.health === 'critical').length }
-                ].map(item => {
-                  const percentage = (item.count / portfolioStats.totalProjects) * 100;
-                  return (
-                    <div key={item.status}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {item.count} ({percentage.toFixed(0)}%)
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                        <div className={`${item.color} h-3 rounded-full`} style={{ width: `${percentage}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+    const costTrendData = [
+        { month: 'يونيو', مخطط: 200000, فعلي: 180000 },
+        { month: 'يوليو', مخطط: 400000, فعلي: 400000 },
+        { month: 'أغسطس', مخطط: 600000, فعلي: 620000 },
+        { month: 'سبتمبر', مخطط: 800000, فعلي: 850000 },
+        { month: 'أكتوبر', مخطط: 1000000, فعلي: 1050000 },
+        { month: 'نوفمبر (حتى الآن)', مخطط: 1200000, فعلي: 1150000 }
+    ];
 
-            {/* Financial Performance */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <BarChart3 size={20} />
-                الأداء المالي للمحفظة
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">الميزانية الإجمالية</span>
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">
-                    {portfolioStats.totalBudget.toLocaleString('ar-SA')} ريال
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">المصروفات حتى الآن</span>
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    {portfolioStats.totalSpent.toLocaleString('ar-SA')} ريال
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">المتبقي</span>
-                  <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                    {(portfolioStats.totalBudget - portfolioStats.totalSpent).toLocaleString('ar-SA')} ريال
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">معامل أداء التكلفة (CPI)</span>
-                  <span className={`text-lg font-bold ${portfolioStats.avgCPI >= 1 ? 'text-green-600' : 'text-red-600'}`}>
-                    {portfolioStats.avgCPI.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+    const resourceUtilizationData = [
+        { resource: 'العمالة', utilization: 75 },
+        { resource: 'المعدات', utilization: 67 },
+        { resource: 'المواد', utilization: 82 },
+        { resource: 'المقاولون', utilization: 55 }
+    ];
 
-          {/* Projects List */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">قائمة المشاريع</h3>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-              >
-                <option value="health">ترتيب حسب: الصحة</option>
-                <option value="name">ترتيب حسب: الاسم</option>
-                <option value="progress">ترتيب حسب: التقدم</option>
-                <option value="budget">ترتيب حسب: الميزانية</option>
-              </select>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">المشروع</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الصحة</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">التقدم</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الميزانية</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">CPI / SPI</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">المخاطر</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الأيام المتبقية</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {sortedProjects.map(project => (
-                    <ProjectRow
-                      key={project.id}
-                      project={project}
-                      onClick={() => onSelectProject(project.id)}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+    const performanceRadarData = [
+        { subject: 'الجدول', A: 92, fullMark: 100 },
+        { subject: 'التكلفة', A: 96, fullMark: 100 },
+        { subject: 'الجودة', A: 92, fullMark: 100 },
+        { subject: 'السلامة', A: 100, fullMark: 100 },
+        { subject: 'الموارد', A: 75, fullMark: 100 },
+        { subject: 'المشتريات', A: 82, fullMark: 100 }
+    ];
 
-      {/* Other Views */}
-      {selectedView !== 'overview' && (
-        <div className="flex-1 overflow-auto p-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              {selectedView === 'financial' && 'التحليل المالي التفصيلي'}
-              {selectedView === 'schedule' && 'تحليل الجداول الزمنية'}
-              {selectedView === 'risks' && 'إدارة مخاطر المحفظة'}
-              {selectedView === 'resources' && 'إدارة موارد المحفظة'}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">سيتم إضافة التفاصيل الكاملة قريباً</p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Helper function
-function getPlannedProgress(project: Project): number {
-  const startDate = new Date(project.startDate);
-  const endDate = new Date(project.endDate || project.startDate);
-  const today = new Date();
-  
-  const totalDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-  const elapsedDays = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-  
-  return Math.max(0, Math.min(100, (elapsedDays / totalDays) * 100));
-}
-
-// Helper Components
-const ExecutiveKPI: React.FC<{
-  title: string;
-  value: string | number;
-  subtitle: string;
-  icon: React.ElementType;
-  color: string;
-  trend: 'positive' | 'negative' | 'warning' | 'neutral';
-}> = ({ title, value, subtitle, icon: Icon, color, trend }) => {
-  const getTrendIcon = () => {
-    if (trend === 'positive') return <TrendingUp className="text-green-500" size={20} />;
-    if (trend === 'negative') return <TrendingDown className="text-red-500" size={20} />;
-    if (trend === 'warning') return <AlertTriangle className="text-yellow-500" size={20} />;
-    return <Activity className="text-gray-500" size={20} />;
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="text-white" size={24} />
-        </div>
-        {getTrendIcon()}
-      </div>
-      <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">{title}</p>
-      <p className="text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
-    </div>
-  );
-};
-
-const ProjectRow: React.FC<{
-  project: ProjectKPI;
-  onClick: () => void;
-}> = ({ project, onClick }) => {
-  const getHealthBadge = () => {
-    const colors = {
-      excellent: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-      good: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    // Status Indicators
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Green': return 'bg-green-500';
+            case 'Yellow': return 'bg-yellow-500';
+            case 'Red': return 'bg-red-500';
+            default: return 'bg-gray-500';
+        }
     };
-    const labels = {
-      excellent: 'ممتاز',
-      good: 'جيد',
-      warning: 'تحذير',
-      critical: 'حرج'
+
+    const getStatusIcon = (status: string) => {
+        switch (status) {
+            case 'Green': return <CheckCircle size={20} />;
+            case 'Yellow': return <AlertCircle size={20} />;
+            case 'Red': return <AlertCircle size={20} />;
+            default: return <Minus size={20} />;
+        }
     };
+
+    const getTrendIcon = (trend: string) => {
+        switch (trend) {
+            case 'Improving': return <ArrowUp className="text-green-600" size={16} />;
+            case 'Declining': return <ArrowDown className="text-red-600" size={16} />;
+            case 'Stable': return <Minus className="text-gray-600" size={16} />;
+            default: return <Minus className="text-gray-600" size={16} />;
+        }
+    };
+
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[project.health]}`}>
-        {labels[project.health]}
-      </span>
-    );
-  };
+        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 className="text-3xl font-bold flex items-center gap-3">
+                            <Briefcase size={32} />
+                            لوحة التحكم التنفيذية
+                        </h1>
+                        <p className="text-indigo-100 mt-1">
+                            {projectName} - تقرير شامل لصاحب الشركة
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className="relative p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                        >
+                            <Bell size={24} />
+                            {notifications.filter(n => !n.read).length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    {notifications.filter(n => !n.read).length}
+                                </span>
+                            )}
+                        </button>
+                        <button className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+                            <RefreshCw size={24} />
+                        </button>
+                        <button className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+                            <Download size={24} />
+                        </button>
+                    </div>
+                </div>
 
-  return (
-    <tr
-      onClick={onClick}
-      className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-    >
-      <td className="px-6 py-4">
-        <div className="text-sm font-medium text-gray-900 dark:text-white">{project.name}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">الإنجاز: {project.completionDate}</div>
-      </td>
-      <td className="px-6 py-4">{getHealthBadge()}</td>
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full"
-              style={{ width: `${project.progress}%` }}
-            />
-          </div>
-          <span className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">
-            {project.progress.toFixed(0)}%
-          </span>
+                {/* Overall Status Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-white/10 backdrop-blur-lg rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm">الحالة العامة</span>
+                            {getStatusIcon(executiveReport.overallStatus)}
+                        </div>
+                        <div className={`w-full h-2 rounded-full ${getStatusColor(executiveReport.overallStatus)}`} />
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-lg rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm">الجدول</span>
+                            <Clock size={20} />
+                        </div>
+                        <p className="text-sm font-medium">{executiveReport.scheduleStatus}</p>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-lg rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm">التكلفة</span>
+                            <DollarSign size={20} />
+                        </div>
+                        <p className="text-sm font-medium">{executiveReport.costStatus}</p>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-lg rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm">الجودة</span>
+                            <Award size={20} />
+                        </div>
+                        <p className="text-sm font-medium">{executiveReport.qualityStatus}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 overflow-auto p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column - KPIs and Metrics */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Key Financial Metrics */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <DollarSign size={24} className="text-green-600" />
+                                المؤشرات المالية الرئيسية
+                            </h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">قيمة العقد</p>
+                                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                                        {(executiveReport.contractValue / 1000000).toFixed(1)}M ريال
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">المدفوع</p>
+                                    <p className="text-xl font-bold text-green-600">
+                                        {(executiveReport.valuePaid / 1000000).toFixed(1)}M ريال
+                                    </p>
+                                    <p className="text-xs text-gray-500">{((executiveReport.valuePaid / executiveReport.contractValue) * 100).toFixed(0)}%</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">المكتسب</p>
+                                    <p className="text-xl font-bold text-blue-600">
+                                        {(executiveReport.valueEarned / 1000000).toFixed(1)}M ريال
+                                    </p>
+                                    <p className="text-xs text-gray-500">{((executiveReport.valueEarned / executiveReport.contractValue) * 100).toFixed(0)}%</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">هامش الربح</p>
+                                    <p className={`text-xl font-bold ${executiveReport.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {executiveReport.profitMargin.toFixed(1)}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Progress Overview Chart */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                منحنى التقدم (مخطط vs فعلي)
+                            </h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <AreaChart data={progressTrendData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="month" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Area type="monotone" dataKey="مخطط" stroke="#4F46E5" fill="#4F46E5" fillOpacity={0.3} />
+                                    <Area type="monotone" dataKey="فعلي" stroke="#10B981" fill="#10B981" fillOpacity={0.3} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* Cost Trend Chart */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                اتجاه التكاليف
+                            </h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={costTrendData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="month" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="مخطط" stroke="#4F46E5" strokeWidth={2} />
+                                    <Line type="monotone" dataKey="فعلي" stroke="#EF4444" strokeWidth={2} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* Resource Utilization */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                استخدام الموارد
+                            </h3>
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart data={resourceUtilizationData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis type="number" domain={[0, 100]} />
+                                    <YAxis dataKey="resource" type="category" />
+                                    <Tooltip />
+                                    <Bar dataKey="utilization" fill="#4F46E5" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* Performance Radar */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                تحليل الأداء الشامل
+                            </h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <RadarChart data={performanceRadarData}>
+                                    <PolarGrid />
+                                    <PolarAngleAxis dataKey="subject" />
+                                    <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                                    <Radar name="الأداء" dataKey="A" stroke="#4F46E5" fill="#4F46E5" fillOpacity={0.6} />
+                                    <Tooltip />
+                                </RadarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Right Column - KPIs, Issues, Decisions */}
+                    <div className="space-y-6">
+                        {/* KPIs Grid */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <Target size={20} className="text-indigo-600" />
+                                مؤشرات الأداء الرئيسية
+                            </h3>
+                            <div className="space-y-3">
+                                {kpis.map(kpi => (
+                                    <div key={kpi.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-medium text-gray-900 dark:text-white">{kpi.name}</span>
+                                            <div className="flex items-center gap-1">
+                                                {getTrendIcon(kpi.trend)}
+                                                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                                    kpi.status === 'Good' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                    kpi.status === 'Warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                                }`}>
+                                                    {kpi.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                                {kpi.currentValue}{kpi.unit}
+                                            </span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                الهدف: {kpi.targetValue}{kpi.unit}
+                                            </span>
+                                        </div>
+                                        <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                            <div 
+                                                className={`h-1.5 rounded-full ${
+                                                    kpi.status === 'Good' ? 'bg-green-500' :
+                                                    kpi.status === 'Warning' ? 'bg-yellow-500' :
+                                                    'bg-red-500'
+                                                }`}
+                                                style={{ width: `${Math.min((kpi.currentValue / kpi.targetValue) * 100, 100)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Major Accomplishments */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <CheckCircle size={20} className="text-green-600" />
+                                الإنجازات الرئيسية
+                            </h3>
+                            <ul className="space-y-2">
+                                {executiveReport.majorAccomplishments.map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-900 dark:text-white">
+                                        <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Critical Issues */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <AlertCircle size={20} className="text-red-600" />
+                                القضايا الحرجة
+                            </h3>
+                            <ul className="space-y-2">
+                                {executiveReport.criticalIssues.map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-900 dark:text-white">
+                                        <AlertCircle size={16} className="text-red-600 mt-0.5 flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Upcoming Milestones */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <Calendar size={20} className="text-blue-600" />
+                                المعالم القادمة
+                            </h3>
+                            <ul className="space-y-2">
+                                {executiveReport.upcomingMilestones.map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-900 dark:text-white">
+                                        <Clock size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Decisions Required */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-orange-200 dark:border-orange-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <Zap size={20} className="text-orange-600" />
+                                قرارات مطلوبة
+                            </h3>
+                            <ul className="space-y-2">
+                                {executiveReport.decisionsRequired.map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-900 dark:text-white">
+                                        <Zap size={16} className="text-orange-600 mt-0.5 flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Resource Summary */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <Users size={20} className="text-purple-600" />
+                                ملخص الموارد
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">العمالة الحالية</span>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{executiveReport.currentManpower}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ذروة العمالة</span>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{executiveReport.peakManpower}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">المعدات النشطة</span>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{executiveReport.activeEquipment}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Notifications Panel */}
+            {showNotifications && (
+                <div className="fixed inset-y-0 left-0 w-96 bg-white dark:bg-gray-800 shadow-2xl border-r border-gray-200 dark:border-gray-700 z-50 overflow-auto">
+                    <div className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Bell size={24} />
+                                الإشعارات
+                            </h3>
+                            <button 
+                                onClick={() => setShowNotifications(false)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {notifications.map(notif => (
+                                <div 
+                                    key={notif.id}
+                                    className={`p-4 rounded-lg border ${
+                                        notif.type === 'Critical' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
+                                        notif.type === 'Warning' ? 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20' :
+                                        notif.type === 'Info' ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20' :
+                                        'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                                    } ${!notif.read ? 'font-semibold' : ''}`}
+                                >
+                                    <div className="flex items-start justify-between mb-2">
+                                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">{notif.title}</h4>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                            notif.priority === 'Urgent' ? 'bg-red-600 text-white' :
+                                            notif.priority === 'High' ? 'bg-orange-600 text-white' :
+                                            notif.priority === 'Medium' ? 'bg-yellow-600 text-white' :
+                                            'bg-gray-600 text-white'
+                                        }`}>
+                                            {notif.priority}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-700 dark:text-gray-300 mb-2">{notif.message}</p>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">{notif.date}</span>
+                                        {notif.actionRequired && (
+                                            <button className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">
+                                                اتخاذ إجراء →
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="text-sm font-medium text-gray-900 dark:text-white">
-          {(project.totalBudget / 1000000).toFixed(2)}M ريال
-        </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          مصروف: {(project.spentBudget / 1000000).toFixed(2)}M
-        </div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="text-sm">
-          <span className={`font-medium ${project.cpi >= 1 ? 'text-green-600' : 'text-red-600'}`}>
-            {project.cpi.toFixed(2)}
-          </span>
-          {' / '}
-          <span className={`font-medium ${project.spi >= 1 ? 'text-green-600' : 'text-red-600'}`}>
-            {project.spi.toFixed(2)}
-          </span>
-        </div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="text-sm text-gray-900 dark:text-white">
-          {project.openRisks} مفتوح
-        </div>
-        {project.criticalRisks > 0 && (
-          <div className="text-xs text-red-600 dark:text-red-400">
-            {project.criticalRisks} حرج
-          </div>
-        )}
-      </td>
-      <td className="px-6 py-4">
-        <span className={`text-sm font-medium ${
-          project.daysRemaining < 0
-            ? 'text-red-600'
-            : project.daysRemaining < 30
-            ? 'text-yellow-600'
-            : 'text-gray-900 dark:text-white'
-        }`}>
-          {project.daysRemaining} يوم
-        </span>
-      </td>
-    </tr>
-  );
+    );
 };
 
 export default ExecutiveDashboard;

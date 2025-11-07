@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, ProjectMember } from '../types';
 import { X } from 'lucide-react';
+import { TeamMemberPicker } from './TeamMemberPicker';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -189,18 +190,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             </div>
           </div>
            <div className="mb-4">
-            <label htmlFor="taskAssignees" className="block text-sm font-medium mb-2">المسؤولون</label>
-            <select
-                id="taskAssignees"
-                multiple
-                value={assignees}
-                onChange={e => setAssignees(Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value))}
-                className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded-lg h-24"
-            >
-                {members.map(member => (
-                    <option key={member.id} value={member.id}>{member.name}</option>
-                ))}
-            </select>
+            <TeamMemberPicker
+              members={members}
+              selectedMemberIds={assignees}
+              onSelectionChange={setAssignees}
+              label="المسؤولون عن المهمة"
+              placeholder="ابحث عن الأعضاء..."
+            />
           </div>
 
           <div className="flex justify-end gap-4 mt-6">

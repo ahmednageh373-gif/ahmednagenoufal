@@ -315,13 +315,20 @@ export interface RetrofittingPlan {
 
 
 // --- Project Members ---
-export type MemberRole = 'Admin' | 'Engineer' | 'Viewer';
+export type MemberRole = 'Admin' | 'Engineer' | 'Viewer' | 'Project Manager' | 'Architect' | 'Contractor' | 'Consultant';
 
 export interface ProjectMember {
     id: string;
     name: string;
     email: string;
     role: MemberRole;
+    avatar?: string; // URL or data URI
+    avatarColor?: string; // Hex color for generated avatars
+    phone?: string;
+    department?: string;
+    skills?: string[];
+    isActive?: boolean;
+    joinedDate?: string;
 }
 
 

@@ -3,6 +3,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import type { ScheduleTask, CriticalPathAnalysis, ProjectMember } from '../types';
 import { MoreHorizontal, User, Circle, CheckCircle, Clock, TrendingUp, TrendingDown, Minus, Eye, EyeOff, Info } from 'lucide-react';
 import { TaskContextMenu } from './TaskContextMenu';
+import { getInitials, generateColorFromString, getContrastColor } from '../utils/avatarUtils';
 
 // A type for tasks that have been processed to include calculated values
 export interface ProcessedScheduleTask extends ScheduleTask {
@@ -26,6 +27,41 @@ interface GanttChartProps {
 }
 
 const DAY_WIDTH = 35; // px
+
+// Member Avatar Component for Gantt Chart
+const MemberAvatarSmall: React.FC<{ member: ProjectMember; size?: number }> = ({ member, size = 24 }) => {
+    const initials = getInitials(member.name);
+    const backgroundColor = member.avatarColor || generateColorFromString(member.name);
+    const textColor = getContrastColor(backgroundColor);
+
+    if (member.avatar) {
+        return (
+            <img
+                src={member.avatar}
+                alt={member.name}
+                className="rounded-full object-cover border-2 border-white dark:border-gray-800"
+                style={{ width: size, height: size }}
+                title={member.name}
+            />
+        );
+    }
+
+    return (
+        <div
+            className="rounded-full flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
+            style={{
+                width: size,
+                height: size,
+                backgroundColor,
+                color: textColor,
+                fontSize: `${size * 0.4}px`,
+            }}
+            title={member.name}
+        >
+            {initials}
+        </div>
+    );
+};
 
 const getDaysDiff = (date1: Date, date2: Date) => {
     const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
@@ -377,10 +413,20 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
                                     </div>
                                     <div className="w-20 flex justify-center items-center -space-x-2">
                                         {assignees.slice(0,3).map(member => (
-                                             <div key={member.id} title={member.name} className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-indigo-600 border-2 border-white dark:border-gray-900">
-                                                {member.name.charAt(0)}
-                                            </div>
+                                            <MemberAvatarSmall
+                                                key={member.id}
+                                                member={member}
+                                                size={24}
+                                            />
                                         ))}
+                                        {assignees.length > 3 && (
+                                            <div
+                                                className="w-6 h-6 rounded-full bg-gray-600 dark:bg-gray-700 border-2 border-white dark:border-gray-900 flex items-center justify-center text-[10px] font-bold text-white"
+                                                title={`+${assignees.length - 3} أعضاء`}
+                                            >
+                                                +{assignees.length - 3}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="w-16 flex justify-center">{getStatusIcon(task.status)}</div>
                                     {showVarianceIndicators && baselineStats.total > 0 && (
@@ -505,17 +551,44 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
                                         <div className={`absolute top-0 left-0 h-full rounded-md ${barColors.fill}`} style={{ width: `${task.progress}%` }}></div>
                                         <span className="relative truncate">{task.name}</span>
                                         
-                                        {/* Variance indicator badge on bar */}
-                                        {showVarianceIndicators && task.variance && task.varianceDays !== undefined && (
-                                            <span className={`relative ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                                task.variance === 'ahead' ? 'bg-green-500' :
-                                                task.variance === 'behind' ? 'bg-red-500' :
-                                                'bg-blue-500'
-                                            }`}>
-                                                {task.variance === 'ahead' ? `+${Math.abs(task.varianceDays)}` : 
-                                                 task.variance === 'behind' ? `-${task.varianceDays}` : '✓'}
-                                            </span>
-                                        )}
+                                        <div className="relative flex items-center gap-1">
+                                            {/* Member Avatars */}
+                                            {task.assignees && task.assignees.length > 0 && (
+                                                <div className="flex items-center -space-x-2">
+                                                    {task.assignees.slice(0, 3).map((assigneeId) => {
+                                                        const member = members.find(m => m.id === assigneeId);
+                                                        if (!member) return null;
+                                                        return (
+                                                            <MemberAvatarSmall
+                                                                key={member.id}
+                                                                member={member}
+                                                                size={20}
+                                                            />
+                                                        );
+                                                    })}
+                                                    {task.assignees.length > 3 && (
+                                                        <div
+                                                            className="w-5 h-5 rounded-full bg-gray-600 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold"
+                                                            title={`+${task.assignees.length - 3} أعضاء`}
+                                                        >
+                                                            +{task.assignees.length - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            
+                                            {/* Variance indicator badge on bar */}
+                                            {showVarianceIndicators && task.variance && task.varianceDays !== undefined && (
+                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                                    task.variance === 'ahead' ? 'bg-green-500' :
+                                                    task.variance === 'behind' ? 'bg-red-500' :
+                                                    'bg-blue-500'
+                                                }`}>
+                                                    {task.variance === 'ahead' ? `+${Math.abs(task.varianceDays)}` : 
+                                                     task.variance === 'behind' ? `-${task.varianceDays}` : '✓'}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             );

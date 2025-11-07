@@ -3,7 +3,10 @@
  * التواصل مع الـ 10 أنظمة في Backend Python
  */
 
-const BACKEND_URL = 'https://5000-i8ngr18dc7uqtnynq0d23-b9b802c4.sandbox.novita.ai';
+// Auto-detect backend URL based on current origin
+const BACKEND_URL = typeof window !== 'undefined' 
+  ? window.location.origin.replace('3000', '5000')
+  : 'http://localhost:5000';
 
 interface BackendResponse<T = any> {
   status: string;

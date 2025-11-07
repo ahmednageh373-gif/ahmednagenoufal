@@ -2098,6 +2098,23 @@ try:
 except Exception as e:
     print(f"⚠️ Warning: Could not register Primavera Magic APIs: {e}")
 
+# ============================================
+# PDF Manager APIs Integration
+# ============================================
+
+try:
+    from pdf_manager import pdf_manager_api
+    app.register_blueprint(pdf_manager_api)
+    print("✅ PDF Manager APIs registered successfully")
+    print("   📄 PDF Features Available:")
+    print("      - Upload PDF files (up to 50MB)")
+    print("      - Extract text with PyPDF2/pdfplumber")
+    print("      - AI-powered content analysis")
+    print("      - View/Download PDFs")
+    print("      - Categorize and tag documents")
+except Exception as e:
+    print(f"⚠️ Warning: Could not register PDF Manager APIs: {e}")
+
 
 # ============================================
 # تشغيل التطبيق

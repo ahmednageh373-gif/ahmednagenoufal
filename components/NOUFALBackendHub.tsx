@@ -142,16 +142,22 @@ export const NOUFALBackendHub: React.FC = () => {
   ];
 
   useEffect(() => {
+    console.log('NOUFALBackendHub mounted, checking health...');
+    console.log('API Base URL:', noufalAPI['baseUrl'] || 'undefined');
     checkSystemHealth();
   }, []);
 
   const checkSystemHealth = async () => {
     setLoading(true);
     try {
+      console.log('Checking backend health...');
       const [healthResponse, statusResponse] = await Promise.all([
         noufalAPI.healthCheck(),
         noufalAPI.getSystemStatus(),
       ]);
+
+      console.log('Health response:', healthResponse);
+      console.log('Status response:', statusResponse);
 
       setSystemStatus({
         health: healthResponse,
@@ -159,6 +165,7 @@ export const NOUFALBackendHub: React.FC = () => {
       });
     } catch (error) {
       console.error('Failed to check system health:', error);
+      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }

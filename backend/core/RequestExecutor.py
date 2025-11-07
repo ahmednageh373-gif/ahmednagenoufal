@@ -356,7 +356,8 @@ class RequestExecutor:
                 'scheduler': True,
                 'compliance_checker': True,
                 's_curve_generator': True,
-                'request_parser': True
+                'request_parser': True,
+                'request_executor': True
             },
             'cache': {
                 'last_uploaded_file': self.cache['last_uploaded_file'] is not None,

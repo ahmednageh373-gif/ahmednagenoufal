@@ -64,6 +64,7 @@ const MobileFieldHub = React.lazy(() => import('./components/MobileFieldHub').th
 const RFIManager = React.lazy(() => import('./components/RFIManager').then(module => ({ default: module.default })));
 const DesignExecutionManager = React.lazy(() => import('./components/DesignExecutionManager').then(module => ({ default: module.default })));
 const IntegrationMonitor = React.lazy(() => import('./components/IntegrationMonitor').then(module => ({ default: module.default })));
+const PDFManager = React.lazy(() => import('./components/PDFManager').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -412,6 +413,8 @@ const App: React.FC = () => {
                 return <DesignExecutionManager />;
             case 'integration-monitor':
                 return <IntegrationMonitor />;
+            case 'pdf-manager':
+                return <PDFManager />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

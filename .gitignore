@@ -1,10 +1,4 @@
-# ==========================================
-# Noufal Engineering System - .gitignore
-# ==========================================
-
-# ========================
 # Python
-# ========================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -29,148 +23,56 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# ========================
 # Virtual Environment
-# ========================
-.env
-.venv
-env/
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
 
-# ========================
 # IDEs
-# ========================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
-*.sublime-project
-*.sublime-workspace
 
-# ========================
 # Testing
-# ========================
 .pytest_cache/
 .coverage
-.coverage.*
 htmlcov/
-.tox/
-.nox/
-.hypothesis/
-coverage.xml
 *.cover
-*.py,cover
-nosetests.xml
+.hypothesis/
 
-# ========================
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment Variables
+.env
+.env.local
+
 # Logs
-# ========================
-logs/
 *.log
-*.log.*
-log/
+logs/
 
-# ========================
-# Docker
-# ========================
-.docker/
-docker-compose.override.yml
-
-# ========================
-# OS Files
-# ========================
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ========================
 # Database
-# ========================
 *.db
-*.sqlite
 *.sqlite3
-*.db-journal
-*.db-shm
-*.db-wal
 
-# ========================
-# Uploads & Temp
-# ========================
-uploads/
+# Exports (keep structure, ignore files)
+backend/data/schedules/*.xlsx
+backend/data/schedules/*.xer
+backend/data/schedules/*.json
+backend/data/schedules/*.txt
+backend/data/schedules/*.csv
+!backend/data/schedules/.gitkeep
+
+# Temporary files
+*.tmp
 temp/
 tmp/
-*.tmp
-*.bak
-*.backup
-*.old
 
-# ========================
-# Node.js (Frontend)
-# ========================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-package-lock.json
-yarn.lock
-dist/
-dist-ssr/
-*.local
-.vite/
-.cache/
-
-# ========================
-# Secrets & Keys
-# ========================
-*.pem
-*.key
-*.cert
-*.crt
-secrets/
-.secrets/
-
-# ========================
-# Pre-commit (keep config tracked)
-# ========================
-# We keep .pre-commit-config.yaml tracked
-# But exclude cache:
-.pre-commit-cache/
-
-# ========================
-# Documentation Build
-# ========================
-docs/_build/
-site/
-
-# ========================
-# Type Checking
-# ========================
-.mypy_cache/
-.dmypy.json
-dmypy.json
-.pyre/
-.pytype/
-
-# ========================
-# Jupyter
-# ========================
-.ipynb_checkpoints
-*.ipynb
-
-# ========================
-# Misc
-# ========================
-cython_debug/
-
-# ========================
-# Project Specific
-# ========================
-database/*.db
-!database/.gitkeep
+# OS
+Thumbs.db
+.DS_Store

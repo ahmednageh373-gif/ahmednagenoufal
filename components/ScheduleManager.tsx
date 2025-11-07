@@ -391,6 +391,29 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
         }
     };
 
+    const handleSetBaseline = () => {
+        if (schedule.length === 0) {
+            alert("لا يمكن تعيين الأساس لجدول فارغ.");
+            return;
+        }
+        
+        const tasksWithBaseline = schedule.filter(t => t.baselineStart || t.baselineEnd);
+        const confirmMessage = tasksWithBaseline.length > 0 
+            ? `يوجد ${tasksWithBaseline.length} مهمة لديها تواريخ أساس بالفعل. هل تريد استبدالها بالتواريخ الحالية؟`
+            : `سيتم تعيين التواريخ الحالية كتواريخ أساس لجميع المهام (${schedule.length} مهمة). هل تريد المتابعة؟`;
+        
+        if (window.confirm(confirmMessage)) {
+            const newSchedule = schedule.map(task => ({
+                ...task,
+                baselineStart: task.start,
+                baselineEnd: task.end,
+                baselineProgress: task.progress,
+            }));
+            onUpdateSchedule(project.id, newSchedule);
+            alert(`✅ تم تعيين الأساس بنجاح ل ${schedule.length} مهمة`);
+        }
+    };
+
     return (
         <div>
             <header className="flex justify-between items-center mb-8 flex-wrap gap-4 no-print">
@@ -401,6 +424,9 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
                     </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">
+                     <button onClick={handleSetBaseline} className="flex items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700">
+                        <BarChart size={18} /><span>تعيين الأساس</span>
+                    </button>
                      <button onClick={handleExportXLSX} className="flex items-center gap-2 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">
                         <File size={18} /><span>تصدير Excel احترافي</span>
                     </button>

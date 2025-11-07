@@ -68,6 +68,10 @@ export interface ScheduleTask {
     revisedStart?: string;
     revisedEnd?: string;
     recoverySuggestion?: 'crashed' | 'fast-tracked' | 're-sequenced' | 'unchanged';
+    // For baseline comparison
+    baselineStart?: string;
+    baselineEnd?: string;
+    baselineProgress?: number;
 }
 
 // --- Financial Manager ---

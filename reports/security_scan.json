@@ -1,0 +1,2145 @@
+{
+  "timestamp": "2025-11-07T16:51:39.853583",
+  "root_directory": "/home/user/webapp/backend",
+  "total_files": 116,
+  "total_lines": 29783,
+  "files_analyzed": [
+    {
+      "path": "/home/user/webapp/backend/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/app.py",
+      "sha256": "1a93d7f186f718f6d3036518cc6eb4c9b7d60af55ba7fc35e13a909338c7828d",
+      "size_bytes": 72793,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Flask, request, jsonify, send_from_directory\nfrom flask_cors import CORS\nfrom pathlib import Path\nfrom datetime import datetime\nimport sys",
+        "ExcelIntelligence\nfrom core",
+        "ProductivityDatabase\nfrom core",
+        "RelationshipEngine\nfrom core",
+        "SBCComplianceChecker\nfrom core",
+        "RequestParser\nfrom core",
+        "AutomationEngine\nfrom core",
+        "HousePlanIntegrator",
+        "DashboardService",
+        "ClaudePromptsService, PromptType",
+        "EngineeringToolsService\n        \n        tools",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "EngineeringToolsService\n        \n        data",
+        "advanced_api\n    app",
+        "primavera_magic_api\n    app",
+        "pdf_manager_api\n    app"
+      ],
+      "functions": [
+        "home",
+        "health_check",
+        "upload_file",
+        "classify_items",
+        "calculate_duration",
+        "get_productivity_rates",
+        "analyze_boq",
+        "analyze_items_deep",
+        "build_relationships",
+        "generate_schedule",
+        "get_gantt_data",
+        "check_sbc_compliance",
+        "generate_s_curve",
+        "generate_financial_s_curve",
+        "parse_request",
+        "execute_request",
+        "system_status",
+        "get_suggestions",
+        "get_automations",
+        "create_automation",
+        "toggle_automation",
+        "delete_automation",
+        "trigger_automation",
+        "get_automation_stats",
+        "get_automation_templates",
+        "get_template_by_id",
+        "search_templates",
+        "quick_estimate",
+        "get_regions",
+        "convert_units",
+        "calculate_irregular_land_area",
+        "get_available_units",
+        "scrape_house_plan",
+        "scrape_house_plan_list",
+        "estimate_from_house_plan",
+        "generate_boq_from_plan",
+        "compare_house_plans",
+        "analyze_house_plan",
+        "get_dashboard_stats",
+        "get_tool_usage_stats",
+        "get_recent_activities",
+        "check_system_health",
+        "log_tool_usage",
+        "get_projects",
+        "create_project",
+        "get_category_stats",
+        "get_usage_trend",
+        "list_claude_prompts",
+        "get_claude_prompt_info",
+        "format_claude_prompt",
+        "get_claude_templates",
+        "engineering_tools_list",
+        "engineering_tools_execute",
+        "engineering_tools_converter",
+        "engineering_tools_load_calculator",
+        "engineering_tools_steel_weight",
+        "engineering_tools_cutting_length",
+        "engineering_tools_rate_analysis",
+        "engineering_tools_building_estimator",
+        "engineering_tools_soil_mechanics",
+        "comprehensive_boq_analysis"
+      ],
+      "classes": [],
+      "complexity_score": 507
+    },
+    {
+      "path": "/home/user/webapp/backend/config.py",
+      "sha256": "2b3c633537c6fffaa2121f87b478a4094bfa8869994ae5ef17e6b3ff1b9436a4",
+      "size_bytes": 5490,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "os\nfrom pathlib import Path\nfrom typing import List\nfrom dotenv import load_dotenv"
+      ],
+      "functions": [
+        "init_app",
+        "init_app",
+        "get_config"
+      ],
+      "classes": [
+        "Config",
+        "DevelopmentConfig",
+        "ProductionConfig",
+        "TestingConfig"
+      ],
+      "complexity_score": 10
+    },
+    {
+      "path": "/home/user/webapp/backend/alembic.ini",
+      "sha256": "d18037da8f774b36d4ff63a938584c66e0e27fba6fc14c15edf3745baa14a172",
+      "size_bytes": 3668,
+      "file_type": ".ini",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 26
+    },
+    {
+      "path": "/home/user/webapp/backend/database.py",
+      "sha256": "01979f3c63f15b96da13fd96a72dd56c3d0612026e4bb7ee591897d1641107f0",
+      "size_bytes": 5874,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "create_engine, event\nfrom sqlalchemy",
+        "sessionmaker, scoped_session\nfrom sqlalchemy",
+        "os\nfrom contextlib import contextmanager"
+      ],
+      "functions": [
+        "set_sqlite_pragma",
+        "get_db",
+        "endpoint",
+        "get_db_context",
+        "init_db",
+        "drop_db",
+        "reset_db",
+        "get_or_create",
+        "bulk_insert",
+        "bulk_update"
+      ],
+      "classes": [
+        "DatabaseUtils"
+      ],
+      "complexity_score": 29
+    },
+    {
+      "path": "/home/user/webapp/backend/security.py",
+      "sha256": "2702dd8822dbe1d439be62b4d815fe8548bc91b5fe509c0477ee60ce496ae37f",
+      "size_bytes": 10548,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "request, jsonify\nfrom functools import wraps\nfrom datetime import datetime, timedelta\nimport hashlib\nimport secrets\nimport re\n\n\nclass SecurityHeaders",
+        "os\n        valid_key",
+        "datetime\n        \n        log_entry",
+        "init_security\n        init_security"
+      ],
+      "functions": [
+        "init_app",
+        "add_security_headers",
+        "__init__",
+        "is_allowed",
+        "_cleanup",
+        "rate_limit",
+        "endpoint",
+        "decorator",
+        "decorated_function",
+        "sanitize_string",
+        "validate_email",
+        "validate_phone",
+        "validate_file_extension",
+        "hash_password",
+        "verify_password",
+        "generate_api_key",
+        "hash_api_key",
+        "verify_api_key",
+        "require_api_key",
+        "secure_endpoint",
+        "decorated_function",
+        "log_event",
+        "init_security",
+        "log_request"
+      ],
+      "classes": [
+        "SecurityHeaders",
+        "RateLimiter",
+        "InputValidator",
+        "PasswordHasher",
+        "APIKeyManager",
+        "AuditLogger"
+      ],
+      "complexity_score": 70
+    },
+    {
+      "path": "/home/user/webapp/backend/monitoring.py",
+      "sha256": "884687909167be8683bfcf4b80ba6b1cd5c8e03ef2d7197328074e38e0b2d09d",
+      "size_bytes": 15053,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "psutil\nimport os\nimport time\nimport logging\nfrom datetime import datetime\nfrom typing import Dict, List, Optional\nfrom dataclasses import dataclass, asdict\nfrom threading import Thread, Lock\nimport json"
+      ],
+      "functions": [
+        "__init__",
+        "get_current_metrics",
+        "_check_thresholds",
+        "get_process_metrics",
+        "get_health_status",
+        "get_metrics_summary",
+        "start_monitoring",
+        "monitor_loop",
+        "stop_monitoring",
+        "export_metrics",
+        "clear_history",
+        "init_monitoring",
+        "monitoring_health",
+        "monitoring_metrics",
+        "monitoring_summary",
+        "monitoring_processes"
+      ],
+      "classes": [
+        "SystemMetrics",
+        "ProcessMetrics",
+        "SystemMonitor"
+      ],
+      "complexity_score": 55
+    },
+    {
+      "path": "/home/user/webapp/backend/caching.py",
+      "sha256": "cbf091e80cc91f6666e98ae50938c7a2e31095c7747dc00f1a19c2e45082bf67",
+      "size_bytes": 16704,
+      "file_type": ".py",
+      "findings": [
+        {
+          "file_path": "/home/user/webapp/backend/caching.py",
+          "line_number": 313,
+          "severity": "medium",
+          "finding_type": "weak_crypto",
+          "description": "Weak cryptographic algorithm",
+          "matched_text": "return hashlib.md5(key_data.encode()).hexdigest()",
+          "recommendation": "Use SHA-256 or better for hashing. Use bcrypt/argon2 for passwords"
+        },
+        {
+          "file_path": "/home/user/webapp/backend/caching.py",
+          "line_number": 350,
+          "severity": "medium",
+          "finding_type": "weak_crypto",
+          "description": "Weak cryptographic algorithm",
+          "matched_text": "cache_key = has***t()",
+          "recommendation": "Use SHA-256 or better for hashing. Use bcrypt/argon2 for passwords"
+        },
+        {
+          "file_path": "/home/user/webapp/backend/caching.py",
+          "line_number": 369,
+          "severity": "medium",
+          "finding_type": "weak_crypto",
+          "description": "Weak cryptographic algorithm",
+          "matched_text": "wrapper.cache_key = lam***d5(",
+          "recommendation": "Use SHA-256 or better for hashing. Use bcrypt/argon2 for passwords"
+        }
+      ],
+      "imports": [
+        "logging\nimport time\nimport pickle\nimport hashlib\nimport json\nfrom functools import wraps\nfrom typing import Any, Optional, Callable, Dict\nfrom datetime import timedelta\nimport threading",
+        "redis\n    REDIS_AVAILABLE"
+      ],
+      "functions": [
+        "__init__",
+        "get",
+        "set",
+        "delete",
+        "clear",
+        "exists",
+        "get_stats",
+        "cleanup_expired",
+        "__init__",
+        "get",
+        "set",
+        "delete",
+        "clear",
+        "exists",
+        "get_stats",
+        "__init__",
+        "get",
+        "set",
+        "delete",
+        "clear",
+        "exists",
+        "get_stats",
+        "generate_key",
+        "get_cache_manager",
+        "cached",
+        "get_user",
+        "decorator",
+        "wrapper",
+        "invalidate_cache",
+        "init_cache",
+        "cache_stats",
+        "cache_clear",
+        "fibonacci"
+      ],
+      "classes": [
+        "InMemoryCache",
+        "RedisCache",
+        "CacheManager"
+      ],
+      "complexity_score": 100
+    },
+    {
+      "path": "/home/user/webapp/backend/logging_config.py",
+      "sha256": "02315de60db1845206032da4f381a9b223c3b3f7af63ce434f5f9488100046a3",
+      "size_bytes": 14538,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "logging\nimport logging",
+        "os\nimport sys\nimport json\nfrom datetime import datetime\nfrom pathlib import Path\nfrom typing import Optional\nimport traceback\n\n\nclass JSONFormatter",
+        "time\n    from flask import request, g"
+      ],
+      "functions": [
+        "format",
+        "format",
+        "format",
+        "setup_logging",
+        "log_request",
+        "log_audit",
+        "init_logging",
+        "before_request",
+        "after_request",
+        "handle_exception"
+      ],
+      "classes": [
+        "JSONFormatter",
+        "ColoredFormatter",
+        "RequestFormatter"
+      ],
+      "complexity_score": 109
+    },
+    {
+      "path": "/home/user/webapp/backend/backup.py",
+      "sha256": "0ffe81bdbd1954ed9b4b8aff3a900ad60169ab9c47012e53a360fdfcc5062934",
+      "size_bytes": 20907,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "os\nimport shutil\nimport subprocess\nimport logging\nimport gzip\nimport sqlite3\nfrom datetime import datetime, timedelta\nfrom pathlib import Path\nfrom typing import Optional, List, Dict\nfrom dataclasses import dataclass\nimport json",
+        "BackgroundScheduler\n    from apscheduler"
+      ],
+      "functions": [
+        "__init__",
+        "create_backup",
+        "_backup_sqlite",
+        "_backup_postgresql",
+        "_compress_file",
+        "_rotate_backups",
+        "list_backups",
+        "restore_backup",
+        "delete_backup",
+        "get_backup_stats",
+        "__init__",
+        "schedule_daily_backup",
+        "schedule_interval_backup",
+        "_run_backup",
+        "start",
+        "stop",
+        "get_jobs",
+        "init_backup",
+        "create_backup",
+        "list_backups",
+        "backup_stats",
+        "delete_backup"
+      ],
+      "classes": [
+        "BackupInfo",
+        "DatabaseBackup",
+        "BackupScheduler"
+      ],
+      "complexity_score": 120
+    },
+    {
+      "path": "/home/user/webapp/backend/permissions.py",
+      "sha256": "e993790941189ee3af74ea8177bf0f0493e8e7e80ccf2a0427441708a02d658a",
+      "size_bytes": 26422,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Enum\nfrom typing import List, Dict, Set, Optional\nfrom dataclasses import dataclass, field\nfrom datetime import datetime\nimport json\nimport logging\n\nlogger"
+      ],
+      "functions": [
+        "__init__",
+        "get_role_permissions",
+        "get_user_permissions",
+        "has_permission",
+        "has_any_permission",
+        "has_all_permissions",
+        "add_custom_permission",
+        "remove_custom_permission",
+        "change_user_role",
+        "get_role_description",
+        "get_permission_matrix",
+        "export_permissions_json",
+        "require_permission",
+        "decorator",
+        "wrapper",
+        "require_any_permission",
+        "decorator",
+        "wrapper",
+        "init_permissions",
+        "get_permission_matrix",
+        "get_roles",
+        "check_permission"
+      ],
+      "classes": [
+        "Role",
+        "Permission",
+        "User",
+        "PermissionManager"
+      ],
+      "complexity_score": 68
+    },
+    {
+      "path": "/home/user/webapp/backend/procurement.py",
+      "sha256": "af11ccb7f56c3b2585ccadccbfe7eb7ee56e8732891fca575061bd0cd73ae38e",
+      "size_bytes": 24313,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Enum\nfrom dataclasses import dataclass, field\nfrom datetime import datetime, timedelta\nfrom typing import List, Dict, Optional\nimport logging\n\nlogger"
+      ],
+      "functions": [
+        "__init__",
+        "create_purchase_request",
+        "approve_purchase_request",
+        "reject_purchase_request",
+        "create_purchase_order",
+        "send_purchase_order",
+        "confirm_purchase_order",
+        "record_delivery",
+        "add_supplier",
+        "update_supplier_rating",
+        "update_supplier_balance",
+        "get_material_status_report",
+        "get_supplier_performance_report",
+        "get_pending_deliveries",
+        "_generate_pr_number",
+        "_generate_po_number",
+        "_generate_dn_number",
+        "_get_pr_by_id",
+        "_get_po_by_id",
+        "_get_supplier_by_id",
+        "_get_supplier_name",
+        "init_procurement",
+        "create_pr",
+        "create_po",
+        "material_status_report",
+        "supplier_performance_report",
+        "pending_deliveries"
+      ],
+      "classes": [
+        "PRStatus",
+        "POStatus",
+        "MaterialStatus",
+        "Material",
+        "PurchaseRequestItem",
+        "PurchaseRequest",
+        "Supplier",
+        "PurchaseOrderItem",
+        "PurchaseOrder",
+        "DeliveryNote",
+        "ProcurementManager"
+      ],
+      "complexity_score": 78
+    },
+    {
+      "path": "/home/user/webapp/backend/subcontractors.py",
+      "sha256": "be3013e6959f8c7ec91ad5d3438fbb023a920d906d4960c20871a9f70f728721",
+      "size_bytes": 5898,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Enum\nfrom dataclasses import dataclass, field\nfrom datetime import datetime\nfrom typing import List, Dict, Optional\nimport logging\n\nlogger"
+      ],
+      "functions": [
+        "__init__",
+        "add_subcontractor",
+        "create_contract",
+        "record_progress",
+        "create_payment",
+        "get_performance_report",
+        "init_subcontractors",
+        "list_subcontractors",
+        "list_contracts"
+      ],
+      "classes": [
+        "ContractStatus",
+        "PaymentStatus",
+        "Subcontractor",
+        "SubcontractorContract",
+        "WorkProgress",
+        "Payment",
+        "SubcontractorManager"
+      ],
+      "complexity_score": 25
+    },
+    {
+      "path": "/home/user/webapp/backend/drawing_management.py",
+      "sha256": "88ab46a21dd488ac8a23d1f1dd911a3e8022ad1184564b53badd52271b7fb198",
+      "size_bytes": 5819,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Enum\nfrom dataclasses import dataclass, field\nfrom datetime import datetime\nfrom typing import List, Dict, Optional\nimport logging\n\nlogger"
+      ],
+      "functions": [
+        "__init__",
+        "add_drawing",
+        "create_revision",
+        "approve_drawing",
+        "create_transmittal",
+        "get_drawing_history",
+        "compare_revisions",
+        "init_drawing_management",
+        "list_drawings",
+        "get_revisions"
+      ],
+      "classes": [
+        "DrawingStatus",
+        "DocumentType",
+        "Drawing",
+        "DrawingRevision",
+        "Transmittal",
+        "DrawingManager"
+      ],
+      "complexity_score": 18
+    },
+    {
+      "path": "/home/user/webapp/backend/dashboards.py",
+      "sha256": "35f3f09582663d15952fdf4f3a756b75d2d63cfd4597c0d2006322c66f908149",
+      "size_bytes": 39119,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Any\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict"
+      ],
+      "functions": [
+        "get_executive_summary",
+        "get_financial_overview",
+        "get_project_health_status",
+        "get_critical_alerts",
+        "get_project_overview",
+        "get_schedule_dashboard",
+        "get_budget_dashboard",
+        "get_team_performance",
+        "get_daily_activities",
+        "get_labor_dashboard",
+        "submit_daily_report",
+        "get_drawing_comparison_dashboard",
+        "get_rfi_dashboard",
+        "get_supervision_dashboard",
+        "get_schedule_analysis",
+        "get_cost_performance_dashboard",
+        "get_drawing_management_dashboard",
+        "get_financial_dashboard",
+        "__init__",
+        "get_dashboard_for_role",
+        "_get_company_owner_dashboard",
+        "_get_project_manager_dashboard",
+        "_get_site_engineer_dashboard",
+        "_get_execution_engineer_dashboard",
+        "_get_supervisor_dashboard",
+        "_get_planning_engineer_dashboard",
+        "_get_cost_control_dashboard",
+        "_get_technical_office_dashboard",
+        "_get_accounts_finance_dashboard"
+      ],
+      "classes": [
+        "DashboardWidget",
+        "DashboardMetric",
+        "DashboardAlert",
+        "CompanyOwnerDashboard",
+        "ProjectManagerDashboard",
+        "SiteEngineerDashboard",
+        "ExecutionEngineerDashboard",
+        "SupervisorDashboard",
+        "PlanningEngineerDashboard",
+        "CostControlEngineerDashboard",
+        "TechnicalOfficeDashboard",
+        "AccountsFinanceDashboard",
+        "DashboardManager"
+      ],
+      "complexity_score": 50
+    },
+    {
+      "path": "/home/user/webapp/backend/module_integration.py",
+      "sha256": "8bd1d05313660a920d8fb02eab881b6699520a5da007d6544c1166241ba55249",
+      "size_bytes": 27985,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Any, Tuple\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict"
+      ],
+      "functions": [
+        "__init__",
+        "publish",
+        "subscribe",
+        "get_events",
+        "__init__",
+        "create_pr_from_boq",
+        "on_boq_item_created",
+        "on_po_confirmed",
+        "on_material_delivered",
+        "get_material_status_for_boq",
+        "__init__",
+        "link_activity_to_boq",
+        "on_activity_started",
+        "on_activity_completed",
+        "get_boq_progress_by_schedule",
+        "__init__",
+        "create_rfi_from_drawing_conflict",
+        "on_drawing_revised",
+        "on_rfi_answered",
+        "__init__",
+        "link_contract_to_boq",
+        "calculate_payment_due",
+        "on_contract_signed",
+        "on_progress_updated",
+        "__init__",
+        "track_budget",
+        "on_po_created",
+        "on_payment_made",
+        "generate_cost_forecast",
+        "__init__",
+        "get_integration_status",
+        "get_module_dependencies"
+      ],
+      "classes": [
+        "EventType",
+        "IntegrationEvent",
+        "EventBus",
+        "BOQProcurementIntegration",
+        "ScheduleBOQIntegration",
+        "DrawingRFIIntegration",
+        "SubcontractorIntegration",
+        "BudgetCostControlIntegration",
+        "IntegrationManager"
+      ],
+      "complexity_score": 49
+    },
+    {
+      "path": "/home/user/webapp/backend/advanced_analytics.py",
+      "sha256": "b415f5bd8aa3f4685b3a4aca18a14fde420cc9d85de5d2f9edd17db699ffb328",
+      "size_bytes": 28763,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Tuple, Any\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict\nimport statistics"
+      ],
+      "functions": [
+        "__post_init__",
+        "__post_init__",
+        "__init__",
+        "calculate_evm",
+        "get_performance_status",
+        "get_trend_analysis",
+        "forecast_completion_date",
+        "analyze_profitability",
+        "analyze_cash_flow",
+        "analyze_cost_breakdown",
+        "analyze_schedule_performance",
+        "analyze_critical_path",
+        "__init__",
+        "get_project_kpis",
+        "_calculate_health_score",
+        "_generate_recommendations",
+        "__init__",
+        "get_comprehensive_analysis"
+      ],
+      "classes": [
+        "EVMAnalysis",
+        "FinancialMetrics",
+        "ScheduleMetrics",
+        "EVMAnalyzer",
+        "FinancialAnalyzer",
+        "ScheduleAnalyzer",
+        "KPIDashboard",
+        "AnalyticsManager"
+      ],
+      "complexity_score": 186
+    },
+    {
+      "path": "/home/user/webapp/backend/interactive_reports.py",
+      "sha256": "61e6ec9f4ab15cd37804443aa66446b9a7dc5bcc08f911ad27a98053f3cb58f2",
+      "size_bytes": 34010,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Any, Tuple\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict"
+      ],
+      "functions": [
+        "generate",
+        "generate",
+        "generate",
+        "generate",
+        "__init__",
+        "generate_report",
+        "export_report",
+        "_export_to_pdf",
+        "_export_to_excel",
+        "_export_to_word",
+        "_export_to_html",
+        "_export_to_json",
+        "get_report_list"
+      ],
+      "classes": [
+        "ReportType",
+        "ReportFormat",
+        "ReportMetadata",
+        "ReportSection",
+        "InteractiveReport",
+        "ExecutiveSummaryReport",
+        "ProgressReport",
+        "FinancialReport",
+        "MaterialStatusReport",
+        "ReportManager"
+      ],
+      "complexity_score": 104
+    },
+    {
+      "path": "/home/user/webapp/backend/mobile_field_api.py",
+      "sha256": "8ec73ae3b1082b545cfe6d8e8914dcc81bc38c050bb55ec5d0fbd6bdfd47331a",
+      "size_bytes": 28061,
+      "file_type": ".py",
+      "findings": [
+        {
+          "file_path": "/home/user/webapp/backend/mobile_field_api.py",
+          "line_number": 805,
+          "severity": "critical",
+          "finding_type": "generic_password",
+          "description": "Hardcoded password detected",
+          "matched_text": "password=\"pas***123\",",
+          "recommendation": "Never store passwords in code. Use environment variables and password managers"
+        }
+      ],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Any\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict\nimport json"
+      ],
+      "functions": [
+        "__init__",
+        "login",
+        "_get_user_permissions",
+        "submit_daily_report",
+        "get_daily_reports",
+        "upload_photo",
+        "get_site_photos",
+        "submit_attendance",
+        "get_attendance_history",
+        "update_activity_progress",
+        "get_activity_updates",
+        "submit_material_request",
+        "get_material_requests",
+        "log_safety_observation",
+        "get_safety_observations",
+        "queue_offline_data",
+        "sync_offline_data",
+        "get_mobile_dashboard"
+      ],
+      "classes": [
+        "MobileUser",
+        "DailyReport",
+        "SitePhoto",
+        "ActivityUpdate",
+        "MaterialRequest",
+        "SafetyObservation",
+        "MobileFieldAPI"
+      ],
+      "complexity_score": 79
+    },
+    {
+      "path": "/home/user/webapp/backend/rfi_system.py",
+      "sha256": "2b866cd1edddb615fa35fd06ef5d36beecb3716de6862085fc2391d5b8caa224",
+      "size_bytes": 20958,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Any\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict"
+      ],
+      "functions": [
+        "__init__",
+        "_initialize_templates",
+        "create_rfi",
+        "_generate_rfi_number",
+        "submit_rfi",
+        "_auto_assign_rfi",
+        "respond_to_rfi",
+        "close_rfi",
+        "add_comment",
+        "get_rfi",
+        "get_rfi_list",
+        "get_rfi_analytics",
+        "get_templates"
+      ],
+      "classes": [
+        "RFIStatus",
+        "RFIPriority",
+        "RFICategory",
+        "RFI",
+        "RFIComment",
+        "RFITemplate",
+        "RFIManager"
+      ],
+      "complexity_score": 92
+    },
+    {
+      "path": "/home/user/webapp/backend/design_execution.py",
+      "sha256": "ea2df10973fce7e4e6489ad0634fd44535a53fc70879d1cf1f1e4d32b9f17de4",
+      "size_bytes": 24518,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, field\nfrom typing import List, Dict, Optional, Any, Tuple\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nfrom collections import defaultdict"
+      ],
+      "functions": [
+        "__init__",
+        "create_design_package",
+        "_generate_package_number",
+        "submit_for_review",
+        "review_design_package",
+        "initiate_design_modification",
+        "_generate_modification_number",
+        "approve_modification",
+        "mark_modification_implemented",
+        "perform_compliance_check",
+        "get_compliance_report",
+        "submit_ve_proposal",
+        "get_ve_summary",
+        "get_design_dashboard",
+        "_count_by_phase",
+        "_count_by_discipline"
+      ],
+      "classes": [
+        "DesignPhase",
+        "DesignStatus",
+        "ComplianceLevel",
+        "DesignPackage",
+        "DesignModification",
+        "ComplianceCheck",
+        "ValueEngineeringProposal",
+        "DesignExecutionManager"
+      ],
+      "complexity_score": 158
+    },
+    {
+      "path": "/home/user/webapp/backend/advanced_apis.py",
+      "sha256": "10c045ed00454536b603d893cf6818e503047a9aa34726e29418a42c70b2933f",
+      "size_bytes": 17670,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Blueprint, request, jsonify\nfrom datetime import datetime\nimport sys\nfrom pathlib import Path",
+        "DashboardManager\nfrom module_integration import IntegrationManager\nfrom advanced_analytics import AnalyticsManager\nfrom interactive_reports import ReportManager, ReportType, ReportFormat\nfrom mobile_field_api import MobileFieldAPI\nfrom rfi_system import RFIManager, RFICategory, RFIPriority\nfrom design_execution import DesignExecutionManager",
+        "random\n        budget",
+        "random\n        analysis"
+      ],
+      "functions": [
+        "get_dashboard",
+        "calculate_evm",
+        "get_financial_analytics",
+        "get_schedule_analytics",
+        "get_kpi_dashboard",
+        "get_comprehensive_analysis",
+        "generate_report",
+        "list_reports",
+        "mobile_login",
+        "submit_daily_report",
+        "upload_site_photo",
+        "get_mobile_dashboard",
+        "create_rfi",
+        "submit_rfi",
+        "respond_to_rfi",
+        "list_rfis",
+        "get_rfi_details",
+        "get_rfi_analytics",
+        "create_design_package",
+        "create_design_modification",
+        "perform_compliance_check",
+        "get_design_dashboard",
+        "get_integration_status",
+        "advanced_health"
+      ],
+      "classes": [],
+      "complexity_score": 167
+    },
+    {
+      "path": "/home/user/webapp/backend/primavera_magic_apis.py",
+      "sha256": "9d17c058c75b21a12e81d57e6f22ac4d7981cd557f6e9631a79da6bb40de1ebd",
+      "size_bytes": 12605,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Blueprint, request, jsonify\nfrom pathlib import Path\nimport sys"
+      ],
+      "functions": [
+        "get_available_tools",
+        "sdk_import_activities",
+        "sdk_export_activities",
+        "sdk_create_project",
+        "xer_parse_file",
+        "xer_extract_activities",
+        "xer_extract_wbs",
+        "xls_generate_activity_report",
+        "xls_generate_resource_report",
+        "sql_execute_query",
+        "sql_get_project_stats",
+        "wbs_create_from_excel",
+        "wbs_get_hierarchy",
+        "wbs_auto_number",
+        "rsc_get_loading",
+        "rsc_create_histogram",
+        "boq_import_as_resources",
+        "boq_link_to_activities",
+        "boq_generate_cost_report"
+      ],
+      "classes": [],
+      "complexity_score": 108
+    },
+    {
+      "path": "/home/user/webapp/backend/pdf_manager.py",
+      "sha256": "4eda019494a0352518d347d06a93ab6f403035ef503c72441c7a3d96110334cd",
+      "size_bytes": 17051,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Blueprint, request, jsonify, send_file\nfrom werkzeug",
+        "os\nimport json\nfrom datetime import datetime\nfrom pathlib import Path\nimport mimetypes",
+        "PyPDF2\n    HAS_PYPDF2",
+        "PyPDF2\n    HAS_PYPDF2",
+        "pdfplumber\n    HAS_PDFPLUMBER",
+        "pdfplumber\n    HAS_PDFPLUMBER"
+      ],
+      "functions": [
+        "allowed_file",
+        "load_metadata",
+        "save_metadata",
+        "extract_text_pypdf2",
+        "extract_text_pdfplumber",
+        "extract_pdf_info",
+        "analyze_pdf_with_ai",
+        "upload_pdf",
+        "list_pdfs",
+        "get_pdf_info",
+        "download_pdf",
+        "view_pdf",
+        "extract_text",
+        "analyze_pdf",
+        "delete_pdf",
+        "update_pdf_metadata"
+      ],
+      "classes": [],
+      "complexity_score": 162
+    },
+    {
+      "path": "/home/user/webapp/backend/api/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/api/cost_calculator.py",
+      "sha256": "0781cd1148f6cfd5d9e08c80d7b4ff7c159c53b8d370ba304568bbcc325c8a8a",
+      "size_bytes": 15888,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Blueprint, request, jsonify\nfrom typing import Dict, List, Optional\nfrom dataclasses import dataclass, asdict\nfrom datetime import datetime\nimport logging\n\nlogger"
+      ],
+      "functions": [
+        "total_cost_per_unit",
+        "find_cost_item",
+        "calculate_cost",
+        "list_activities",
+        "calculate",
+        "analyze_boq",
+        "health_check",
+        "not_found",
+        "internal_error"
+      ],
+      "classes": [
+        "CostItem",
+        "CostCalculation",
+        "BOQCostAnalysis"
+      ],
+      "complexity_score": 68
+    },
+    {
+      "path": "/home/user/webapp/backend/core/AutomationEngine.py",
+      "sha256": "77ad16a19ce62d15e8be84e8508682871860ac333cc4294dcca9087505e09ce9",
+      "size_bytes": 26824,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "json\nimport sqlite3\nfrom datetime import datetime, timedelta\nfrom typing import Dict, List, Any, Optional\nimport re\nfrom enum import Enum\nimport schedule\nimport smtplib\nfrom email",
+        "MIMEMultipart\n\n\nclass TriggerType"
+      ],
+      "functions": [
+        "__init__",
+        "_init_database",
+        "create_automation",
+        "trigger_event",
+        "_evaluate_conditions",
+        "_execute_actions",
+        "_action_send_notification",
+        "_action_send_email",
+        "_action_create_item",
+        "_action_update_item",
+        "_action_move_item",
+        "_action_leave_comment",
+        "_action_trigger_webhook",
+        "_action_send_slack",
+        "_action_assign_members",
+        "_action_change_status",
+        "_action_add_label",
+        "_action_set_due_date",
+        "_action_archive_item",
+        "_action_create_folder",
+        "_interpolate_template",
+        "_load_active_automations",
+        "_log_execution",
+        "_update_execution_count",
+        "get_automation_stats",
+        "get_all_automations",
+        "toggle_automation",
+        "delete_automation"
+      ],
+      "classes": [
+        "TriggerType",
+        "ActionType",
+        "ConditionOperator",
+        "AutomationEngine"
+      ],
+      "complexity_score": 123
+    },
+    {
+      "path": "/home/user/webapp/backend/core/AutomationTemplates.py",
+      "sha256": "3b28968128afdf3b0fbd9630643601ad7e6282dadc4d193362e9c7894b12127d",
+      "size_bytes": 27724,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Dict, List\n\n\nclass AutomationTemplates"
+      ],
+      "functions": [
+        "get_all_templates",
+        "get_reminder_templates",
+        "get_recurring_templates",
+        "get_ifttt_templates",
+        "get_form_templates",
+        "get_notification_templates",
+        "get_engineering_templates",
+        "get_template_by_id",
+        "search_templates"
+      ],
+      "classes": [
+        "AutomationTemplates"
+      ],
+      "complexity_score": 95
+    },
+    {
+      "path": "/home/user/webapp/backend/core/ComprehensiveScheduler.py",
+      "sha256": "fcde8ad53c51937fa8c46733f5c2d2bfc132866e43554036089dd19a71fec9d3",
+      "size_bytes": 19608,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Tuple, Optional\nfrom datetime import datetime, timedelta\nimport json\n\n\nclass ComprehensiveScheduler"
+      ],
+      "functions": [
+        "__init__",
+        "_initialize_calendar",
+        "generate_schedule",
+        "_add_durations",
+        "_topological_sort",
+        "_calculate_dates",
+        "_get_next_work_day",
+        "_add_work_days",
+        "_assign_resources",
+        "_identify_milestones",
+        "_calculate_statistics",
+        "export_to_gantt_data",
+        "optimize_schedule",
+        "_optimize_for_duration",
+        "_optimize_for_cost",
+        "_optimize_for_resources"
+      ],
+      "classes": [
+        "ComprehensiveScheduler"
+      ],
+      "complexity_score": 73
+    },
+    {
+      "path": "/home/user/webapp/backend/core/ExcelIntelligence.py",
+      "sha256": "fda1c870519dec17f63c9e938e806e3a2ca597b2dcffd40b35c8bc5a1f933214",
+      "size_bytes": 14087,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pandas as pd\nfrom typing import Dict, List, Tuple, Optional\nimport re\nfrom pathlib import Path\n\n\nclass ExcelIntelligence"
+      ],
+      "functions": [
+        "__init__",
+        "discover_file_type",
+        "extract_data",
+        "_extract_boq_data",
+        "_extract_schedule_data",
+        "_extract_resources_data",
+        "_extract_generic_data",
+        "_find_column"
+      ],
+      "classes": [
+        "ExcelIntelligence"
+      ],
+      "complexity_score": 55
+    },
+    {
+      "path": "/home/user/webapp/backend/core/ItemAnalyzer.py",
+      "sha256": "a1ba4a049941e7bff7f4b4c82ed5eb06026233aa007bd0d36a8d0691e45c0a0e",
+      "size_bytes": 16863,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "re\nimport sqlite3\nfrom typing import Dict, List, Tuple, Optional\nfrom datetime import datetime\n\n\nclass ItemAnalyzer"
+      ],
+      "functions": [
+        "__init__",
+        "analyze_item",
+        "_extract_information",
+        "_determine_complexity",
+        "_extract_technical_specs",
+        "_detect_dependencies",
+        "_generate_warnings",
+        "analyze_batch",
+        "_generate_recommendations",
+        "get_item_relationships"
+      ],
+      "classes": [
+        "ItemAnalyzer"
+      ],
+      "complexity_score": 63
+    },
+    {
+      "path": "/home/user/webapp/backend/core/ItemClassifier.py",
+      "sha256": "2fa38c1738085bdbe5decd9b8d737a51f12653e0e285a2bedc4f18edabfb5da2",
+      "size_bytes": 6143,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Tuple, Optional\nimport re\n\n\nclass ItemClassifier"
+      ],
+      "functions": [
+        "__init__",
+        "_load_classification_dictionary",
+        "classify",
+        "classify_batch",
+        "get_statistics"
+      ],
+      "classes": [
+        "ItemClassifier"
+      ],
+      "complexity_score": 74
+    },
+    {
+      "path": "/home/user/webapp/backend/core/ProductivityDatabase.py",
+      "sha256": "5dde9d77bf129fc2b975ae2f9ebf782216e877c3e71afacdab626a1017dfc812",
+      "size_bytes": 5799,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Optional\n\n\nclass ProductivityDatabase"
+      ],
+      "functions": [
+        "__init__",
+        "get_rate",
+        "calculate_duration",
+        "get_all_rates"
+      ],
+      "classes": [
+        "ProductivityDatabase"
+      ],
+      "complexity_score": 12
+    },
+    {
+      "path": "/home/user/webapp/backend/core/RelationshipEngine.py",
+      "sha256": "b28c50f90bb86a9c670e5912bf3e899c60a39344947a1407c30a01cef3cee0a0",
+      "size_bytes": 20420,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Tuple, Optional, Set\nfrom datetime import datetime, timedelta\nimport json\n\n\nclass RelationshipEngine"
+      ],
+      "functions": [
+        "__init__",
+        "_load_relationship_rules",
+        "build_dependency_graph",
+        "_identify_activity_type",
+        "_find_activities_by_type",
+        "_add_relationship",
+        "_calculate_levels",
+        "_identify_critical_path",
+        "get_critical_path",
+        "get_activity_schedule",
+        "export_to_json",
+        "detect_cycles",
+        "dfs"
+      ],
+      "classes": [
+        "RelationshipEngine"
+      ],
+      "complexity_score": 67
+    },
+    {
+      "path": "/home/user/webapp/backend/core/RequestExecutor.py",
+      "sha256": "331d359717e7078338485ed34581066efec4d020d846610fd5ee59ec662051a4",
+      "size_bytes": 15984,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Optional\nimport json\nfrom datetime import datetime",
+        "ExcelIntelligence\nfrom",
+        "ItemAnalyzer\nfrom",
+        "RelationshipEngine\nfrom",
+        "SBCComplianceChecker\nfrom",
+        "RequestParser\n\n\nclass RequestExecutor"
+      ],
+      "functions": [
+        "__init__",
+        "execute",
+        "_execute_create_schedule",
+        "_execute_analyze_boq",
+        "_execute_generate_s_curve",
+        "_execute_check_compliance",
+        "_execute_export",
+        "_execute_query",
+        "get_system_status",
+        "_check_database_connection",
+        "clear_cache",
+        "execute_batch"
+      ],
+      "classes": [
+        "RequestExecutor"
+      ],
+      "complexity_score": 80
+    },
+    {
+      "path": "/home/user/webapp/backend/core/RequestParser.py",
+      "sha256": "fe08990465d79d1454ad5c645ec4d2f33467250ec7fb5394b9d0c17d2a1dd371",
+      "size_bytes": 14733,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "re\nfrom typing import Dict, List, Tuple, Optional\nfrom datetime import datetime\n\n\nclass RequestParser"
+      ],
+      "functions": [
+        "__init__",
+        "_initialize_intent_patterns",
+        "_initialize_entity_patterns",
+        "parse",
+        "_clean_text",
+        "_detect_intent",
+        "_extract_entities",
+        "_parse_date",
+        "_calculate_confidence",
+        "_enhance_command",
+        "parse_batch",
+        "generate_suggestions",
+        "validate_command",
+        "_get_required_parameters"
+      ],
+      "classes": [
+        "RequestParser"
+      ],
+      "complexity_score": 54
+    },
+    {
+      "path": "/home/user/webapp/backend/core/SBCComplianceChecker.py",
+      "sha256": "62dc31208a977bc535eaf8e6c924efe7f7d9df4508f35f32e2b2dfb785a67e01",
+      "size_bytes": 20005,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Tuple, Optional\nimport re\n\n\nclass SBCComplianceChecker"
+      ],
+      "functions": [
+        "__init__",
+        "_load_sbc_rules",
+        "check_compliance",
+        "_identify_item_type",
+        "_run_category_checks",
+        "_extract_concrete_strength",
+        "_extract_dimensions",
+        "_extract_thickness",
+        "_generate_recommendations",
+        "check_batch",
+        "generate_compliance_report"
+      ],
+      "classes": [
+        "SBCComplianceChecker"
+      ],
+      "complexity_score": 57
+    },
+    {
+      "path": "/home/user/webapp/backend/core/SCurveGenerator.py",
+      "sha256": "16fdb8c9ebb0ecdedb3d46ca5fdaff158d33a00dcf097864c1471636a29c09bb",
+      "size_bytes": 18885,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom typing import Dict, List, Tuple, Optional\nfrom datetime import datetime, timedelta\nimport json\nimport math\n\n\nclass SCurveGenerator"
+      ],
+      "functions": [
+        "__init__",
+        "generate_s_curve",
+        "_calculate_date_range",
+        "_generate_time_periods",
+        "_calculate_planned_progress",
+        "_calculate_overlap",
+        "_calculate_s_curve_statistics",
+        "generate_financial_s_curve",
+        "compare_curves",
+        "_determine_overall_status",
+        "export_to_chart_js",
+        "calculate_earned_value",
+        "_evaluate_evm_performance"
+      ],
+      "classes": [
+        "SCurveGenerator"
+      ],
+      "complexity_score": 77
+    },
+    {
+      "path": "/home/user/webapp/backend/core/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/core/civil_concept_tools.py",
+      "sha256": "a94e61363cf96675a55609d996797c2abf81d87f7933f8c209e09d2787418c94",
+      "size_bytes": 23459,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "math\nfrom typing import Dict, List, Optional, Tuple\nfrom dataclasses import dataclass\nfrom datetime import datetime",
+        "time\n        start_time"
+      ],
+      "functions": [
+        "convert_units",
+        "calculate_area",
+        "calculate_volume",
+        "calculate_loads",
+        "estimate_building",
+        "analyze_rates",
+        "generate_boq",
+        "calculate_steel_weight",
+        "calculate_cutting_length",
+        "generate_bar_bending_schedule",
+        "design_rcc",
+        "analyze_structure",
+        "analyze_soil",
+        "design_foundation",
+        "execute_tool"
+      ],
+      "classes": [
+        "BasicToolsService",
+        "EstimationToolsService",
+        "DesignToolsService",
+        "AnalysisToolsService",
+        "ToolResult",
+        "CivilConceptIntegrationService"
+      ],
+      "complexity_score": 69
+    },
+    {
+      "path": "/home/user/webapp/backend/core/claude_prompts_service.py",
+      "sha256": "7a7e08e73ea0d58fc9ac6bcbd376bcc4ad2f121427e9746593573f728557f0e7",
+      "size_bytes": 26812,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Dict, List, Optional, Any\nfrom dataclasses import dataclass\nfrom enum import Enum\n\n\nclass PromptType"
+      ],
+      "functions": [
+        "get_all_templates",
+        "get_template",
+        "format_prompt",
+        "get_prompt_info",
+        "list_all_prompts"
+      ],
+      "classes": [
+        "PromptType",
+        "PromptTemplate",
+        "ClaudePromptsService"
+      ],
+      "complexity_score": 37
+    },
+    {
+      "path": "/home/user/webapp/backend/core/dashboard_service.py",
+      "sha256": "07401f8b47e7fe6503f1ade3edcfd5958928f501dc4cd2dfa74910c9bdd99c13",
+      "size_bytes": 16942,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom datetime import datetime, timedelta\nfrom typing import Dict, List, Optional\nfrom dataclasses import dataclass, asdict\nimport json"
+      ],
+      "functions": [
+        "__init__",
+        "_init_tables",
+        "get_dashboard_stats",
+        "get_tool_usage_stats",
+        "get_recent_activities",
+        "check_system_health",
+        "log_tool_usage",
+        "create_project",
+        "get_projects",
+        "get_tool_categories_stats",
+        "get_usage_trend"
+      ],
+      "classes": [
+        "DashboardStats",
+        "ToolUsage",
+        "RecentActivity",
+        "SystemHealth",
+        "DashboardService"
+      ],
+      "complexity_score": 45
+    },
+    {
+      "path": "/home/user/webapp/backend/core/engineering_tools_service.py",
+      "sha256": "483a6a1048e5935649becb926a90995a832fe7df256c2bea8ce825939b5dbe11",
+      "size_bytes": 21489,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "dataclass, asdict\nfrom typing import Dict, List, Any, Optional\nfrom enum import Enum\nimport math\nimport time\n\n\nclass ToolType"
+      ],
+      "functions": [
+        "convert_units",
+        "calculate_loads",
+        "calculate_steel_weight",
+        "calculate_cutting_length",
+        "analyze_rate",
+        "calculate_building_estimate",
+        "analyze_soil",
+        "get_all_tools",
+        "execute_tool"
+      ],
+      "classes": [
+        "ToolType",
+        "ToolResult",
+        "EngineeringToolsService"
+      ],
+      "complexity_score": 63
+    },
+    {
+      "path": "/home/user/webapp/backend/core/house_plan_extractor.py",
+      "sha256": "ec1627f7814b32319b425c51579ddabc8c48bd1edcdd0dd5afa766912199c9a8",
+      "size_bytes": 18882,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "re\nimport requests\nfrom bs4 import BeautifulSoup\nfrom typing import Dict, List, Optional, Tuple\nfrom dataclasses import dataclass, asdict\nfrom datetime import datetime\nimport json"
+      ],
+      "functions": [
+        "extract_table_data",
+        "parse_dimension",
+        "extract_land_data",
+        "extract_building_data",
+        "extract_rooms_data",
+        "extract_structure_data",
+        "extract_from_text",
+        "scrape_plan",
+        "scrape_plan_list",
+        "_generate_plan_id",
+        "_calculate_confidence",
+        "compare_plans",
+        "calculate_statistics",
+        "to_dict"
+      ],
+      "classes": [
+        "LandData",
+        "BuildingData",
+        "RoomData",
+        "StructureData",
+        "HousePlanData",
+        "TableDataExtractor",
+        "TextDataExtractor",
+        "HousePlanScraper",
+        "HousePlanAnalyzer"
+      ],
+      "complexity_score": 75
+    },
+    {
+      "path": "/home/user/webapp/backend/core/house_plan_integrator.py",
+      "sha256": "14672eb333ef0d6897d55a2aab3d371fda50de27ea987461cc848d5bdc485bc1",
+      "size_bytes": 17118,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Dict, List, Optional\nfrom dataclasses import dataclass, asdict\nimport json",
+        "UnitConverter, LengthUnit, AreaUnit",
+        "HousePlanScraper"
+      ],
+      "functions": [
+        "__init__",
+        "generate_estimate_from_plan",
+        "_convert_to_sqm",
+        "_convert_to_meters",
+        "_determine_building_type",
+        "_estimate_storeys",
+        "_analyze_rooms",
+        "_estimate_confidence",
+        "_generate_notes",
+        "compare_plans_with_estimates",
+        "generate_boq_from_plan"
+      ],
+      "classes": [
+        "IntegratedEstimate",
+        "HousePlanIntegrator"
+      ],
+      "complexity_score": 58
+    },
+    {
+      "path": "/home/user/webapp/backend/core/quick_estimator.py",
+      "sha256": "dd11b09bfc90d0c400c99ccc59037ea9c2c878d52f19b06bc93150901955f8ff",
+      "size_bytes": 18264,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Dict, List, Optional, Tuple\nfrom dataclasses import dataclass\nfrom enum import Enum\nimport math\n\n\nclass Region"
+      ],
+      "functions": [
+        "__init__",
+        "estimate",
+        "_get_storey_multiplier",
+        "_generate_warnings",
+        "_calculate_confidence_level",
+        "generate_comparison_table"
+      ],
+      "classes": [
+        "Region",
+        "BuildingType",
+        "FinishLevel",
+        "RegionalFactors",
+        "QuickEstimatorConfig",
+        "EstimateInput",
+        "EstimateOutput",
+        "QuickEstimator"
+      ],
+      "complexity_score": 57
+    },
+    {
+      "path": "/home/user/webapp/backend/core/unit_converter.py",
+      "sha256": "62bb3c0809c357cdf2117156aad53c954662e6d7bcce8079036fd230fe9ff49d",
+      "size_bytes": 16195,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Dict, Union, Optional\nfrom enum import Enum\nimport math\n\n\nclass LengthUnit"
+      ],
+      "functions": [
+        "convert_length",
+        "convert_area",
+        "convert_volume",
+        "convert_weight",
+        "convert_pressure",
+        "convert_force",
+        "convert_temperature",
+        "batch_convert",
+        "calculate_area_with_diagonal",
+        "calculate_area_with_coordinates"
+      ],
+      "classes": [
+        "LengthUnit",
+        "AreaUnit",
+        "VolumeUnit",
+        "WeightUnit",
+        "PressureUnit",
+        "ForceUnit",
+        "TemperatureUnit",
+        "UnitConverter",
+        "IrregularLandCalculator"
+      ],
+      "complexity_score": 79
+    },
+    {
+      "path": "/home/user/webapp/backend/core/primavera_magic_tools.py",
+      "sha256": "f9af064fded949cbb3f9217205c3069c55c3b1a2f881ead2e9c846b7cfe20603",
+      "size_bytes": 36187,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "re\nimport json\nimport sqlite3\nfrom typing import Dict, List, Optional, Any, Tuple\nfrom dataclasses import dataclass, asdict\nfrom datetime import datetime, timedelta\nfrom pathlib import Path\nimport xml"
+      ],
+      "functions": [
+        "__post_init__",
+        "__init__",
+        "_init_database",
+        "import_activities_from_excel",
+        "export_activities_to_excel",
+        "create_project",
+        "parse_xer_file",
+        "extract_activities_from_xer",
+        "extract_wbs_from_xer",
+        "extract_resources_from_xer",
+        "generate_activity_report",
+        "generate_resource_report",
+        "__init__",
+        "execute_query",
+        "get_project_statistics",
+        "__init__",
+        "create_wbs_from_excel",
+        "get_wbs_hierarchy",
+        "auto_number_wbs",
+        "number_node",
+        "__init__",
+        "get_resource_loading",
+        "create_resource_histogram",
+        "__init__",
+        "import_boq_as_resources",
+        "link_boq_to_activities",
+        "generate_boq_cost_report",
+        "__init__",
+        "get_available_tools"
+      ],
+      "classes": [
+        "PrimaveraActivity",
+        "PrimaveraWBS",
+        "PrimaveraResource",
+        "ResourceAssignment",
+        "SDKMagicTool",
+        "XERMagicTool",
+        "XLSMagicTool",
+        "SQLMagicTool",
+        "WBSMagicTool",
+        "RSCMagicTool",
+        "BOQMagicTool",
+        "PrimaveraMagicToolsManager"
+      ],
+      "complexity_score": 112
+    },
+    {
+      "path": "/home/user/webapp/backend/database/seed_data.py",
+      "sha256": "05eaeba67be0db0cba71bb1d5d35cb52618fe50eefeadf64b137f53772f20a0c",
+      "size_bytes": 6674,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom pathlib import Path\n\n\ndef seed_productivity_rates"
+      ],
+      "functions": [
+        "seed_productivity_rates",
+        "seed_classification_dictionary",
+        "main"
+      ],
+      "classes": [],
+      "complexity_score": 12
+    },
+    {
+      "path": "/home/user/webapp/backend/database/setup_database.py",
+      "sha256": "b1683ab2f051dc6f29909abc1e198b4031fe98746de8905953c46b3609f4cedf",
+      "size_bytes": 1806,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "sqlite3\nfrom pathlib import Path\nimport sys"
+      ],
+      "functions": [
+        "create_database"
+      ],
+      "classes": [],
+      "complexity_score": 3
+    },
+    {
+      "path": "/home/user/webapp/backend/integrations/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/models/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/services/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/services/report_service.py",
+      "sha256": "2fd3dca87ad95150d2199b0f74442651759dba1d4fd343932143ac82d9165b34",
+      "size_bytes": 12041,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "Path\nfrom typing import Dict, List, Optional\nfrom datetime import datetime\nfrom jinja2 import Environment, FileSystemLoader, select_autoescape\nimport logging",
+        "HTML, CSS\n            \n            output_dir"
+      ],
+      "functions": [
+        "__init__",
+        "generate_boq_report",
+        "generate_schedule_report",
+        "save_html_report",
+        "_html_to_pdf",
+        "_filter_round",
+        "_filter_format_date",
+        "_filter_format_number",
+        "_filter_format_currency",
+        "main"
+      ],
+      "classes": [
+        "ReportService"
+      ],
+      "complexity_score": 48
+    },
+    {
+      "path": "/home/user/webapp/backend/tests/__init__.py",
+      "sha256": "09fbaad586d89f7d06fabde1c3cc7ba0029d65095c304d9a0618784b31a91646",
+      "size_bytes": 52,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 1
+    },
+    {
+      "path": "/home/user/webapp/backend/tests/conftest.py",
+      "sha256": "25c9864ef75c26d391486db3ebb97550f4eb4bbf5ec730c73225563dec871b3a",
+      "size_bytes": 1605,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pytest\nimport sys\nfrom pathlib import Path",
+        "app as flask_app\nfrom config import TestingConfig"
+      ],
+      "functions": [
+        "app",
+        "client",
+        "runner",
+        "sample_boq_items",
+        "auth_headers"
+      ],
+      "classes": [],
+      "complexity_score": 5
+    },
+    {
+      "path": "/home/user/webapp/backend/tests/test_api_health.py",
+      "sha256": "78d4b924351f597634403160a36e1e1378b09d98e5ac59b52e34d363d94c5227",
+      "size_bytes": 1659,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pytest\n\n\ndef test_home_endpoint"
+      ],
+      "functions": [
+        "test_home_endpoint",
+        "test_health_check",
+        "test_system_status",
+        "test_404_error",
+        "test_cors_headers",
+        "test_security_headers"
+      ],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/tests/test_boq_analysis.py",
+      "sha256": "0502e1242dc579e4cb44b7dee6c0234e0189b64a41c7c9cf790d045e767953c9",
+      "size_bytes": 2237,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pytest\n\n\ndef test_classify_items_empty"
+      ],
+      "functions": [
+        "test_classify_items_empty",
+        "test_classify_items_success",
+        "test_analyze_boq_empty",
+        "test_analyze_boq_success",
+        "test_calculate_duration",
+        "test_calculate_duration_invalid"
+      ],
+      "classes": [],
+      "complexity_score": 10
+    },
+    {
+      "path": "/home/user/webapp/backend/utils/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [],
+      "functions": [],
+      "classes": [],
+      "complexity_score": 0
+    },
+    {
+      "path": "/home/user/webapp/backend/utils/logger.py",
+      "sha256": "a36d59f401ec0fce2b894c6da0126bff0eaf5d389e40a4c051a0d0c1dc70dc64",
+      "size_bytes": 3692,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "logging\nimport sys\nfrom pathlib import Path\nfrom logging",
+        "jsonlogger\nfrom datetime import datetime\n\n\nclass CustomJsonFormatter"
+      ],
+      "functions": [
+        "add_fields",
+        "setup_logger",
+        "get_logger",
+        "__init__",
+        "__enter__",
+        "__exit__"
+      ],
+      "classes": [
+        "CustomJsonFormatter",
+        "LoggerContext"
+      ],
+      "complexity_score": 29
+    },
+    {
+      "path": "/home/user/webapp/backend/utils/middleware.py",
+      "sha256": "2a4a30239ca916f184c47c4540b1bae932a162f10e8f36c5c2b314efaec85759",
+      "size_bytes": 6477,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "wraps\nfrom flask import request, jsonify, g\nfrom flask_limiter import Limiter\nfrom flask_limiter",
+        "time\nfrom typing import Callable\nimport traceback\n\n\ndef setup_rate_limiter"
+      ],
+      "functions": [
+        "setup_rate_limiter",
+        "setup_security_headers",
+        "add_security_headers",
+        "setup_request_logging",
+        "log_request",
+        "log_response",
+        "setup_error_handlers",
+        "bad_request",
+        "not_found",
+        "rate_limit_exceeded",
+        "internal_error",
+        "handle_exception",
+        "require_api_key",
+        "protected_route",
+        "decorated_function",
+        "validate_json",
+        "process_data",
+        "decorated_function",
+        "measure_execution_time",
+        "slow_operation",
+        "decorated_function"
+      ],
+      "classes": [],
+      "complexity_score": 36
+    },
+    {
+      "path": "/home/user/webapp/backend/utils/advanced_analyzer.py",
+      "sha256": "2bd324da580ed60d441f468fe61428b00bdfc01d3bd7015f6a6097203ca7428b",
+      "size_bytes": 22913,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "hashlib\nimport json\nimport logging\nimport pathlib\nimport re\nimport sys\nfrom dataclasses import dataclass, asdict, field\nfrom datetime import datetime\nfrom typing import Dict, List, Optional, Set, Any\nfrom enum import Enum\nimport argparse"
+      ],
+      "functions": [
+        "to_dict",
+        "to_dict",
+        "to_dict",
+        "calculate_file_hash",
+        "should_skip_file",
+        "redact_sensitive_text",
+        "scan_for_secrets",
+        "extract_python_metadata",
+        "calculate_complexity",
+        "analyze_file",
+        "scan_directory",
+        "save_json_report",
+        "save_html_report",
+        "main"
+      ],
+      "classes": [
+        "SeverityLevel",
+        "SecurityFinding",
+        "FileAnalysis",
+        "AnalysisReport"
+      ],
+      "complexity_score": 118
+    },
+    {
+      "path": "/home/user/webapp/backend/migrations/env.py",
+      "sha256": "294fdb15ac849400708bdb543b8d3d0c2ed769a436bdd93d3da58635a05965e4",
+      "size_bytes": 2629,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "fileConfig\nimport os\nimport sys\n\nfrom sqlalchemy import engine_from_config\nfrom sqlalchemy import pool\n\nfrom alembic import context",
+        "Base, DATABASE_URL\n    import models\nexcept ImportError",
+        "Base, DATABASE_URL\n    from backend import models"
+      ],
+      "functions": [
+        "run_migrations_offline",
+        "run_migrations_online"
+      ],
+      "classes": [],
+      "complexity_score": 14
+    },
+    {
+      "path": "/home/user/webapp/backend/project_template/02_Processing/Scripts/quantity_analysis.py",
+      "sha256": "f9fd8275a03cd0a4a2c1fd459ed8feca16e6570aad033ef89181930e9843ce23",
+      "size_bytes": 22078,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pandas as pd\nimport numpy as np\nfrom pathlib import Path\nfrom typing import Dict, List, Tuple, Optional\nimport openpyxl\nfrom openpyxl",
+        "datetime\nimport logging",
+        "re\n                strength_match",
+        "re\n                diameter_match"
+      ],
+      "functions": [
+        "__init__",
+        "read_boq_data",
+        "clean_data",
+        "calculate_quantities",
+        "calculate_final_quantity",
+        "get_calculation_formula",
+        "validate_sbc_compliance",
+        "export_to_excel",
+        "_format_excel",
+        "run_full_analysis",
+        "main"
+      ],
+      "classes": [
+        "SBCStandards",
+        "QuantityAnalyzer"
+      ],
+      "complexity_score": 88
+    },
+    {
+      "path": "/home/user/webapp/backend/project_template/02_Processing/Scripts/schedule_analysis.py",
+      "sha256": "3ec53a40146880bd09e59db80e35a0cb41f9e72c2ffa9270708267a75a3748f3",
+      "size_bytes": 20961,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pandas as pd\nimport numpy as np\nfrom pathlib import Path\nfrom typing import Dict, List, Tuple, Optional\nfrom datetime import datetime, timedelta\nimport matplotlib",
+        "matplotlib",
+        "rcParams\nimport logging"
+      ],
+      "functions": [
+        "calculate_pv",
+        "calculate_ev",
+        "calculate_cv",
+        "calculate_sv",
+        "calculate_cpi",
+        "calculate_spi",
+        "calculate_eac",
+        "calculate_etc",
+        "calculate_vac",
+        "__init__",
+        "read_schedule_data",
+        "read_progress_data",
+        "calculate_progress",
+        "calc_planned_progress",
+        "classify_status",
+        "identify_critical_path",
+        "calculate_evm_metrics",
+        "generate_s_curve",
+        "run_full_analysis",
+        "main"
+      ],
+      "classes": [
+        "EVMCalculator",
+        "ScheduleAnalyzer"
+      ],
+      "complexity_score": 69
+    },
+    {
+      "path": "/home/user/webapp/backend/project_template/02_Processing/Scripts/smart_reports_generator.py",
+      "sha256": "925161226c70726cd3e206c20a46b827b56f992cc5416e4909017fd384ddd96c",
+      "size_bytes": 18462,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pandas as pd\nfrom pathlib import Path\nfrom typing import Dict, List, Optional\nfrom datetime import datetime\nfrom docx import Document\nfrom docx",
+        "WD_ALIGN_PARAGRAPH\nfrom docx",
+        "OxmlElement\nimport logging"
+      ],
+      "functions": [
+        "__init__",
+        "load_quantity_data",
+        "load_schedule_data",
+        "generate_analytical_text",
+        "create_word_report",
+        "_set_rtl",
+        "_set_paragraph_color",
+        "run_full_report_generation",
+        "main"
+      ],
+      "classes": [
+        "SmartReportGenerator"
+      ],
+      "complexity_score": 60
+    },
+    {
+      "path": "/home/user/webapp/backend/tests/sample_data/generate_sample_data.py",
+      "sha256": "710c56449dd459762f86baa6625eeb839c439b31dd1aa01757df695b3f2bb88f",
+      "size_bytes": 16112,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pandas as pd\nfrom pathlib import Path\nfrom datetime import datetime, timedelta\nimport random"
+      ],
+      "functions": [
+        "__init__",
+        "generate_boq_sample",
+        "generate_schedule_sample",
+        "generate_progress_sample",
+        "generate_all_samples",
+        "main"
+      ],
+      "classes": [
+        "SampleDataGenerator"
+      ],
+      "complexity_score": 55
+    },
+    {
+      "path": "/home/user/webapp/backend/tests/test_core/test_quantity_analysis.py",
+      "sha256": "bbbc77c2ad1e1764ef784ee97585ae1f8aa32669565a92b605b62a35739be152",
+      "size_bytes": 11146,
+      "file_type": ".py",
+      "findings": [],
+      "imports": [
+        "pytest\nimport pandas as pd\nimport sys\nfrom pathlib import Path",
+        "QuantityAnalyzer, SBCStandards\n\n\nclass TestSBCStandards"
+      ],
+      "functions": [
+        "test_concrete_min_strength",
+        "test_concrete_min_cover",
+        "test_rebar_dimensions",
+        "test_min_dimensions",
+        "temp_project_dir",
+        "sample_boq_df",
+        "test_analyzer_initialization",
+        "test_clean_data",
+        "test_calculate_quantities_volume",
+        "test_calculate_quantities_area",
+        "test_calculate_quantities_count",
+        "test_calculation_formula_generation",
+        "test_sbc_validation_concrete_strength",
+        "test_sbc_validation_slab_thickness",
+        "test_sbc_validation_rebar_diameter",
+        "full_project_setup",
+        "test_full_analysis_workflow",
+        "test_suite_summary"
+      ],
+      "classes": [
+        "TestSBCStandards",
+        "TestQuantityAnalyzer",
+        "TestIntegration"
+      ],
+      "complexity_score": 20
+    }
+  ],
+  "summary": {
+    "total_files_scanned": 116,
+    "files_analyzed": 68,
+    "total_lines_of_code": 29783,
+    "total_findings": 4,
+    "findings_by_severity": {
+      "critical": 1,
+      "high": 0,
+      "medium": 3,
+      "low": 0,
+      "info": 0
+    },
+    "high_risk_files": [
+      "/home/user/webapp/backend/mobile_field_api.py"
+    ]
+  }
+}

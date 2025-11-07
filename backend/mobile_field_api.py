@@ -800,9 +800,12 @@ if __name__ == "__main__":
     
     # مثال 1: تسجيل الدخول
     print("=== User Login ===")
+    # NOTE: In production, never hardcode passwords. Use environment variables or secure vaults.
+    import os
+    test_password = os.getenv('TEST_USER_PASSWORD', 'demo_password_change_me')
     login_result = mobile_api.login(
         username="ahmed.engineer",
-        password="password123",
+        password=test_password,
         device_id="DEVICE-123456"
     )
     print(f"Login successful: {login_result['success']}")

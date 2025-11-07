@@ -1,26 +1,36 @@
 version: '3.8'
 
+# ==========================================
+# Noufal Engineering System - Docker Compose
+# ==========================================
+
 services:
-  # Backend Flask API
-  backend:
+  # ========================
+  # Backend API Service
+  # ========================
+  api:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: noufal-backend
+    container_name: noufal-api
+    restart: unless-stopped
     ports:
       - "5000:5000"
+    env_file:
+      - ./backend/.env
     environment:
       - FLASK_ENV=production
-      - FLASK_DEBUG=False
-      - DATABASE_PATH=/app/database/noufal.db
-      - LOG_FILE=/app/logs/app.log
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - REDIS_URL=redis://redis:6379/0
     volumes:
-      - ./backend/database:/app/database
-      - ./backend/logs:/app/logs
-      - ./uploads:/app/uploads
+      - ./backend:/app
+      - uploads:/app/uploads
+      - logs:/app/logs
+    depends_on:
+      - db
+      - redis
     networks:
       - noufal-network
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s
@@ -28,44 +38,110 @@ services:
       retries: 3
       start_period: 40s
 
-  # Frontend (Vite + React)
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: noufal-frontend
+  # ========================
+  # PostgreSQL Database
+  # ========================
+  db:
+    image: postgres:15-alpine
+    container_name: noufal-db
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5432:5432"
     environment:
-      - VITE_API_URL=http://backend:5000
-    depends_on:
-      - backend
-    networks:
-      - noufal-network
-    restart: unless-stopped
-
-  # Nginx Reverse Proxy (Optional)
-  nginx:
-    image: nginx:alpine
-    container_name: noufal-nginx
-    ports:
-      - "80:80"
-      - "443:443"
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - backend
-      - frontend
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - noufal-network
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ========================
+  # Redis Cache
+  # ========================
+  redis:
+    image: redis:7-alpine
+    container_name: noufal-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    networks:
+      - noufal-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================
+  # pgAdmin (Database UI)
+  # ========================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: noufal-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@noufal.com
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - noufal-network
+    depends_on:
+      - db
+
+  # ========================
+  # Frontend (Optional)
+  # ========================
+  # Uncomment if you want to run frontend with Docker
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: noufal-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - VITE_API_URL=http://localhost:5000
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - noufal-network
+  #   depends_on:
+  #     - api
+
+# ========================
+# Volumes
+# ========================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  uploads:
+    driver: local
+  logs:
+    driver: local
+
+# ========================
+# Networks
+# ========================
 networks:
   noufal-network:
     driver: bridge
-
-volumes:
-  database-data:
-  logs-data:
-  uploads-data:

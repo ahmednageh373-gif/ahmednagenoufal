@@ -1,3 +1,7 @@
+# ==========================================
+# Noufal Engineering System - .gitignore
+# ==========================================
+
 # ========================
 # Python
 # ========================
@@ -28,24 +32,13 @@ MANIFEST
 # ========================
 # Virtual Environment
 # ========================
-venv/
+.env
+.venv
 env/
+venv/
 ENV/
-.venv/
-.env/
 env.bak/
 venv.bak/
-
-# ========================
-# Environment Variables
-# ========================
-.env
-.env.local
-.env.development
-.env.test
-.env.production
-.env.*.local
-*.env
 
 # ========================
 # IDEs
@@ -60,10 +53,40 @@ venv.bak/
 *.sublime-workspace
 
 # ========================
-# Jupyter Notebook
+# Testing
 # ========================
-.ipynb_checkpoints
-*.ipynb
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+coverage.xml
+*.cover
+*.py,cover
+nosetests.xml
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
+*.log.*
+log/
+
+# ========================
+# Docker
+# ========================
+.docker/
+docker-compose.override.yml
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # ========================
 # Database
@@ -76,28 +99,15 @@ venv.bak/
 *.db-wal
 
 # ========================
-# Logs
+# Uploads & Temp
 # ========================
-*.log
-logs/
-*.log.*
-log/
-
-# ========================
-# Testing
-# ========================
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-htmlcov/
+uploads/
+temp/
+tmp/
+*.tmp
+*.bak
+*.backup
+*.old
 
 # ========================
 # Node.js (Frontend)
@@ -110,30 +120,11 @@ lerna-debug.log*
 .pnpm-debug.log*
 package-lock.json
 yarn.lock
-
-# ========================
-# Build artifacts
-# ========================
 dist/
 dist-ssr/
 *.local
 .vite/
 .cache/
-
-# ========================
-# OS Files
-# ========================
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ========================
-# Uploads
-# ========================
-uploads/
-temp/
-tmp/
-*.tmp
 
 # ========================
 # Secrets & Keys
@@ -146,37 +137,40 @@ secrets/
 .secrets/
 
 # ========================
-# Backups
+# Pre-commit (keep config tracked)
 # ========================
-*.bak
-*.backup
-*.old
-*~
+# We keep .pre-commit-config.yaml tracked
+# But exclude cache:
+.pre-commit-cache/
 
 # ========================
-# Docker
-# ========================
-docker-compose.override.yml
-
-# ========================
-# Documentation build
+# Documentation Build
 # ========================
 docs/_build/
 site/
 
 # ========================
-# Misc
+# Type Checking
 # ========================
 .mypy_cache/
 .dmypy.json
 dmypy.json
 .pyre/
 .pytype/
+
+# ========================
+# Jupyter
+# ========================
+.ipynb_checkpoints
+*.ipynb
+
+# ========================
+# Misc
+# ========================
 cython_debug/
 
 # ========================
 # Project Specific
 # ========================
-# Add your project-specific ignores here
 database/*.db
 !database/.gitkeep

@@ -3,8 +3,30 @@ import { Sidebar } from './components/Sidebar';
 import { Menu } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
-// Fix: Correct import path for types.
-import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem, ProjectMember } from './types';
+// Fix: Correct import path for types - split into multiple lines for readability
+import type { 
+  Project, 
+  ProjectItem, 
+  PurchaseOrder, 
+  Objective, 
+  KeyResult, 
+  ProjectWorkflow, 
+  FinancialItem, 
+  ScheduleTask, 
+  Risk, 
+  SiteLogEntry, 
+  Drawing, 
+  DrawingFolder, 
+  DocumentCategory, 
+  BOQMatch, 
+  AssistantSettings, 
+  Subcontractor, 
+  SubcontractorInvoice, 
+  StructuralAssessment, 
+  WorkLogEntry, 
+  ChecklistItem, 
+  ProjectMember 
+} from './types';
 
 // Lazy load all the main view components
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
@@ -97,8 +119,8 @@ const App: React.FC = () => {
             }
         } catch (error) {
             console.error("Could not load projects from local storage", error);
-            setHasError(true);
-            setErrorMessage('فشل تحميل المشاريع من التخزين المحلي');
+            // Note: Cannot call setHasError here - it's not available yet
+            // Error will be logged to console instead
         }
         return mockProjects; // Fallback to mock data on first load or error
     });

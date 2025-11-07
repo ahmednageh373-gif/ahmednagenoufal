@@ -32,8 +32,8 @@ const PrimaveraMagicTools: React.FC<PrimaveraMagicToolsProps> = ({ onToolSelect 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-detect API URL
-  const API_BASE_URL = window.location.origin.replace('3000', '5000');
+  // Auto-detect API URL - handle both port 3000 and 3001
+  const API_BASE_URL = window.location.origin.replace(/300[01]/, '5000');
 
   useEffect(() => {
     fetchTools();

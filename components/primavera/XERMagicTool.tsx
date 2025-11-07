@@ -36,7 +36,7 @@ const XERMagicTool: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'activities' | 'wbs' | 'resources'>('overview');
 
-  const API_BASE_URL = window.location.origin.replace('3000', '5000');
+  const API_BASE_URL = window.location.origin.replace(/300[01]/, '5000');
 
   const handleParseXER = async () => {
     if (!xerFile) {

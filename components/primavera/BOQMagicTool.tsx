@@ -7,7 +7,7 @@ const BOQMagicTool: React.FC = () => {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE_URL = window.location.origin.replace('3000', '5000');
+  const API_BASE_URL = window.location.origin.replace(/300[01]/, '5000');
 
   const handleImportBOQ = async () => {
     if (!boqFile) {

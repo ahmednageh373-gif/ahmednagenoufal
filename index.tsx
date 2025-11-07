@@ -45,6 +45,7 @@ console.log('🚀 بدء تحميل React...');
 
 // Import App directly
 import App from './App';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 console.log('✅ App module imported');
 
@@ -107,7 +108,9 @@ if (rootElement) {
     root.render(
       <React.StrictMode>
         <ErrorBoundary>
-          <App />
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
         </ErrorBoundary>
       </React.StrictMode>
     );

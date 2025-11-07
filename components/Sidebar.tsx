@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -162,6 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                 </nav>
 
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+                    <NavItem icon={Palette} label="🎨 تخصيص المظهر" viewName="theme-customizer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={HelpCircle} label="المساعدة والتوثيق" viewName="docs-viewer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <button
                         onClick={onToggleDesktopCollapse}

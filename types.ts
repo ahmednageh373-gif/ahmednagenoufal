@@ -719,3 +719,51 @@ export interface ScheduleImportResult {
     warnings: string[];
     errors: string[];
 }
+
+// --- Theme Customization ---
+
+export type ThemeMode = 'light' | 'dark' | 'auto';
+export type FontSize = 'small' | 'medium' | 'large' | 'extra-large';
+export type ColorScheme = 'default' | 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'teal' | 'pink';
+
+export interface ThemeColors {
+    primary: string;
+    primaryDark: string;
+    primaryLight: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    surface: string;
+    text: string;
+    textSecondary: string;
+    border: string;
+    success: string;
+    warning: string;
+    error: string;
+    info: string;
+}
+
+export interface ThemeConfig {
+    mode: ThemeMode;
+    colorScheme: ColorScheme;
+    fontSize: FontSize;
+    customColors?: Partial<ThemeColors>;
+    borderRadius: 'none' | 'small' | 'medium' | 'large';
+    spacing: 'compact' | 'normal' | 'comfortable';
+    animations: boolean;
+    highContrast: boolean;
+}
+
+export interface ThemePreset {
+    id: string;
+    name: string;
+    nameAr: string;
+    description: string;
+    descriptionAr: string;
+    config: ThemeConfig;
+    preview: {
+        primary: string;
+        secondary: string;
+        background: string;
+    };
+}

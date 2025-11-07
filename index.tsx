@@ -47,6 +47,9 @@ console.log('🚀 بدء تحميل React...');
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
 
+// Initialize performance monitoring
+import './utils/performanceMonitor';
+
 console.log('✅ App module imported');
 
 const LoadingFallback = () => (

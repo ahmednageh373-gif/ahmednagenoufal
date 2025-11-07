@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "vite build && npm run post-build",
     "post-build": "node -e \"console.log('✅ Build completed!'); const fs = require('fs'); console.log('📁 Files in dist:', fs.readdirSync('dist')); console.log('📦 Files in dist/assets:', fs.readdirSync('dist/assets').length);\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:netlify": "npm run build && netlify deploy --prod --dir=dist",
+    "deploy:vercel": "npm run build && vercel --prod",
+    "deploy:preview": "netlify deploy --dir=dist"
   },
   "dependencies": {
     "@google/genai": "^1.26.0",
     "@google/generative-ai": "^0.24.1",
-    "@tensorflow/tfjs": "4.20.0",
     "docx": "^9.5.1",
     "dxf-parser": "^1.1.2",
     "exceljs": "^4.4.0",

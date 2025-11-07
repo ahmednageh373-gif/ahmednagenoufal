@@ -3,7 +3,13 @@
 // AI Prediction & Optimization System for Construction Projects
 // ============================================================================
 
-import * as tf from '@tensorflow/tfjs';
+// NOTE: TensorFlow.js is commented out to reduce bundle size (1.5 MB)
+// Uncomment and run: npm install @tensorflow/tfjs
+// if you want to use AI prediction features
+// import * as tf from '@tensorflow/tfjs';
+
+// Mock TensorFlow types for compilation
+const tf = null as any;
 
 // ============================================================================
 // 1. أنواع البيانات الأساسية (Core Types)

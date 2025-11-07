@@ -1,13 +1,7 @@
-# Netlify Redirects Configuration for AN.AI
+# Netlify redirects file for SPA routing
 
-# Force HTTPS
-http://* https://:splat 301!
+# API routes (if you add Netlify Functions later)
+/api/*  /.netlify/functions/:splat  200
 
-# API proxy to backend
-/api/* https://your-backend-domain.com/api/:splat 200
-
-# SPA fallback - all routes go to index.html
-/* /index.html 200
-
-# Custom 404 page (optional)
-/404 /index.html 200
+# SPA fallback - all other routes go to index.html
+/*  /index.html  200

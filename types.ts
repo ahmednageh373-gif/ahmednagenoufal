@@ -589,7 +589,8 @@ export interface AdvancedScheduleActivity {
     boqItemId?: string; // Link to BOQ item
     
     // Duration and dates
-    duration: number; // in days
+    duration: number; // in days (base duration before adjustments)
+    adjustedDuration?: number; // duration after shift factor and risk buffer
     startDate: string;
     endDate: string;
     
@@ -621,6 +622,12 @@ export interface AdvancedScheduleActivity {
     // Productivity
     productivityRate?: number;
     estimatedManHours?: number;
+    
+    // NEW: Shift Configuration
+    shiftConfig?: ShiftConfiguration;
+    
+    // NEW: Risk Buffer
+    riskBuffer?: RiskBuffer;
 }
 
 export interface SBCRequirement {
@@ -630,6 +637,70 @@ export interface SBCRequirement {
     requiredInspections?: string[];
     complianceNotes?: string;
     isCompliant: boolean;
+}
+
+// --- NEW: Shift Configuration (معامل الورديات) ---
+export interface ShiftConfiguration {
+    shiftsPerDay: 1 | 2 | 3;
+    shiftFactor: number; // 1.0 for 1 shift, 0.6 for 2 shifts, 0.45 for 3 shifts
+    workHoursPerShift: number; // typically 8 hours
+    description: string;
+}
+
+// --- NEW: Risk Buffer (احتياطي الزمن) ---
+export type RiskType = 'non-critical' | 'critical' | 'external' | 'precision';
+
+export interface RiskBuffer {
+    riskType: RiskType;
+    bufferPercentage: number; // 3%, 5%, 6%, or 8%
+    bufferDays: number; // calculated days to add
+    reason: string; // explanation for the buffer
+}
+
+// --- NEW: Resource Histogram (موازنة الأحمال) ---
+export interface ResourceHistogram {
+    date: string;
+    laborCount: number;
+    equipmentCount: number;
+    materialCost: number;
+}
+
+export interface ResourceLevelingResult {
+    histogram: ResourceHistogram[];
+    peakLabor: number;
+    averageLabor: number;
+    peakToAverageRatio: number; // should be ≤ 1.20 (120%)
+    isBalanced: boolean;
+    recommendations: string[];
+}
+
+// --- NEW: Project Calendar (تقويم المشروع) ---
+export interface ProjectCalendar {
+    workDays: ('Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday')[];
+    holidays: { date: string; name: string; }[];
+    rainyDayBuffer: number; // percentage (e.g., 6% = 1 rainy day per 17 work days)
+    ramadanPeriods: { startDate: string; endDate: string; productivityFactor: number; }[];
+    weatherConstraints?: {
+        maxTemperature?: number; // e.g., 45°C
+        minTemperature?: number;
+        rainySeasonMonths?: number[]; // 1-12
+    };
+}
+
+// --- NEW: Milestone (نقاط التسليم الرئيسية) ---
+export interface ProjectMilestone {
+    id: number;
+    name: string;
+    description: string;
+    targetDate: string;
+    actualDate?: string;
+    status: 'Pending' | 'Achieved' | 'Delayed';
+    linkedActivities: number[]; // activity IDs
+    isContractual: boolean; // if linked to contract
+    penalties?: {
+        perDay: number;
+        maxAmount: number;
+    };
 }
 
 export interface ProductivityRate {

@@ -320,10 +320,12 @@ export class SpecificationsAnalyzer {
 
     /**
      * تحويل الأنشطة المستخرجة إلى أنشطة جدول زمني
+     * مع تطبيق معامل الورديات واحتياطي الزمن
      */
     static convertToScheduleActivities(
         detailedSpecs: DetailedSpecification[],
-        projectStartDate: Date
+        projectStartDate: Date,
+        defaultShiftsPerDay: 1 | 2 | 3 = 1
     ): AdvancedScheduleActivity[] {
         const activities: AdvancedScheduleActivity[] = [];
         let activityId = 1;
@@ -336,11 +338,28 @@ export class SpecificationsAnalyzer {
             for (let i = 0; i < spec.extractedActivities.length; i++) {
                 const extracted = spec.extractedActivities[i];
                 
-                // حساب المدة بناءً على نوع النشاط والكمية
-                const duration = this.calculateActivityDuration(
+                // الخطوة 4: حساب المدة الخام بناءً على الإنتاجية والورديات
+                const shiftConfig = {
+                    shiftsPerDay: defaultShiftsPerDay,
+                    shiftFactor: this.getShiftFactor(defaultShiftsPerDay),
+                    workHoursPerShift: 8,
+                    description: defaultShiftsPerDay === 1 ? 'وردية واحدة' : 
+                                defaultShiftsPerDay === 2 ? 'ورديتان' : 'ثلاث ورديات'
+                };
+
+                const baseDuration = this.calculateActivityDuration(
                     extracted.type,
                     extracted.estimatedQuantity,
-                    extracted.unit
+                    extracted.unit,
+                    shiftConfig
+                );
+
+                // الخطوة 7: إضافة احتياطي الزمن (سيتم تحديث isCritical بعد CPM)
+                const { adjustedDuration, riskBuffer } = this.applyRiskBuffer(
+                    baseDuration,
+                    extracted.type,
+                    false, // will be updated after CPM
+                    false  // isExternal - can be configured per activity
                 );
 
                 const activity: AdvancedScheduleActivity = {
@@ -350,9 +369,10 @@ export class SpecificationsAnalyzer {
                     description: extracted.description,
                     category: spec.category,
                     boqItemId: spec.originalItem.id,
-                    duration: duration,
+                    duration: baseDuration,
+                    adjustedDuration: adjustedDuration,
                     startDate: currentDate.toISOString().split('T')[0],
-                    endDate: this.addDays(currentDate, duration).toISOString().split('T')[0],
+                    endDate: this.addDays(currentDate, adjustedDuration).toISOString().split('T')[0],
                     earlyStart: '',
                     earlyFinish: '',
                     lateStart: '',
@@ -366,13 +386,15 @@ export class SpecificationsAnalyzer {
                     progress: 0,
                     status: 'Not Started' as ActivityStatus,
                     productivityRate: 0,
-                    estimatedManHours: this.estimateManHours(extracted.type, extracted.estimatedQuantity)
+                    estimatedManHours: this.estimateManHours(extracted.type, extracted.estimatedQuantity),
+                    shiftConfig: shiftConfig,
+                    riskBuffer: riskBuffer
                 };
 
                 activities.push(activity);
                 
-                // تحديث التاريخ الحالي
-                currentDate = this.addDays(currentDate, Math.ceil(duration / 2)); // تداخل جزئي
+                // تحديث التاريخ الحالي (مع تداخل جزئي)
+                currentDate = this.addDays(currentDate, Math.ceil(adjustedDuration / 2));
             }
         }
 
@@ -380,14 +402,16 @@ export class SpecificationsAnalyzer {
     }
 
     /**
-     * حساب مدة النشاط
+     * حساب مدة النشاط (الخطوة 4)
+     * المدة = الكمية ÷ (معدل الإنتاجية × عدد الورديات)
      */
     private static calculateActivityDuration(
         activityType: string,
         quantity: number,
-        unit: string
+        unit: string,
+        shiftConfig?: { shiftsPerDay: 1 | 2 | 3 }
     ): number {
-        // معدلات إنتاجية تقديرية
+        // معدلات إنتاجية تقديرية (من ProductivityDatabase)
         const rates: { [key: string]: number } = {
             'excavation': 25, // م3 per day
             'concrete': 15,   // م3 per day
@@ -402,10 +426,70 @@ export class SpecificationsAnalyzer {
         };
 
         const rate = rates[activityType] || 10;
-        const calculatedDays = Math.ceil(quantity / rate);
         
-        // حد أدنى يوم واحد، حد أقصى 30 يوم
-        return Math.max(1, Math.min(30, calculatedDays));
+        // الخطوة 5: معامل التحويل حسب عدد الورديات
+        const shiftFactor = this.getShiftFactor(shiftConfig?.shiftsPerDay || 1);
+        
+        // المدة الخام = الكمية ÷ (معدل × معامل الوردية)
+        const rawDuration = quantity / (rate * shiftFactor);
+        const calculatedDays = Math.ceil(rawDuration);
+        
+        // حد أدنى 0.5 يوم، حد أقصى 30 يوم
+        return Math.max(0.5, Math.min(30, calculatedDays));
+    }
+
+    /**
+     * الخطوة 5: معامل التحويل حسب عدد الورديات
+     */
+    private static getShiftFactor(shiftsPerDay: 1 | 2 | 3): number {
+        const factors: { [key: number]: number } = {
+            1: 1.0,  // وردية واحدة = 100%
+            2: 0.6,  // ورديتان = 60% كفاءة
+            3: 0.45  // ثلاث ورديات = 45% كفاءة
+        };
+        return factors[shiftsPerDay] || 1.0;
+    }
+
+    /**
+     * الخطوة 7: إضافة احتياطي الزمن (Risk Buffer)
+     */
+    private static applyRiskBuffer(
+        baseDuration: number,
+        activityType: string,
+        isCritical: boolean,
+        isExternal: boolean = false
+    ): { adjustedDuration: number; riskBuffer: any } {
+        let bufferPercentage = 3; // default: غير حرج
+        let riskType: 'non-critical' | 'critical' | 'external' | 'precision' = 'non-critical';
+        let reason = 'نشاط غير حرج';
+
+        // تحديد نسبة الاحتياطي حسب نوع النشاط
+        if (activityType === 'painting' || activityType === 'installation') {
+            bufferPercentage = 8;
+            riskType = 'precision';
+            reason = 'أعمال دقيقة (رخام، دهان فاخر)';
+        } else if (isExternal) {
+            bufferPercentage = 6;
+            riskType = 'external';
+            reason = 'أعمال خارجية (مقاول باطن)';
+        } else if (isCritical) {
+            bufferPercentage = 5;
+            riskType = 'critical';
+            reason = 'نشاط حرج (Critical Path)';
+        }
+
+        const bufferDays = Math.ceil(baseDuration * (bufferPercentage / 100));
+        const adjustedDuration = baseDuration + bufferDays;
+
+        return {
+            adjustedDuration,
+            riskBuffer: {
+                riskType,
+                bufferPercentage,
+                bufferDays,
+                reason
+            }
+        };
     }
 
     /**

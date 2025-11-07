@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primavera Magic Tools - اختبار شامل</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        .test-section h2 {
+            color: #764ba2;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.pending { background: #ffc107; color: #000; }
+        .status.running { background: #17a2b8; color: white; }
+        .status.success { background: #28a745; color: white; }
+        .status.failed { background: #dc3545; color: white; }
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .summary h2 {
+            margin-top: 0;
+            color: white;
+        }
+        .stat {
+            display: inline-block;
+            margin: 10px 20px;
+            font-size: 18px;
+        }
+        .stat strong {
+            font-size: 24px;
+        }
+        .icon { font-size: 24px; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Primavera Magic Tools</h1>
+        <p class="subtitle">اختبار شامل لجميع الأدوات السبعة</p>
+
+        <!-- Test 1: Get Available Tools -->
+        <div class="test-section">
+            <h2><span class="icon">📦</span>اختبار 1: الحصول على قائمة الأدوات</h2>
+            <button onclick="testGetTools()">تشغيل الاختبار</button>
+            <span class="status pending" id="test1-status">قيد الانتظار</span>
+            <div id="test1-result"></div>
+        </div>
+
+        <!-- Test 2: SDK Magic Tool -->
+        <div class="test-section">
+            <h2><span class="icon">🔌</span>اختبار 2: SDK Magic Tool - استيراد أنشطة</h2>
+            <button onclick="testSDKImport()">تشغيل الاختبار</button>
+            <span class="status pending" id="test2-status">قيد الانتظار</span>
+            <div id="test2-result"></div>
+        </div>
+
+        <!-- Test 3: BOQ Magic Tool -->
+        <div class="test-section">
+            <h2><span class="icon">💰</span>اختبار 3: BOQ Magic Tool - تقرير التكاليف</h2>
+            <button onclick="testBOQReport()">تشغيل الاختبار</button>
+            <span class="status pending" id="test3-status">قيد الانتظار</span>
+            <div id="test3-result"></div>
+        </div>
+
+        <!-- Test 4: RSC Magic Tool -->
+        <div class="test-section">
+            <h2><span class="icon">👥</span>اختبار 4: RSC Magic Tool - قائمة الموارد</h2>
+            <button onclick="testRSCList()">تشغيل الاختبار</button>
+            <span class="status pending" id="test4-status">قيد الانتظار</span>
+            <div id="test4-result"></div>
+        </div>
+
+        <!-- Test 5: Run All Tests -->
+        <div class="test-section">
+            <h2><span class="icon">🚀</span>تشغيل جميع الاختبارات</h2>
+            <button onclick="runAllTests()" style="font-size: 18px; padding: 15px 30px;">▶ تشغيل جميع الاختبارات</button>
+            <span class="status pending" id="all-status">قيد الانتظار</span>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary" id="summary" style="display: none;">
+            <h2>📊 ملخص النتائج</h2>
+            <div class="stat">✅ نجح: <strong id="passed-count">0</strong></div>
+            <div class="stat">❌ فشل: <strong id="failed-count">0</strong></div>
+            <div class="stat">⏱️ الوقت: <strong id="total-time">0</strong> ثانية</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        let testResults = { passed: 0, failed: 0, totalTime: 0 };
+
+        async function testGetTools() {
+            const statusEl = document.getElementById('test1-status');
+            const resultEl = document.getElementById('test1-result');
+            
+            statusEl.textContent = 'جاري التشغيل...';
+            statusEl.className = 'status running';
+            
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/primavera-magic/tools`);
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                if (data.success && data.total_count === 7) {
+                    statusEl.textContent = 'نجح ✅';
+                    statusEl.className = 'status success';
+                    resultEl.className = 'result success';
+                    resultEl.textContent = `✅ تم الحصول على ${data.total_count} أدوات بنجاح!\n\nالوقت: ${elapsed} ثانية\n\nالأدوات:\n${data.tools.map(t => `- ${t.name} (${t.name_ar})`).join('\n')}`;
+                    testResults.passed++;
+                } else {
+                    throw new Error('عدد الأدوات غير صحيح');
+                }
+            } catch (error) {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                statusEl.textContent = 'فشل ❌';
+                statusEl.className = 'status failed';
+                resultEl.className = 'result error';
+                resultEl.textContent = `❌ خطأ: ${error.message}\n\nالوقت: ${elapsed} ثانية`;
+                testResults.failed++;
+            }
+        }
+
+        async function testSDKImport() {
+            const statusEl = document.getElementById('test2-status');
+            const resultEl = document.getElementById('test2-result');
+            
+            statusEl.textContent = 'جاري التشغيل...';
+            statusEl.className = 'status running';
+            
+            const startTime = Date.now();
+            
+            try {
+                const testData = {
+                    activities: [
+                        {
+                            activity_id: 'TEST_SDK_001',
+                            activity_name: 'Test Activity from SDK',
+                            wbs_id: 'WBS-TEST',
+                            original_duration: 10,
+                            remaining_duration: 10,
+                            status: 'Not Started'
+                        }
+                    ]
+                };
+                
+                const response = await fetch(`${API_URL}/api/primavera-magic/sdk/import-activities`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                if (data.success && data.imported_count === 1) {
+                    statusEl.textContent = 'نجح ✅';
+                    statusEl.className = 'status success';
+                    resultEl.className = 'result success';
+                    resultEl.textContent = `✅ تم استيراد ${data.imported_count} نشاط بنجاح!\n\nالوقت: ${elapsed} ثانية\n\nالنتيجة:\n${JSON.stringify(data, null, 2)}`;
+                    testResults.passed++;
+                } else {
+                    throw new Error('فشل استيراد الأنشطة');
+                }
+            } catch (error) {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                statusEl.textContent = 'فشل ❌';
+                statusEl.className = 'status failed';
+                resultEl.className = 'result error';
+                resultEl.textContent = `❌ خطأ: ${error.message}\n\nالوقت: ${elapsed} ثانية`;
+                testResults.failed++;
+            }
+        }
+
+        async function testBOQReport() {
+            const statusEl = document.getElementById('test3-status');
+            const resultEl = document.getElementById('test3-result');
+            
+            statusEl.textContent = 'جاري التشغيل...';
+            statusEl.className = 'status running';
+            
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/primavera-magic/boq/cost-report`);
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                if (data.success) {
+                    statusEl.textContent = 'نجح ✅';
+                    statusEl.className = 'status success';
+                    resultEl.className = 'result success';
+                    resultEl.textContent = `✅ تم الحصول على تقرير التكاليف بنجاح!\n\nالوقت: ${elapsed} ثانية\n\nالملخص:\n- عدد البنود: ${data.summary.item_count}\n- التكلفة المدرجة: ${data.summary.total_budgeted_cost}\n- التكلفة الفعلية: ${data.summary.total_actual_cost}\n- الفرق: ${data.summary.variance}`;
+                    testResults.passed++;
+                } else {
+                    throw new Error('فشل الحصول على التقرير');
+                }
+            } catch (error) {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                statusEl.textContent = 'فشل ❌';
+                statusEl.className = 'status failed';
+                resultEl.className = 'result error';
+                resultEl.textContent = `❌ خطأ: ${error.message}\n\nالوقت: ${elapsed} ثانية`;
+                testResults.failed++;
+            }
+        }
+
+        async function testRSCList() {
+            const statusEl = document.getElementById('test4-status');
+            const resultEl = document.getElementById('test4-result');
+            
+            statusEl.textContent = 'جاري التشغيل...';
+            statusEl.className = 'status running';
+            
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/primavera-magic/rsc/list`);
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                if (data.success) {
+                    statusEl.textContent = 'نجح ✅';
+                    statusEl.className = 'status success';
+                    resultEl.className = 'result success';
+                    resultEl.textContent = `✅ تم الحصول على قائمة الموارد بنجاح!\n\nالوقت: ${elapsed} ثانية\n\nعدد الموارد: ${data.total_count}\n\nالموارد:\n${JSON.stringify(data.resources, null, 2)}`;
+                    testResults.passed++;
+                } else {
+                    throw new Error('فشل الحصول على قائمة الموارد');
+                }
+            } catch (error) {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                statusEl.textContent = 'فشل ❌';
+                statusEl.className = 'status failed';
+                resultEl.className = 'result error';
+                resultEl.textContent = `❌ خطأ: ${error.message}\n\nالوقت: ${elapsed} ثانية`;
+                testResults.failed++;
+            }
+        }
+
+        async function runAllTests() {
+            const allStatusEl = document.getElementById('all-status');
+            allStatusEl.textContent = 'جاري التشغيل...';
+            allStatusEl.className = 'status running';
+            
+            // Reset results
+            testResults = { passed: 0, failed: 0, totalTime: 0 };
+            
+            const overallStart = Date.now();
+            
+            // Run all tests sequentially
+            await testGetTools();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testSDKImport();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testBOQReport();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testRSCList();
+            
+            const totalTime = ((Date.now() - overallStart) / 1000).toFixed(2);
+            testResults.totalTime = totalTime;
+            
+            // Update summary
+            document.getElementById('passed-count').textContent = testResults.passed;
+            document.getElementById('failed-count').textContent = testResults.failed;
+            document.getElementById('total-time').textContent = totalTime;
+            document.getElementById('summary').style.display = 'block';
+            
+            if (testResults.failed === 0) {
+                allStatusEl.textContent = 'نجح جميع الاختبارات ✅';
+                allStatusEl.className = 'status success';
+            } else {
+                allStatusEl.textContent = `فشل ${testResults.failed} من الاختبارات ❌`;
+                allStatusEl.className = 'status failed';
+            }
+        }
+    </script>
+</body>
+</html>

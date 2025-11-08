@@ -63,6 +63,7 @@ const InteractiveReports = React.lazy(() => import('./components/InteractiveRepo
 const MobileFieldHub = React.lazy(() => import('./components/MobileFieldHub').then(module => ({ default: module.default })));
 const RFIManager = React.lazy(() => import('./components/RFIManager').then(module => ({ default: module.default })));
 const DesignExecutionManager = React.lazy(() => import('./components/DesignExecutionManager').then(module => ({ default: module.default })));
+const SiteInspection = React.lazy(() => import('./components/SiteInspection').then(module => ({ default: module.default })));
 const IntegrationMonitor = React.lazy(() => import('./components/IntegrationMonitor').then(module => ({ default: module.default })));
 const PDFManager = React.lazy(() => import('./components/PDFManager').then(module => ({ default: module.default })));
 const ThemeCustomizer = React.lazy(() => import('./components/ThemeCustomizer').then(module => ({ default: module.default })));
@@ -416,6 +417,8 @@ const App: React.FC = () => {
                 return <RFIManager />;
             case 'design-execution':
                 return <DesignExecutionManager />;
+            case 'site-inspection':
+                return <SiteInspection />;
             case 'integration-monitor':
                 return <IntegrationMonitor />;
             case 'pdf-manager':

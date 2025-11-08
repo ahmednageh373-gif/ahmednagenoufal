@@ -166,24 +166,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     {/* التنفيذ */}
                     <NavSection title="التنفيذ" icon={Hammer} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Compass} label="إدارة التصميم والتنفيذ" viewName="design-execution" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Camera} label="📸 تفتيش الموقع (AI)" viewName="site-inspection" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Camera} label="متابعة الموقع" viewName="site" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Sparkles} label="مركز العمليات الميدانية" viewName="mobile-field-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={HardHat} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={DollarSign} label="الحسابات الهندسية" viewName="financials" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={ClipboardCheck} label="التقييم والترميم" viewName="assessments" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        
+                        {/* التصميم تحت التنفيذ */}
+                        <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Package} label="مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Shield} label="نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
                     
                     {/* إدارة الموارد */}
                     <NavSection title="إدارة الموارد" icon={Package} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Hammer} label="إدارة الموارد" viewName="resources-manager" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Users} label="الموارد البشرية" viewName="resource-management" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                    </NavSection>
-
-                    {/* التصميم */}
-                    <NavSection title="التصميم" icon={Compass} isCollapsed={isDesktopCollapsed}>
-                        <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={Package} label="مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={Shield} label="نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
 
                     {/* إدارة المشروعات */}

@@ -43,7 +43,6 @@ export const DesignExecutionManager: React.FC = () => {
     { id: 'packages', name: 'حزم التصميم', icon: Package },
     { id: 'compliance', name: 'فحص الامتثال', icon: CheckCircle },
     { id: 'value_engineering', name: 'هندسة القيمة', icon: TrendingUp },
-    { id: 'site_inspection', name: '📸 تفتيش الموقع', icon: Camera },
     { id: 'modifications', name: 'التعديلات', icon: Settings },
   ];
 
@@ -809,7 +808,6 @@ ${img.analysis.safety_concerns.map(concern => `⚠️ ${concern}`).join('\n')}
         {activeTab === 'packages' && renderPackages()}
         {activeTab === 'compliance' && renderCompliance()}
         {activeTab === 'value_engineering' && renderValueEngineering()}
-        {activeTab === 'site_inspection' && renderSiteInspection()}
         {activeTab === 'modifications' && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <p className="text-gray-600 dark:text-gray-400">

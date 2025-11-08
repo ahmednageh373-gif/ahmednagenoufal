@@ -22,6 +22,7 @@ import {
   Filter, SortAsc, BookOpen, Info
 } from 'lucide-react';
 import { yqArchBlocks, blockCategories, getBlocksByCategory, searchBlocks } from '../data/yqarch-library-data';
+import CADCanvas from './CADCanvas';
 
 type DrawingTool = 'select' | 'line' | 'polyline' | 'circle' | 'arc' | 'rectangle' | 'text';
 type LayerVisibility = 'visible' | 'hidden' | 'locked';
@@ -56,6 +57,11 @@ export const CADUnifiedPlatform: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBlock, setSelectedBlock] = useState<any>(null);
+  const [blockRotation, setBlockRotation] = useState<number>(0);
+  const [blockScale, setBlockScale] = useState<number>(1);
+  const [blockFlipH, setBlockFlipH] = useState<boolean>(false);
+  const [blockFlipV, setBlockFlipV] = useState<boolean>(false);
+  const [isInsertMode, setIsInsertMode] = useState<boolean>(false);
   const [layers, setLayers] = useState<Layer[]>([
     { id: 'layer-1', name: 'WALLS', color: '#FF0000', lineType: 'Continuous', lineWeight: 0.3, visibility: 'visible' },
     { id: 'layer-2', name: 'DOORS', color: '#00FF00', lineType: 'Continuous', lineWeight: 0.2, visibility: 'visible' },
@@ -64,6 +70,12 @@ export const CADUnifiedPlatform: React.FC = () => {
   ]);
   const [drawings, setDrawings] = useState<DrawingEntity[]>([]);
   const [bulgeValue, setBulgeValue] = useState<number>(0);
+
+  // Handle entity added from canvas
+  const handleEntityAdded = (entity: any) => {
+    console.log('Entity added:', entity);
+    setDrawings([...drawings, entity]);
+  };
 
   // Filter blocks
   const filteredBlocks = searchQuery
@@ -291,6 +303,111 @@ export const CADUnifiedPlatform: React.FC = () => {
                   </div>
                 ))}
               </div>
+              
+              {/* Block Insertion Controls */}
+              {selectedBlock && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">إعدادات الإدراج</h3>
+                  
+                  {/* Rotation Control */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      التدوير: {blockRotation}°
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="360"
+                        step="15"
+                        value={blockRotation}
+                        onChange={(e) => setBlockRotation(Number(e.target.value))}
+                        className="flex-1"
+                      />
+                      <button
+                        onClick={() => setBlockRotation(0)}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                        title="إعادة تعيين"
+                      >
+                        <RefreshCw size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Scale Control */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      التحجيم: {blockScale.toFixed(2)}x
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="5"
+                        step="0.1"
+                        value={blockScale}
+                        onChange={(e) => setBlockScale(Number(e.target.value))}
+                        className="flex-1"
+                      />
+                      <button
+                        onClick={() => setBlockScale(1)}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                        title="إعادة تعيين"
+                      >
+                        <RefreshCw size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Flip Controls */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setBlockFlipH(!blockFlipH)}
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${
+                        blockFlipH
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                      }`}
+                      title="قلب أفقي"
+                    >
+                      <FlipHorizontal size={16} />
+                      <span className="text-sm">أفقي</span>
+                    </button>
+                    <button
+                      onClick={() => setBlockFlipV(!blockFlipV)}
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${
+                        blockFlipV
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                      }`}
+                      title="قلب رأسي"
+                    >
+                      <FlipHorizontal size={16} className="transform rotate-90" />
+                      <span className="text-sm">رأسي</span>
+                    </button>
+                  </div>
+                  
+                  {/* Insert Button */}
+                  <button
+                    onClick={() => {
+                      setSelectedTool('insert-block' as any);
+                      setIsInsertMode(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    <Plus size={20} />
+                    <span>إدراج البلوك</span>
+                  </button>
+                  
+                  {isInsertMode && (
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        ✓ وضع الإدراج نشط - انقر على Canvas لإدراج البلوك
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -493,36 +610,17 @@ export const CADUnifiedPlatform: React.FC = () => {
 
         {/* Main Canvas Area */}
         <div className="flex-1 bg-gray-100 dark:bg-gray-900 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-gray-400 dark:text-gray-600">
-              <Grid className="w-16 h-16 mx-auto mb-4" />
-              <p className="text-lg font-medium">Canvas Area</p>
-              <p className="text-sm mt-2">منطقة الرسم التفاعلية</p>
-              <p className="text-xs mt-4 max-w-md">
-                🎨 سيتم هنا عرض لوحة الرسم التفاعلية مع إمكانية السحب والإفلات والتعديل المباشر
-              </p>
-            </div>
-          </div>
-
-          {/* Top Toolbar */}
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Zoom In">
-              <ZoomIn size={18} />
-            </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Zoom Out">
-              <ZoomOut size={18} />
-            </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Fit to Screen">
-              <Home size={18} />
-            </button>
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Undo">
-              <RefreshCw size={18} />
-            </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Grid">
-              <Grid size={18} />
-            </button>
-          </div>
+          <CADCanvas
+            selectedTool={selectedTool as any}
+            selectedLayer={layers.find(l => l.visibility === 'visible')?.id || layers[0].id}
+            layers={layers}
+            onEntityAdded={handleEntityAdded}
+            selectedBlock={selectedBlock}
+            blockRotation={blockRotation}
+            blockScale={blockScale}
+            blockFlipH={blockFlipH}
+            blockFlipV={blockFlipV}
+          />
         </div>
 
         {/* Right Properties Panel */}

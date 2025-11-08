@@ -3,30 +3,8 @@ import { Sidebar } from './components/Sidebar';
 import { Menu } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
-// Fix: Correct import path for types - split into multiple lines for readability
-import type { 
-  Project, 
-  ProjectItem, 
-  PurchaseOrder, 
-  Objective, 
-  KeyResult, 
-  ProjectWorkflow, 
-  FinancialItem, 
-  ScheduleTask, 
-  Risk, 
-  SiteLogEntry, 
-  Drawing, 
-  DrawingFolder, 
-  DocumentCategory, 
-  BOQMatch, 
-  AssistantSettings, 
-  Subcontractor, 
-  SubcontractorInvoice, 
-  StructuralAssessment, 
-  WorkLogEntry, 
-  ChecklistItem, 
-  ProjectMember 
-} from './types';
+// Fix: Correct import path for types.
+import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem, ProjectMember } from './types';
 
 // Lazy load all the main view components
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
@@ -41,8 +19,7 @@ const SubcontractorManager = React.lazy(() => import('./components/Subcontractor
 const ProjectHub = React.lazy(() => import('./components/ProjectHub').then(module => ({ default: module.ProjectHub })));
 const OKRManager = React.lazy(() => import('./components/OKRManager').then(module => ({ default: module.OKRManager })));
 const WorkflowArchitect = React.lazy(() => import('./components/WorkflowArchitect').then(module => ({ default: module.WorkflowArchitect })));
-// Temporarily disabled due to Activity icon conflict
-// const AutomationCenter = React.lazy(() => import('./components/AutomationCenter').then(module => ({ default: module.AutomationCenter })));
+const AutomationCenter = React.lazy(() => import('./components/AutomationCenter').then(module => ({ default: module.AutomationCenter })));
 const AnalysisCenter = React.lazy(() => import('./components/AnalysisCenter').then(module => ({ default: module.AnalysisCenter })));
 const LiveAssistant = React.lazy(() => import('./components/LiveAssistant').then(module => ({ default: module.LiveAssistant })));
 const DocumentationViewer = React.lazy(() => import('./components/DocumentationViewer').then(module => ({ default: module.DocumentationViewer })));
@@ -70,7 +47,8 @@ const ProEngineeringHub = React.lazy(() => import('./components/ProEngineeringHu
 const RealAIProcessor = React.lazy(() => import('./components/RealAIProcessor').then(module => ({ default: module.default })));
 const NOUFALIntegratedSystem = React.lazy(() => import('./components/NOUFALIntegratedSystem').then(module => ({ default: module.default })));
 // Primavera Magic Tools - أدوات Primavera السحرية
-const PrimaveraMagicRouter = React.lazy(() => import('./components/primavera/PrimaveraMagicRouter').then(module => ({ default: module.default })));
+// TEMPORARILY DISABLED - Component file missing
+// const PrimaveraMagicRouter = React.lazy(() => import('./components/primavera/PrimaveraMagicRouter').then(module => ({ default: module.default })));
 // New Integrated ERP Systems - نظام التكامل الشامل
 const ExecutiveDashboard = React.lazy(() => import('./components/ExecutiveDashboard').then(module => ({ default: module.ExecutiveDashboard })));
 const ResourceManagement = React.lazy(() => import('./components/ResourceManagement').then(module => ({ default: module.ResourceManagement })));
@@ -85,6 +63,9 @@ const InteractiveReports = React.lazy(() => import('./components/InteractiveRepo
 const MobileFieldHub = React.lazy(() => import('./components/MobileFieldHub').then(module => ({ default: module.default })));
 const RFIManager = React.lazy(() => import('./components/RFIManager').then(module => ({ default: module.default })));
 const DesignExecutionManager = React.lazy(() => import('./components/DesignExecutionManager').then(module => ({ default: module.default })));
+const SiteInspection = React.lazy(() => import('./components/SiteInspection').then(module => ({ default: module.default })));
+const ApprovedExecutionDrawings = React.lazy(() => import('./components/ApprovedExecutionDrawings').then(module => ({ default: module.default })));
+const SiteDocuments = React.lazy(() => import('./components/SiteDocuments').then(module => ({ default: module.default })));
 const IntegrationMonitor = React.lazy(() => import('./components/IntegrationMonitor').then(module => ({ default: module.default })));
 const PDFManager = React.lazy(() => import('./components/PDFManager').then(module => ({ default: module.default })));
 const ThemeCustomizer = React.lazy(() => import('./components/ThemeCustomizer').then(module => ({ default: module.default })));
@@ -120,8 +101,8 @@ const App: React.FC = () => {
             }
         } catch (error) {
             console.error("Could not load projects from local storage", error);
-            // Note: Cannot call setHasError here - it's not available yet
-            // Error will be logged to console instead
+            setHasError(true);
+            setErrorMessage('فشل تحميل المشاريع من التخزين المحلي');
         }
         return mockProjects; // Fallback to mock data on first load or error
     });
@@ -363,7 +344,7 @@ const App: React.FC = () => {
             case 'workflow':
                 return <WorkflowArchitect project={activeProject} onUpdateWorkflow={handleUpdateWorkflow} />;
             case 'automation':
-                return <div className="p-8 text-center"><h2 className="text-2xl">🚧 Automation Center قيد الصيانة</h2></div>;
+                return <AutomationCenter />;
             case 'boq-manual':
                 return <BOQManualManager 
                     project={activeProject} 
@@ -413,7 +394,10 @@ const App: React.FC = () => {
             case 'noufal-integrated':
                 return <NOUFALIntegratedSystem />;
             case 'primavera-magic':
-                return <PrimaveraMagicRouter />;
+                return <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+                    <h2 className="text-2xl font-bold mb-4">المكون غير متوفر حالياً</h2>
+                    <p>Primavera Magic Router component is temporarily unavailable</p>
+                </div>;
             case 'executive-dashboard':
                 return <ExecutiveDashboard projectId={activeProject.id} projectName={activeProject.name} />;
             case 'resources-manager':
@@ -435,6 +419,12 @@ const App: React.FC = () => {
                 return <RFIManager />;
             case 'design-execution':
                 return <DesignExecutionManager />;
+            case 'site-inspection':
+                return <SiteInspection />;
+            case 'approved-execution-drawings':
+                return <ApprovedExecutionDrawings />;
+            case 'site-documents':
+                return <SiteDocuments />;
             case 'integration-monitor':
                 return <IntegrationMonitor />;
             case 'pdf-manager':

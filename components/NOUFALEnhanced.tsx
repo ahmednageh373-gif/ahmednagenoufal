@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Home, Calendar, DollarSign, AlertTriangle, MapPin, FileText, 
   Menu, X, Bell, Search, Settings, Users, TrendingUp, BarChart3,
-  CheckCircle, Clock, Zap, Target, Award, TrendingUp as Activity, Download,
+  CheckCircle, Clock, Zap, Target, Award, Activity, Download,
   MessageSquare, Shield, Briefcase, Database, ChevronRight,
   Star, ThumbsUp, Eye, ArrowUp, ArrowDown
 } from 'lucide-react';

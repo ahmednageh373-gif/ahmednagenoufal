@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Palette, Type, Layout, Sparkles, RotateCcw, Save, Moon, Sun, Monitor, Circle, Square, Hexagon, Maximize, Minimize, Zap, Eye, Download, Upload } from 'lucide-react';
-import type { ThemeConfig, ThemeMode, ColorScheme, FontSize } from '../types';
+import type { ThemeConfig, ThemeMode, ColorScheme, FontSize } from '@/types';
 
 export const ThemeCustomizer: React.FC = () => {
     const { theme, updateTheme, resetTheme } = useTheme();

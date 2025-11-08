@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -16,22 +16,60 @@ interface SidebarProps {
     onToggleDesktopCollapse: () => void;
 }
 
-const NavItem: React.FC<{ icon: React.ElementType; label: string; viewName: string; activeView: string; onSelect: (view: string) => void; isCollapsed: boolean }> = ({ icon: Icon, label, viewName, activeView, onSelect, isCollapsed }) => (
+const NavItem: React.FC<{ icon: React.ElementType; label: string; viewName: string; activeView: string; onSelect: (view: string) => void; isCollapsed: boolean; indent?: boolean }> = ({ icon: Icon, label, viewName, activeView, onSelect, isCollapsed, indent = false }) => (
     <button
         onClick={() => onSelect(viewName)}
         title={isCollapsed ? label : undefined}
-        className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+        className={`w-full flex items-center gap-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            indent ? 'pr-4 pl-8' : 'px-4'
+        } ${
             activeView === viewName
                 ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300'
                 : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
         } ${isCollapsed ? 'lg:justify-center' : ''}`}
     >
-        <Icon size={20} className="shrink-0" />
+        <Icon size={indent ? 18 : 20} className="shrink-0" />
         <span className={`whitespace-nowrap transition-opacity duration-200 ${isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'}`}>
             {label}
         </span>
     </button>
 );
+
+interface NavSectionProps {
+    title: string;
+    icon: React.ElementType;
+    isCollapsed: boolean;
+    children: React.ReactNode;
+}
+
+const NavSection: React.FC<NavSectionProps> = ({ title, icon: Icon, isCollapsed, children }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+    
+    return (
+        <div className="mb-2">
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className={`w-full flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${
+                    isCollapsed ? 'lg:justify-center' : ''
+                }`}
+            >
+                <Icon size={16} className="shrink-0" />
+                <span className={`flex-1 text-right transition-opacity duration-200 ${isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'}`}>
+                    {title}
+                </span>
+                <ChevronRight 
+                    size={14} 
+                    className={`shrink-0 transition-all duration-200 ${isExpanded ? 'rotate-90' : ''} ${isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'}`}
+                />
+            </button>
+            <div className={`space-y-0.5 overflow-hidden transition-all duration-300 ${
+                isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+                {children}
+            </div>
+        </div>
+    );
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onSelectProject, activeView, onSelectView, onAddProject, isOpen, onClose, isDesktopCollapsed, onToggleDesktopCollapse }) => {
     const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
@@ -143,7 +181,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     {/* التصميم */}
                     <NavSection title="التصميم" icon={Compass} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Compass} label="إدارة التصميم والتنفيذ" viewName="design-execution" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={DraftingCompass} label="منصة CAD الموحدة" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Package} label="مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Shield} label="نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
@@ -215,6 +252,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                 </nav>
 
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+                    <NavItem icon={Palette} label="تخصيص المظهر" viewName="theme-customizer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={HelpCircle} label="المساعدة والتوثيق" viewName="docs-viewer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <button
                         onClick={onToggleDesktopCollapse}

@@ -47,7 +47,8 @@ const ProEngineeringHub = React.lazy(() => import('./components/ProEngineeringHu
 const RealAIProcessor = React.lazy(() => import('./components/RealAIProcessor').then(module => ({ default: module.default })));
 const NOUFALIntegratedSystem = React.lazy(() => import('./components/NOUFALIntegratedSystem').then(module => ({ default: module.default })));
 // Primavera Magic Tools - أدوات Primavera السحرية
-const PrimaveraMagicRouter = React.lazy(() => import('./components/primavera/PrimaveraMagicRouter').then(module => ({ default: module.default })));
+// TEMPORARILY DISABLED - Component file missing
+// const PrimaveraMagicRouter = React.lazy(() => import('./components/primavera/PrimaveraMagicRouter').then(module => ({ default: module.default })));
 // New Integrated ERP Systems - نظام التكامل الشامل
 const ExecutiveDashboard = React.lazy(() => import('./components/ExecutiveDashboard').then(module => ({ default: module.ExecutiveDashboard })));
 const ResourceManagement = React.lazy(() => import('./components/ResourceManagement').then(module => ({ default: module.ResourceManagement })));
@@ -390,7 +391,10 @@ const App: React.FC = () => {
             case 'noufal-integrated':
                 return <NOUFALIntegratedSystem />;
             case 'primavera-magic':
-                return <PrimaveraMagicRouter />;
+                return <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+                    <h2 className="text-2xl font-bold mb-4">المكون غير متوفر حالياً</h2>
+                    <p>Primavera Magic Router component is temporarily unavailable</p>
+                </div>;
             case 'executive-dashboard':
                 return <ExecutiveDashboard projectId={activeProject.id} projectName={activeProject.name} />;
             case 'resources-manager':

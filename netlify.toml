@@ -1,12 +1,14 @@
 # Netlify Configuration - Simplified for Reliability
 
 [build]
-  command = "npm run build"
+  command = "npm ci --legacy-peer-deps && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_VERSION = "9"
   NPM_FLAGS = "--legacy-peer-deps"
+  NODE_ENV = "production"
 
 # SPA redirect - all routes to index.html
 [[redirects]]

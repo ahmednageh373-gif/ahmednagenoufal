@@ -88,6 +88,7 @@ const DesignExecutionManager = React.lazy(() => import('./components/DesignExecu
 const IntegrationMonitor = React.lazy(() => import('./components/IntegrationMonitor').then(module => ({ default: module.default })));
 const PDFManager = React.lazy(() => import('./components/PDFManager').then(module => ({ default: module.default })));
 const ThemeCustomizer = React.lazy(() => import('./components/ThemeCustomizer').then(module => ({ default: module.default })));
+const CADUnifiedPlatform = React.lazy(() => import('./components/CADUnifiedPlatform').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -440,6 +441,8 @@ const App: React.FC = () => {
                 return <PDFManager />;
             case 'theme-customizer':
                 return <ThemeCustomizer />;
+            case 'cad-platform':
+                return <CADUnifiedPlatform />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

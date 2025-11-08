@@ -43,22 +43,22 @@ interface NavSectionProps {
 }
 
 const NavSection: React.FC<NavSectionProps> = ({ title, icon: Icon, isCollapsed, children }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     
     return (
         <div className="mb-2">
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className={`w-full flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-100 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 ${
                     isCollapsed ? 'lg:justify-center' : ''
                 }`}
             >
-                <Icon size={16} className="shrink-0" />
+                <Icon size={20} className="shrink-0" />
                 <span className={`flex-1 text-right transition-opacity duration-200 ${isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'}`}>
                     {title}
                 </span>
                 <ChevronRight 
-                    size={14} 
+                    size={16} 
                     className={`shrink-0 transition-all duration-200 ${isExpanded ? 'rotate-90' : ''} ${isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'}`}
                 />
             </button>

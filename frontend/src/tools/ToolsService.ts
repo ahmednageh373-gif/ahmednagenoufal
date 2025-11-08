@@ -42,7 +42,7 @@ export interface ToolResult {
 
 export class ConverterTool {
   static readonly id = 'converter';
-  static readonly name = 'محول الوحدات';
+  static readonly displayName = 'محول الوحدات';
   static readonly description = 'تحويل الوحدات الهندسية المختلفة';
 
   private static readonly conversions: Record<string, Record<string, number>> = {
@@ -189,7 +189,7 @@ export interface LoadOutput {
 
 export class LoadCalculatorTool {
   static readonly id = 'load_calculator';
-  static readonly name = 'حاسبة الأحمال';
+  static readonly displayName = 'حاسبة الأحمال';
   static readonly description = 'حساب الأحمال على العناصر الإنشائية';
 
   private static readonly liveLoadFactors: Record<string, number> = {
@@ -342,7 +342,7 @@ export class LoadCalculatorTool {
 
 export class VolumeAreaTool {
   static readonly id = 'volume_area';
-  static readonly name = 'حساب الحجم والمساحة';
+  static readonly displayName = 'حساب الحجم والمساحة';
   static readonly description = 'حساب مساحة وحجم الأشكال الهندسية';
 
   static calculateArea(shape: string, dimensions: Record<string, number>): number {
@@ -426,7 +426,7 @@ export class VolumeAreaTool {
 
 export class BuildingEstimatorTool {
   static readonly id = 'building_estimator';
-  static readonly name = 'مقدر المباني';
+  static readonly displayName = 'مقدر المباني';
   static readonly description = 'تقدير تكلفة المباني';
 
   static estimate(area: number, height: number, quality: 'basic' | 'standard' | 'premium' = 'standard'): Record<string, any> {
@@ -525,7 +525,7 @@ export class BuildingEstimatorTool {
 
 export class SteelWeightTool {
   static readonly id = 'steel_weight';
-  static readonly name = 'وزن الحديد';
+  static readonly displayName = 'وزن الحديد';
   static readonly description = 'حساب وزن حديد التسليح';
 
   static calculate(diameter: number, length: number): number {
@@ -581,7 +581,7 @@ export class SteelWeightTool {
 
 export class CuttingLengthTool {
   static readonly id = 'cutting_length';
-  static readonly name = 'طول القطع';
+  static readonly displayName = 'طول القطع';
   static readonly description = 'حساب طول القطع للحديد';
 
   static calculate(spanLength: number, cover: number, diameter: number): number {
@@ -646,7 +646,7 @@ export class CuttingLengthTool {
 
 export class RateAnalysisTool {
   static readonly id = 'rate_analysis';
-  static readonly name = 'تحليل الأسعار';
+  static readonly displayName = 'تحليل الأسعار';
   static readonly description = 'تحليل أسعار بنود الأعمال';
 
   static analyze(quantity: number, unitPrice: number, laborPct: number = 0.15): Record<string, number> {
@@ -716,7 +716,7 @@ export class RateAnalysisTool {
 
 export class BOQMakerTool {
   static readonly id = 'boq_maker';
-  static readonly name = 'مولد BOQ';
+  static readonly displayName = 'مولد BOQ';
   static readonly description = 'إنشاء جدول الكميات';
 
   static generate(items: Array<{ description: string; unit: string; quantity: number; rate: number }>): Record<string, any> {
@@ -782,7 +782,7 @@ export class BOQMakerTool {
 
 export class StructuralAnalysisTool {
   static readonly id = 'structural_analysis';
-  static readonly name = 'التحليل الإنشائي';
+  static readonly displayName = 'التحليل الإنشائي';
   static readonly description = 'تحليل الإجهادات والانحرافات';
 
   static analyze(totalLoad: number): Record<string, any> {
@@ -835,7 +835,7 @@ export class StructuralAnalysisTool {
 
 export class SoilMechanicsTool {
   static readonly id = 'soil_mechanics';
-  static readonly name = 'ميكانيكا التربة';
+  static readonly displayName = 'ميكانيكا التربة';
   static readonly description = 'حساب قدرة تحمل التربة';
 
   static analyze(unitWeight: number, depth: number, frictionAngle: number, cohesion: number): Record<string, number> {
@@ -931,7 +931,7 @@ export class ToolsService {
   static getTools(): Array<{ id: string; name: string; description: string }> {
     return this.tools.map(tool => ({
       id: (tool as any).id,
-      name: (tool as any).name,
+      name: (tool as any).displayName,
       description: (tool as any).description || ''
     }));
   }

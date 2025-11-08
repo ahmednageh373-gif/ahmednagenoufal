@@ -46,6 +46,26 @@ const AdvancedAIFeatures = React.lazy(() => import('./components/AdvancedAIFeatu
 const ProEngineeringHub = React.lazy(() => import('./components/ProEngineeringHub').then(module => ({ default: module.default })));
 const RealAIProcessor = React.lazy(() => import('./components/RealAIProcessor').then(module => ({ default: module.default })));
 const NOUFALIntegratedSystem = React.lazy(() => import('./components/NOUFALIntegratedSystem').then(module => ({ default: module.default })));
+// Primavera Magic Tools - أدوات Primavera السحرية
+const PrimaveraMagicRouter = React.lazy(() => import('./components/primavera/PrimaveraMagicRouter').then(module => ({ default: module.default })));
+// New Integrated ERP Systems - نظام التكامل الشامل
+const ExecutiveDashboard = React.lazy(() => import('./components/ExecutiveDashboard').then(module => ({ default: module.ExecutiveDashboard })));
+const ResourceManagement = React.lazy(() => import('./components/ResourceManagement').then(module => ({ default: module.ResourceManagement })));
+const CostControlSystem = React.lazy(() => import('./components/CostControlSystem').then(module => ({ default: module.CostControlSystem })));
+const ResourcesManager = React.lazy(() => import('./components/ResourcesManager').then(module => ({ default: module.ResourcesManager })));
+const IntegratedAnalytics = React.lazy(() => import('./components/IntegratedAnalytics').then(module => ({ default: module.IntegratedAnalytics })));
+
+// Advanced Construction Systems - الأنظمة المتقدمة للبناء
+const AdvancedDashboard = React.lazy(() => import('./components/AdvancedDashboard').then(module => ({ default: module.default })));
+const AdvancedAnalytics = React.lazy(() => import('./components/AdvancedAnalytics').then(module => ({ default: module.default })));
+const InteractiveReports = React.lazy(() => import('./components/InteractiveReports').then(module => ({ default: module.default })));
+const MobileFieldHub = React.lazy(() => import('./components/MobileFieldHub').then(module => ({ default: module.default })));
+const RFIManager = React.lazy(() => import('./components/RFIManager').then(module => ({ default: module.default })));
+const DesignExecutionManager = React.lazy(() => import('./components/DesignExecutionManager').then(module => ({ default: module.default })));
+const IntegrationMonitor = React.lazy(() => import('./components/IntegrationMonitor').then(module => ({ default: module.default })));
+const PDFManager = React.lazy(() => import('./components/PDFManager').then(module => ({ default: module.default })));
+const ThemeCustomizer = React.lazy(() => import('./components/ThemeCustomizer').then(module => ({ default: module.default })));
+const CADUnifiedPlatform = React.lazy(() => import('./components/CADUnifiedPlatform').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -369,6 +389,37 @@ const App: React.FC = () => {
                 return <RealAIProcessor projectId={activeProject.id} projectName={activeProject.name} />;
             case 'noufal-integrated':
                 return <NOUFALIntegratedSystem />;
+            case 'primavera-magic':
+                return <PrimaveraMagicRouter />;
+            case 'executive-dashboard':
+                return <ExecutiveDashboard projectId={activeProject.id} projectName={activeProject.name} />;
+            case 'resources-manager':
+                return <ResourceManagement projectId={activeProject.id} />;
+            case 'cost-control':
+                return <CostControlSystem projectId={activeProject.id} totalBudget={activeProject.data.financials.reduce((sum, item) => sum + item.total, 0)} />;
+            case 'integrated-analytics':
+                return <IntegratedAnalytics projectId={activeProject.id} />;
+            // Advanced Construction Systems
+            case 'advanced-dashboard':
+                return <AdvancedDashboard />;
+            case 'advanced-analytics':
+                return <AdvancedAnalytics />;
+            case 'interactive-reports':
+                return <InteractiveReports />;
+            case 'mobile-field-hub':
+                return <MobileFieldHub />;
+            case 'rfi-manager':
+                return <RFIManager />;
+            case 'design-execution':
+                return <DesignExecutionManager />;
+            case 'integration-monitor':
+                return <IntegrationMonitor />;
+            case 'pdf-manager':
+                return <PDFManager />;
+            case 'theme-customizer':
+                return <ThemeCustomizer />;
+            case 'cad-platform':
+                return <CADUnifiedPlatform />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

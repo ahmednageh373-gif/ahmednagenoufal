@@ -148,23 +148,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     {/* لوحة التحكم الرئيسية */}
                     <NavItem icon={LayoutDashboard} label="لوحة التحكم" viewName="dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     
-                    {/* إدارة المقايسات والجدول الزمني */}
-                    <NavSection title="المقايسات والجدول الزمني" icon={Table} isCollapsed={isDesktopCollapsed}>
+                    {/* التنفيذ - قسم موحد شامل */}
+                    <NavSection title="التنفيذ" icon={Hammer} isCollapsed={isDesktopCollapsed}>
+                        {/* المقايسات والجدول الزمني */}
                         <NavItem icon={Table} label="إدارة المقايسات" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Upload} label="رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={BarChart3} label="تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                    </NavSection>
-
-                    {/* المخططات والمستندات */}
-                    <NavSection title="المخططات والمستندات" icon={DraftingCompass} isCollapsed={isDesktopCollapsed}>
+                        
+                        {/* المخططات والمستندات */}
                         <NavItem icon={DraftingCompass} label="المخططات" viewName="drawings" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={FileText} label="المستندات الهندسية" viewName="docs" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={File} label="إدارة ملفات PDF" viewName="pdf-manager" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                    </NavSection>
-
-                    {/* التنفيذ */}
-                    <NavSection title="التنفيذ" icon={Hammer} isCollapsed={isDesktopCollapsed}>
+                        
+                        {/* متابعة التنفيذ */}
                         <NavItem icon={Camera} label="متابعة الموقع" viewName="site" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Sparkles} label="مركز العمليات الميدانية" viewName="mobile-field-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={HardHat} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />

@@ -161,7 +161,23 @@ class ExcelIntelligence:
         
         for sheet_info in discovery_result['detected_sheets']:
             if sheet_info['file_type'] == 'boq':
-                df = pd.read_excel(file_path, sheet_name=sheet_info['sheet_name'])
+                # Try to find header row by reading first 20 rows without header
+                df_test = pd.read_excel(file_path, sheet_name=sheet_info['sheet_name'], header=None, nrows=20)
+                
+                # Find row with most non-null values (likely the header)
+                header_row = 0
+                max_non_null = 0
+                for i in range(len(df_test)):
+                    non_null_count = df_test.iloc[i].notna().sum()
+                    if non_null_count > max_non_null and non_null_count >= 5:  # At least 5 columns
+                        max_non_null = non_null_count
+                        header_row = i
+                
+                # Read with correct header
+                df = pd.read_excel(file_path, sheet_name=sheet_info['sheet_name'], skiprows=header_row)
+                
+                # Remove empty rows
+                df = df.dropna(how='all')
                 
                 # البحث عن أعمدة: الوصف، الكمية، الوحدة، السعر
                 desc_col = self._find_column(df, ['وصف', 'بند', 'description', 'item'])
@@ -170,20 +186,37 @@ class ExcelIntelligence:
                 rate_col = self._find_column(df, ['سعر', 'rate', 'price'])
                 
                 for idx, row in df.iterrows():
-                    if pd.notna(row.get(desc_col, None)):
-                        item = {
-                            'row_number': idx + 1,
-                            'description': str(row.get(desc_col, '')),
-                            'quantity': float(row.get(qty_col, 0)) if pd.notna(row.get(qty_col)) else 0,
-                            'unit': str(row.get(unit_col, '')) if pd.notna(row.get(unit_col)) else '',
-                            'rate': float(row.get(rate_col, 0)) if pd.notna(row.get(rate_col)) else 0,
-                            'sheet': sheet_info['sheet_name']
-                        }
+                    desc_value = row.get(desc_col, None)
+                    if pd.notna(desc_value):
+                        # Skip header-like rows (containing keywords like 'الكمية', 'quantity', etc.)
+                        desc_str = str(desc_value).lower()
+                        if any(kw in desc_str for kw in ['quantity', 'الكمية', 'rate', 'سعر', 'unit', 'وحدة']):
+                            continue
                         
-                        # حساب الإجمالي
-                        item['amount'] = item['quantity'] * item['rate']
-                        
-                        items.append(item)
+                        try:
+                            qty_value = row.get(qty_col, 0)
+                            rate_value = row.get(rate_col, 0)
+                            
+                            # Try to convert to float, skip if fails
+                            quantity = float(qty_value) if pd.notna(qty_value) and qty_value != '' else 0
+                            rate = float(rate_value) if pd.notna(rate_value) and rate_value != '' else 0
+                            
+                            item = {
+                                'row_number': idx + 1,
+                                'description': str(desc_value),
+                                'quantity': quantity,
+                                'unit': str(row.get(unit_col, '')) if pd.notna(row.get(unit_col)) else '',
+                                'rate': rate,
+                                'sheet': sheet_info['sheet_name']
+                            }
+                            
+                            # حساب الإجمالي
+                            item['amount'] = item['quantity'] * item['rate']
+                            
+                            items.append(item)
+                        except (ValueError, TypeError):
+                            # Skip rows that can't be converted to numbers
+                            continue
         
         return {
             'type': 'boq',

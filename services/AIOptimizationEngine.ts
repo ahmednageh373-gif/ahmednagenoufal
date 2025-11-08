@@ -3,7 +3,13 @@
 // AI Prediction & Optimization System for Construction Projects
 // ============================================================================
 
-import * as tf from '@tensorflow/tfjs';
+// NOTE: TensorFlow.js is commented out to reduce bundle size (1.5 MB)
+// Uncomment and run: npm install @tensorflow/tfjs
+// if you want to use AI prediction features
+// import * as tf from '@tensorflow/tfjs';
+
+// Mock TensorFlow types for compilation
+const tf = null as any;
 
 // ============================================================================
 // 1. أنواع البيانات الأساسية (Core Types)
@@ -492,7 +498,7 @@ export class ScheduleOptimizationEngine {
    * تحسين الجدول الزمني باستخدام الخوارزمية الجينية
    * Optimize schedule using Genetic Algorithm
    */
-  optimizeSchedule(activities: Activity[], constraints: Constraint[]): OptimizedSchedule {
+  optimizeSchedule(activities: ScheduleActivityItem[], constraints: Constraint[]): OptimizedSchedule {
     console.log('🧬 بدء تحسين الجدول الزمني...');
     
     const POPULATION_SIZE = 50;
@@ -546,8 +552,8 @@ export class ScheduleOptimizationEngine {
     };
   }
   
-  private initializePopulation(activities: Activity[], size: number): Activity[][] {
-    const population: Activity[][] = [];
+  private initializePopulation(activities: ScheduleActivityItem[], size: number): ScheduleActivityItem[][] {
+    const population: ScheduleActivityItem[][] = [];
     
     for (let i = 0; i < size; i++) {
       const schedule = [...activities];
@@ -564,7 +570,7 @@ export class ScheduleOptimizationEngine {
     return population;
   }
   
-  private calculateFitness(schedule: Activity[], constraints: Constraint[]): number {
+  private calculateFitness(schedule: ScheduleActivityItem[], constraints: Constraint[]): number {
     let fitness = 1000;
     
     // عقوبة على المدة الطويلة
@@ -585,9 +591,9 @@ export class ScheduleOptimizationEngine {
     return Math.max(0, fitness);
   }
   
-  private selection(population: Activity[][], fitness: number[]): Activity[][] {
+  private selection(population: ScheduleActivityItem[][], fitness: number[]): ScheduleActivityItem[][] {
     // Tournament Selection
-    const selected: Activity[][] = [];
+    const selected: ScheduleActivityItem[][] = [];
     const tournamentSize = 3;
     
     for (let i = 0; i < population.length; i++) {
@@ -604,8 +610,8 @@ export class ScheduleOptimizationEngine {
     return selected;
   }
   
-  private crossover(population: Activity[][]): Activity[][] {
-    const offspring: Activity[][] = [];
+  private crossover(population: ScheduleActivityItem[][]): ScheduleActivityItem[][] {
+    const offspring: ScheduleActivityItem[][] = [];
     
     for (let i = 0; i < population.length; i += 2) {
       if (i + 1 < population.length) {
@@ -626,7 +632,7 @@ export class ScheduleOptimizationEngine {
     return offspring;
   }
   
-  private mutation(population: Activity[][], rate: number): Activity[][] {
+  private mutation(population: ScheduleActivityItem[][], rate: number): ScheduleActivityItem[][] {
     return population.map(schedule => {
       if (Math.random() < rate) {
         const mutated = [...schedule];
@@ -639,7 +645,7 @@ export class ScheduleOptimizationEngine {
     });
   }
   
-  private calculateTotalDuration(activities: Activity[]): number {
+  private calculateTotalDuration(activities: ScheduleActivityItem[]): number {
     // حساب المدة الإجمالية مع مراعاة التبعيات
     let totalDuration = 0;
     const endTimes: Map<string, number> = new Map();
@@ -660,7 +666,7 @@ export class ScheduleOptimizationEngine {
     return totalDuration;
   }
   
-  private calculateResourceUtilization(activities: Activity[]): number {
+  private calculateResourceUtilization(activities: ScheduleActivityItem[]): number {
     // حساب كفاءة استخدام الموارد (0-1)
     const resourceLoad: Map<string, number[]> = new Map();
     
@@ -687,7 +693,7 @@ export class ScheduleOptimizationEngine {
     return resourceCount > 0 ? totalUtilization / resourceCount : 0;
   }
   
-  private findCriticalPath(activities: Activity[]): string[] {
+  private findCriticalPath(activities: ScheduleActivityItem[]): string[] {
     // خوارزمية CPM بسيطة
     const criticalPath: string[] = [];
     const endTimes: Map<string, number> = new Map();
@@ -712,7 +718,7 @@ export class ScheduleOptimizationEngine {
     return criticalPath;
   }
   
-  private checkConstraint(schedule: Activity[], constraint: Constraint): boolean {
+  private checkConstraint(schedule: ScheduleActivityItem[], constraint: Constraint): boolean {
     // التحقق من القيود
     switch (constraint.type) {
       case 'MaxDuration':
@@ -725,7 +731,7 @@ export class ScheduleOptimizationEngine {
   }
 }
 
-export interface Activity {
+export interface ScheduleActivityItem {
   id: string;
   name: string;
   duration: number;
@@ -740,7 +746,7 @@ export interface Constraint {
 }
 
 export interface OptimizedSchedule {
-  activities: Activity[];
+  activities: ScheduleActivityItem[];
   totalDuration: number;
   improvement: number;
   resourceUtilization: number;

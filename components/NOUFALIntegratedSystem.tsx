@@ -15,7 +15,9 @@ import {
   Brain,
   Settings,
   Play,
-  RefreshCw
+  RefreshCw,
+  Shield,
+  DollarSign
 } from 'lucide-react';
 
 /**
@@ -35,8 +37,10 @@ import {
  * 10. POST /api/automations/trigger - تفعيل الأتمتة
  */
 
-// Backend URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// Backend URL - Auto-detect based on current origin
+const API_BASE_URL = typeof window !== 'undefined' 
+  ? window.location.origin.replace('3000', '5000')
+  : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
 
 // TypeScript Interfaces
 interface BOQItem {
@@ -98,14 +102,20 @@ const NOUFALIntegratedSystem: React.FC = () => {
   }, []);
 
   const checkBackendHealth = async () => {
+    console.log('Checking backend health at:', API_BASE_URL);
     try {
       const response = await fetch(`${API_BASE_URL}/api/health`);
+      console.log('Backend health response:', response.status, response.ok);
       if (response.ok) {
+        const data = await response.json();
+        console.log('Backend is online:', data);
         setBackendStatus('online');
       } else {
+        console.error('Backend returned non-OK status:', response.status);
         setBackendStatus('offline');
       }
     } catch (error) {
+      console.error('Backend health check failed:', error);
       setBackendStatus('offline');
     }
   };
@@ -146,7 +156,7 @@ const NOUFALIntegratedSystem: React.FC = () => {
     }
   };
 
-  // Analyze BOQ
+  // Analyze BOQ - تحليل شامل مع فحص SBC 2024
   const handleAnalyzeBOQ = async () => {
     if (!file) {
       alert('⚠️ يرجى رفع ملف Excel أولاً');
@@ -158,35 +168,111 @@ const NOUFALIntegratedSystem: React.FC = () => {
     setError(null);
 
     try {
+      // Step 1: رفع الملف واستخراج البيانات (Upload and extract data)
       const formData = new FormData();
       formData.append('file', file);
 
-      setProgress(20);
+      setProgress(10);
 
-      const response = await fetch(`${API_BASE_URL}/api/analyze-boq`, {
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData
       });
 
-      setProgress(60);
-
-      if (!response.ok) {
-        throw new Error('فشل تحليل BOQ');
+      if (!uploadResponse.ok) {
+        throw new Error('فشل رفع الملف - Upload failed');
       }
 
-      const data = await response.json();
+      const uploadData = await uploadResponse.json();
       
-      setProgress(100);
-      setResult({
-        items: data.items || [],
-        summary: data.summary
-      });
+      if (!uploadData.data || !uploadData.data.items) {
+        throw new Error('لم يتم العثور على بنود في الملف - No items found');
+      }
 
-      setIsProcessing(false);
+      setProgress(30);
+
+      // Step 2: التحليل الشامل مع فحص SBC 2024 (Comprehensive analysis with SBC 2024)
+      console.log(`🔍 بدء التحليل الشامل لـ ${uploadData.data.items.length} بند...`);
+      
+      // Create AbortController with 5 minutes timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
+      
+      try {
+        const comprehensiveResponse = await fetch(`${API_BASE_URL}/api/comprehensive-boq-analysis`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            items: uploadData.data.items
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        setProgress(80);
+        
+        console.log('✅ استلام الرد من الخادم...');
+
+        if (!comprehensiveResponse.ok) {
+          const errorData = await comprehensiveResponse.json().catch(() => ({}));
+          throw new Error(errorData.error || 'فشل التحليل الشامل - Comprehensive analysis failed');
+        }
+
+        const comprehensiveData = await comprehensiveResponse.json();
+        
+        if (!comprehensiveData.success) {
+          throw new Error(comprehensiveData.error || 'فشل التحليل - Analysis failed');
+        }
+        
+        console.log('✅ التحليل اكتمل بنجاح');
+
+        setProgress(100);
+        
+        // حفظ النتائج الشاملة (Save comprehensive results)
+        setResult({
+          items: comprehensiveData.analyzed_items || [],
+          summary: comprehensiveData.summary || {},
+          sbc_compliance: comprehensiveData.sbc_compliance || {},
+          classification_stats: comprehensiveData.classification_stats || {},
+          execution_plan: comprehensiveData.execution_plan || {},
+          recommendations: comprehensiveData.recommendations || [],
+          analysis_type: 'comprehensive_with_sbc_2024'
+        });
+
+        setIsProcessing(false);
+
+        // عرض رسالة نجاح مع معلومات الامتثال
+        if (comprehensiveData.sbc_compliance?.summary) {
+          const sbcSummary = comprehensiveData.sbc_compliance.summary;
+          const complianceRate = comprehensiveData.summary?.sbc_compliance_rate || 0;
+          
+          if (sbcSummary.critical_violations && sbcSummary.critical_violations.length > 0) {
+            alert(`⚠️ تحذير: يوجد ${sbcSummary.critical_violations.length} مخالفة حرجة للكود السعودي!\nنسبة الامتثال: ${complianceRate}%`);
+          } else if (complianceRate >= 90) {
+            alert(`✅ ممتاز! نسبة الامتثال للكود السعودي: ${complianceRate}%`);
+          } else if (complianceRate >= 70) {
+            alert(`✓ جيد. نسبة الامتثال للكود السعودي: ${complianceRate}%\nيوجد ${sbcSummary.warnings} تحذير`);
+          } else {
+            alert(`⚠️ انتباه: نسبة الامتثال منخفضة: ${complianceRate}%\nيرجى مراجعة التوصيات`);
+          }
+        }
+        
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        
+        if (fetchError.name === 'AbortError') {
+          throw new Error('انتهى وقت الانتظار - التحليل يأخذ وقتاً طويلاً. يرجى المحاولة مع عدد بنود أقل.');
+        }
+        throw fetchError;
+      }
 
     } catch (err) {
+      console.error('BOQ Analysis Error:', err);
       setError(err instanceof Error ? err.message : 'حدث خطأ في التحليل');
       setIsProcessing(false);
+      setProgress(0);
     }
   };
 
@@ -614,35 +700,153 @@ const NOUFALIntegratedSystem: React.FC = () => {
             </div>
 
             {result?.summary && (
-              <div className="grid md:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-                  <BarChart3 className="w-8 h-8 text-blue-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {result.summary.total_items}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي البنود</p>
+              <div className="space-y-6">
+                {/* Statistics Cards */}
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <BarChart3 className="w-8 h-8 text-blue-500 mb-2" />
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {result.summary.total_items}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي البنود</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                    <FileText className="w-8 h-8 text-green-500 mb-2" />
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {result.summary.total_estimated_duration_months?.toFixed(1) || 0}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">مدة المشروع (شهر)</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                    <Shield className="w-8 h-8 text-purple-500 mb-2" />
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {result.summary.sbc_compliance_rate?.toFixed(1) || 0}%
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">نسبة الامتثال SBC</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-amber-500">
+                    <DollarSign className="w-8 h-8 text-amber-500 mb-2" />
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {(result.summary.total_project_value / 1000000)?.toFixed(2) || 0}M
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">قيمة المشروع (ريال)</p>
+                  </div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-                  <FileText className="w-8 h-8 text-green-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {result.summary.total_quantity?.toFixed(0) || 0}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">إجمالي الكميات</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
-                  <Calendar className="w-8 h-8 text-purple-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {result.summary.project_duration || 0}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">مدة المشروع (يوم)</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 border-red-500">
-                  <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {result.summary.critical_activities || 0}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">الأنشطة الحرجة</p>
-                </div>
+
+                {/* SBC Compliance Details */}
+                {result.sbc_compliance && (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="w-6 h-6 text-purple-600" />
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        فحص الامتثال للكود السعودي SBC 2024
+                      </h3>
+                    </div>
+                    
+                    {result.sbc_compliance.summary && (
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                          <p className="text-sm text-green-700 dark:text-green-400 mb-1">✓ بنود متوافقة</p>
+                          <p className="text-3xl font-bold text-green-600 dark:text-green-300">
+                            {result.sbc_compliance.summary.compliant_items}
+                          </p>
+                        </div>
+                        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                          <p className="text-sm text-red-700 dark:text-red-400 mb-1">✗ بنود غير متوافقة</p>
+                          <p className="text-3xl font-bold text-red-600 dark:text-red-300">
+                            {result.sbc_compliance.summary.non_compliant_items}
+                          </p>
+                        </div>
+                        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                          <p className="text-sm text-amber-700 dark:text-amber-400 mb-1">⚠ تحذيرات</p>
+                          <p className="text-3xl font-bold text-amber-600 dark:text-amber-300">
+                            {result.sbc_compliance.summary.warnings}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {result.sbc_compliance.summary?.critical_violations?.length > 0 && (
+                      <div className="mt-4 bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                        <p className="text-sm font-semibold text-red-700 dark:text-red-400 mb-2">
+                          ⚠️ مخالفات حرجة ({result.sbc_compliance.summary.critical_violations.length}):
+                        </p>
+                        <ul className="space-y-1 text-sm text-red-600 dark:text-red-400">
+                          {result.sbc_compliance.summary.critical_violations.slice(0, 3).map((violation: any, idx: number) => (
+                            <li key={idx}>• {violation.description}</li>
+                          ))}
+                          {result.sbc_compliance.summary.critical_violations.length > 3 && (
+                            <li className="text-xs">... و {result.sbc_compliance.summary.critical_violations.length - 3} مخالفة أخرى</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {result.recommendations && result.recommendations.length > 0 && (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <AlertCircle className="w-6 h-6 text-blue-600" />
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        التوصيات والملاحظات
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {result.recommendations.map((rec: any, idx: number) => (
+                        <div 
+                          key={idx} 
+                          className={`rounded-lg p-4 border ${
+                            rec.type === 'critical' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                            rec.type === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
+                            'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                          }`}
+                        >
+                          <p className="font-semibold text-gray-900 dark:text-white mb-1">{rec.title}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{rec.description}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 italic">
+                            ← {rec.action}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Complexity Distribution */}
+                {result.summary.complexity_distribution && (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <TrendingUp className="w-6 h-6 text-indigo-600" />
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        توزيع التعقيد
+                      </h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                          {result.summary.complexity_distribution.high}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">عالي التعقيد</p>
+                      </div>
+                      <div className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                        <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                          {result.summary.complexity_distribution.medium}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">متوسط التعقيد</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                          {result.summary.complexity_distribution.low}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">منخفض التعقيد</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

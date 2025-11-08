@@ -16,7 +16,7 @@ import {
   Network,
   Calendar,
   ShieldCheck,
-  Activity,
+  TrendingUp as Activity,
   MessageSquare,
   Zap,
   Upload,
@@ -116,7 +116,7 @@ export const NOUFALBackendHub: React.FC = () => {
       id: 's_curve_generator',
       name: 'S-Curve Generator',
       nameAr: 'مولد منحنى S',
-      icon: Activity,
+      icon: TrendingUp as Activity,
       description: 'منحنى S (مخطط/فعلي/مالي)',
       status: false,
       color: 'pink',
@@ -142,16 +142,22 @@ export const NOUFALBackendHub: React.FC = () => {
   ];
 
   useEffect(() => {
+    console.log('NOUFALBackendHub mounted, checking health...');
+    console.log('API Base URL:', noufalAPI['baseUrl'] || 'undefined');
     checkSystemHealth();
   }, []);
 
   const checkSystemHealth = async () => {
     setLoading(true);
     try {
+      console.log('Checking backend health...');
       const [healthResponse, statusResponse] = await Promise.all([
         noufalAPI.healthCheck(),
         noufalAPI.getSystemStatus(),
       ]);
+
+      console.log('Health response:', healthResponse);
+      console.log('Status response:', statusResponse);
 
       setSystemStatus({
         health: healthResponse,
@@ -159,6 +165,7 @@ export const NOUFALBackendHub: React.FC = () => {
       });
     } catch (error) {
       console.error('Failed to check system health:', error);
+      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }

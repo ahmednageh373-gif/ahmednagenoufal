@@ -167,6 +167,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavSection title="التنفيذ" icon={Hammer} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Compass} label="إدارة التصميم والتنفيذ" viewName="design-execution" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Camera} label="📸 تفتيش الموقع (AI)" viewName="site-inspection" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Layers} label="📐 المخططات التنفيذية المعتمدة" viewName="approved-execution-drawings" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={FileText} label="📄 مستندات الموقع" viewName="site-documents" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Camera} label="متابعة الموقع" viewName="site" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Sparkles} label="مركز العمليات الميدانية" viewName="mobile-field-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={HardHat} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />

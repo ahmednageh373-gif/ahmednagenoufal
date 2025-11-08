@@ -64,6 +64,8 @@ const MobileFieldHub = React.lazy(() => import('./components/MobileFieldHub').th
 const RFIManager = React.lazy(() => import('./components/RFIManager').then(module => ({ default: module.default })));
 const DesignExecutionManager = React.lazy(() => import('./components/DesignExecutionManager').then(module => ({ default: module.default })));
 const SiteInspection = React.lazy(() => import('./components/SiteInspection').then(module => ({ default: module.default })));
+const ApprovedExecutionDrawings = React.lazy(() => import('./components/ApprovedExecutionDrawings').then(module => ({ default: module.default })));
+const SiteDocuments = React.lazy(() => import('./components/SiteDocuments').then(module => ({ default: module.default })));
 const IntegrationMonitor = React.lazy(() => import('./components/IntegrationMonitor').then(module => ({ default: module.default })));
 const PDFManager = React.lazy(() => import('./components/PDFManager').then(module => ({ default: module.default })));
 const ThemeCustomizer = React.lazy(() => import('./components/ThemeCustomizer').then(module => ({ default: module.default })));
@@ -419,6 +421,10 @@ const App: React.FC = () => {
                 return <DesignExecutionManager />;
             case 'site-inspection':
                 return <SiteInspection />;
+            case 'approved-execution-drawings':
+                return <ApprovedExecutionDrawings />;
+            case 'site-documents':
+                return <SiteDocuments />;
             case 'integration-monitor':
                 return <IntegrationMonitor />;
             case 'pdf-manager':

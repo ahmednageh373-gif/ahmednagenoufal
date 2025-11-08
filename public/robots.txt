@@ -1,0 +1,21 @@
+# robots.txt for AN.AI Project Management System
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and API endpoints
+Disallow: /api/
+Disallow: /admin/
+Disallow: /backend/
+
+# Disallow sensitive data
+Disallow: /uploads/
+Disallow: /*.json$
+Disallow: /*.log$
+
+# Sitemap location
+Sitemap: https://your-domain.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

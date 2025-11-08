@@ -41,9 +41,9 @@ export interface ToolResult {
 // ============================================================================
 
 export class ConverterTool {
-  static readonly id = 'converter';
-  static readonly displayName = 'محول الوحدات';
-  static readonly description = 'تحويل الوحدات الهندسية المختلفة';
+  static readonly toolId = 'converter';
+  static readonly toolName = 'محول الوحدات';
+  static readonly toolDescription = 'تحويل الوحدات الهندسية المختلفة';
 
   private static readonly conversions: Record<string, Record<string, number>> = {
     // الطول
@@ -188,9 +188,9 @@ export interface LoadOutput {
 }
 
 export class LoadCalculatorTool {
-  static readonly id = 'load_calculator';
-  static readonly displayName = 'حاسبة الأحمال';
-  static readonly description = 'حساب الأحمال على العناصر الإنشائية';
+  static readonly toolId = 'load_calculator';
+  static readonly toolName = 'حاسبة الأحمال';
+  static readonly toolDescription = 'حساب الأحمال على العناصر الإنشائية';
 
   private static readonly liveLoadFactors: Record<string, number> = {
     residential: 2.0,
@@ -341,9 +341,9 @@ export class LoadCalculatorTool {
 // ============================================================================
 
 export class VolumeAreaTool {
-  static readonly id = 'volume_area';
-  static readonly displayName = 'حساب الحجم والمساحة';
-  static readonly description = 'حساب مساحة وحجم الأشكال الهندسية';
+  static readonly toolId = 'volume_area';
+  static readonly toolName = 'حساب الحجم والمساحة';
+  static readonly toolDescription = 'حساب مساحة وحجم الأشكال الهندسية';
 
   static calculateArea(shape: string, dimensions: Record<string, number>): number {
     switch (shape.toLowerCase()) {
@@ -425,9 +425,9 @@ export class VolumeAreaTool {
 }
 
 export class BuildingEstimatorTool {
-  static readonly id = 'building_estimator';
-  static readonly displayName = 'مقدر المباني';
-  static readonly description = 'تقدير تكلفة المباني';
+  static readonly toolId = 'building_estimator';
+  static readonly toolName = 'مقدر المباني';
+  static readonly toolDescription = 'تقدير تكلفة المباني';
 
   static estimate(area: number, height: number, quality: 'basic' | 'standard' | 'premium' = 'standard'): Record<string, any> {
     const qualityFactors: Record<string, number> = {
@@ -524,9 +524,9 @@ export class BuildingEstimatorTool {
 }
 
 export class SteelWeightTool {
-  static readonly id = 'steel_weight';
-  static readonly displayName = 'وزن الحديد';
-  static readonly description = 'حساب وزن حديد التسليح';
+  static readonly toolId = 'steel_weight';
+  static readonly toolName = 'وزن الحديد';
+  static readonly toolDescription = 'حساب وزن حديد التسليح';
 
   static calculate(diameter: number, length: number): number {
     return (Math.pow(diameter, 2) / 162) * length;
@@ -580,9 +580,9 @@ export class SteelWeightTool {
 }
 
 export class CuttingLengthTool {
-  static readonly id = 'cutting_length';
-  static readonly displayName = 'طول القطع';
-  static readonly description = 'حساب طول القطع للحديد';
+  static readonly toolId = 'cutting_length';
+  static readonly toolName = 'طول القطع';
+  static readonly toolDescription = 'حساب طول القطع للحديد';
 
   static calculate(spanLength: number, cover: number, diameter: number): number {
     const bendLength = diameter * 10;
@@ -645,9 +645,9 @@ export class CuttingLengthTool {
 }
 
 export class RateAnalysisTool {
-  static readonly id = 'rate_analysis';
-  static readonly displayName = 'تحليل الأسعار';
-  static readonly description = 'تحليل أسعار بنود الأعمال';
+  static readonly toolId = 'rate_analysis';
+  static readonly toolName = 'تحليل الأسعار';
+  static readonly toolDescription = 'تحليل أسعار بنود الأعمال';
 
   static analyze(quantity: number, unitPrice: number, laborPct: number = 0.15): Record<string, number> {
     const totalAmount = quantity * unitPrice;
@@ -715,9 +715,9 @@ export class RateAnalysisTool {
 }
 
 export class BOQMakerTool {
-  static readonly id = 'boq_maker';
-  static readonly displayName = 'مولد BOQ';
-  static readonly description = 'إنشاء جدول الكميات';
+  static readonly toolId = 'boq_maker';
+  static readonly toolName = 'مولد BOQ';
+  static readonly toolDescription = 'إنشاء جدول الكميات';
 
   static generate(items: Array<{ description: string; unit: string; quantity: number; rate: number }>): Record<string, any> {
     const boqItems = items.map((item, index) => ({
@@ -781,9 +781,9 @@ export class BOQMakerTool {
 }
 
 export class StructuralAnalysisTool {
-  static readonly id = 'structural_analysis';
-  static readonly displayName = 'التحليل الإنشائي';
-  static readonly description = 'تحليل الإجهادات والانحرافات';
+  static readonly toolId = 'structural_analysis';
+  static readonly toolName = 'التحليل الإنشائي';
+  static readonly toolDescription = 'تحليل الإجهادات والانحرافات';
 
   static analyze(totalLoad: number): Record<string, any> {
     return {
@@ -834,9 +834,9 @@ export class StructuralAnalysisTool {
 }
 
 export class SoilMechanicsTool {
-  static readonly id = 'soil_mechanics';
-  static readonly displayName = 'ميكانيكا التربة';
-  static readonly description = 'حساب قدرة تحمل التربة';
+  static readonly toolId = 'soil_mechanics';
+  static readonly toolName = 'ميكانيكا التربة';
+  static readonly toolDescription = 'حساب قدرة تحمل التربة';
 
   static analyze(unitWeight: number, depth: number, frictionAngle: number, cohesion: number): Record<string, number> {
     const effectiveStress = unitWeight * depth;
@@ -930,14 +930,14 @@ export class ToolsService {
 
   static getTools(): Array<{ id: string; name: string; description: string }> {
     return this.tools.map(tool => ({
-      id: (tool as any).id,
-      name: (tool as any).displayName,
-      description: (tool as any).description || ''
+      id: (tool as any).toolId,
+      name: (tool as any).toolName,
+      description: (tool as any).toolDescription || ''
     }));
   }
 
   static getTool(toolId: string): any {
-    return this.tools.find(tool => (tool as any).id === toolId);
+    return this.tools.find(tool => (tool as any).toolId === toolId);
   }
 
   static executeTool(toolId: string, inputs: Record<string, any>): ToolResult {

@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
 // Fix: Correct import path for types.
 import type { ScheduleTask, CriticalPathAnalysis, ProjectMember } from '../types';
-import { MoreHorizontal, User, Circle, CheckCircle, Clock } from 'lucide-react';
+import { MoreHorizontal, User, Circle, CheckCircle, Clock, TrendingUp, TrendingDown, Minus, Eye, EyeOff, Info } from 'lucide-react';
 import { TaskContextMenu } from './TaskContextMenu';
+import { getInitials, generateColorFromString, getContrastColor } from '../utils/avatarUtils';
 
 // A type for tasks that have been processed to include calculated values
 export interface ProcessedScheduleTask extends ScheduleTask {
@@ -10,6 +11,10 @@ export interface ProcessedScheduleTask extends ScheduleTask {
     duration: number;
     originalStartDay?: number;
     originalDuration?: number;
+    baselineStartDay?: number;
+    baselineDuration?: number;
+    variance?: 'ahead' | 'behind' | 'on-track';
+    varianceDays?: number;
 }
 
 interface GanttChartProps {
@@ -22,6 +27,41 @@ interface GanttChartProps {
 }
 
 const DAY_WIDTH = 35; // px
+
+// Member Avatar Component for Gantt Chart
+const MemberAvatarSmall: React.FC<{ member: ProjectMember; size?: number }> = ({ member, size = 24 }) => {
+    const initials = getInitials(member.name);
+    const backgroundColor = member.avatarColor || generateColorFromString(member.name);
+    const textColor = getContrastColor(backgroundColor);
+
+    if (member.avatar) {
+        return (
+            <img
+                src={member.avatar}
+                alt={member.name}
+                className="rounded-full object-cover border-2 border-white dark:border-gray-800"
+                style={{ width: size, height: size }}
+                title={member.name}
+            />
+        );
+    }
+
+    return (
+        <div
+            className="rounded-full flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
+            style={{
+                width: size,
+                height: size,
+                backgroundColor,
+                color: textColor,
+                fontSize: `${size * 0.4}px`,
+            }}
+            title={member.name}
+        >
+            {initials}
+        </div>
+    );
+};
 
 const getDaysDiff = (date1: Date, date2: Date) => {
     const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
@@ -81,10 +121,41 @@ const getBarPriorityClass = (priority?: 'Low' | 'Medium' | 'High') => {
     }
 };
 
+const getVarianceIcon = (variance?: 'ahead' | 'behind' | 'on-track', days?: number) => {
+    if (!variance || days === undefined) return null;
+    
+    switch (variance) {
+        case 'ahead':
+            return (
+                <div className="flex items-center gap-1 text-green-600" title={`متقدم ${Math.abs(days)} يوم`}>
+                    <TrendingUp size={14} />
+                    <span className="text-xs font-medium">{Math.abs(days)}د</span>
+                </div>
+            );
+        case 'behind':
+            return (
+                <div className="flex items-center gap-1 text-red-600" title={`متأخر ${days} يوم`}>
+                    <TrendingDown size={14} />
+                    <span className="text-xs font-medium">{days}د</span>
+                </div>
+            );
+        case 'on-track':
+            return (
+                <div className="flex items-center gap-1 text-blue-600" title="في المسار الصحيح">
+                    <Minus size={14} />
+                </div>
+            );
+        default:
+            return null;
+    }
+};
+
 export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, members, projectStartDate, onEditTask, onDeleteTask, cpmResult }) => {
     const [activeMenuTaskId, setActiveMenuTaskId] = useState<number | null>(null);
     const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
     const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
+    const [showBaseline, setShowBaseline] = useState(true);
+    const [showVarianceIndicators, setShowVarianceIndicators] = useState(true);
     const containerRef = useRef<HTMLDivElement>(null);
     const timelineHeaderRef = useRef<HTMLDivElement>(null);
     const listBodyRef = useRef<HTMLDivElement>(null);
@@ -102,6 +173,8 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
             const dates = [new Date(t.start).getTime(), new Date(t.end).getTime()];
             if (t.originalStart) dates.push(new Date(t.originalStart).getTime());
             if (t.originalEnd) dates.push(new Date(t.originalEnd).getTime());
+            if (t.baselineStart) dates.push(new Date(t.baselineStart).getTime());
+            if (t.baselineEnd) dates.push(new Date(t.baselineEnd).getTime());
             return dates;
         });
         
@@ -123,7 +196,30 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
             const originalStartDay = task.originalStart ? getDaysDiff(new Date(task.originalStart), startDate) : undefined;
             const originalDuration = (task.originalStart && task.originalEnd) ? getDaysDiff(new Date(task.originalEnd), new Date(task.originalStart)) + 1 : undefined;
 
-            return { ...task, startDay, duration, originalStartDay, originalDuration };
+            // Baseline calculation (prefer baselineStart/End, fallback to originalStart/End)
+            const baselineStartDate = task.baselineStart || task.originalStart;
+            const baselineEndDate = task.baselineEnd || task.originalEnd;
+            const baselineStartDay = baselineStartDate ? getDaysDiff(new Date(baselineStartDate), startDate) : undefined;
+            const baselineDuration = (baselineStartDate && baselineEndDate) ? getDaysDiff(new Date(baselineEndDate), new Date(baselineStartDate)) + 1 : undefined;
+
+            // Calculate variance
+            let variance: 'ahead' | 'behind' | 'on-track' | undefined;
+            let varianceDays: number | undefined;
+            if (baselineEndDate) {
+                const actualEnd = new Date(task.end);
+                const plannedEnd = new Date(baselineEndDate);
+                varianceDays = getDaysDiff(actualEnd, plannedEnd);
+                
+                if (Math.abs(varianceDays) <= 2) {
+                    variance = 'on-track';
+                } else if (varianceDays < 0) {
+                    variance = 'ahead'; // Finishing earlier than planned
+                } else {
+                    variance = 'behind'; // Finishing later than planned
+                }
+            }
+
+            return { ...task, startDay, duration, originalStartDay, originalDuration, baselineStartDay, baselineDuration, variance, varianceDays };
         }).sort((a,b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
         // Generate month and day headers
@@ -228,15 +324,77 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
 
     const todayPosition = getDaysDiff(new Date(), startDate);
 
+    // Calculate baseline statistics
+    const baselineStats = useMemo(() => {
+        const tasksWithBaseline = processedTasks.filter(t => t.baselineStartDay !== undefined);
+        const ahead = tasksWithBaseline.filter(t => t.variance === 'ahead').length;
+        const behind = tasksWithBaseline.filter(t => t.variance === 'behind').length;
+        const onTrack = tasksWithBaseline.filter(t => t.variance === 'on-track').length;
+        return { total: tasksWithBaseline.length, ahead, behind, onTrack };
+    }, [processedTasks]);
+
     return (
         <div ref={containerRef} className="gantt-container bg-white dark:bg-gray-900/50 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 w-full overflow-hidden relative">
+            {/* Baseline Controls */}
+            {baselineStats.total > 0 && (
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <Info className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">مقارنة الأساس</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm">
+                            <div className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
+                                <TrendingUp className="w-4 h-4 text-green-600" />
+                                <span className="font-medium text-green-700 dark:text-green-400">{baselineStats.ahead} متقدم</span>
+                            </div>
+                            <div className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                                <Minus className="w-4 h-4 text-blue-600" />
+                                <span className="font-medium text-blue-700 dark:text-blue-400">{baselineStats.onTrack} في المسار</span>
+                            </div>
+                            <div className="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 rounded-full">
+                                <TrendingDown className="w-4 h-4 text-red-600" />
+                                <span className="font-medium text-red-700 dark:text-red-400">{baselineStats.behind} متأخر</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setShowBaseline(!showBaseline)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                                showBaseline 
+                                    ? 'bg-indigo-600 text-white shadow-md' 
+                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700'
+                            }`}
+                        >
+                            {showBaseline ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            <span className="text-sm font-medium">{showBaseline ? 'إخفاء الأساس' : 'إظهار الأساس'}</span>
+                        </button>
+                        <button
+                            onClick={() => setShowVarianceIndicators(!showVarianceIndicators)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                                showVarianceIndicators 
+                                    ? 'bg-purple-600 text-white shadow-md' 
+                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700'
+                            }`}
+                        >
+                            <TrendingUp className="w-4 h-4" />
+                            <span className="text-sm font-medium">{showVarianceIndicators ? 'إخفاء التباين' : 'إظهار التباين'}</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+            
             <div className="flex">
                 {/* Task List (Left Side) */}
-                <div className="w-[500px] border-l border-gray-200 dark:border-gray-800 flex flex-col shrink-0">
+                <div className="w-[580px] border-l border-gray-200 dark:border-gray-800 flex flex-col shrink-0">
                     <div className="h-20 flex items-center p-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
                         <div className="flex-grow font-semibold text-sm">المهمة</div>
                         <div className="w-20 font-semibold text-sm text-center">المسؤول</div>
-                        <div className="w-20 font-semibold text-sm text-center">الحالة</div>
+                        <div className="w-16 font-semibold text-sm text-center">الحالة</div>
+                        {showVarianceIndicators && baselineStats.total > 0 && (
+                            <div className="w-16 font-semibold text-sm text-center">التباين</div>
+                        )}
                         <div className="w-10"></div>
                     </div>
                     <div ref={listBodyRef} className="overflow-y-hidden" style={{ height: `${processedTasks.length * 48}px` }}>
@@ -255,12 +413,27 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
                                     </div>
                                     <div className="w-20 flex justify-center items-center -space-x-2">
                                         {assignees.slice(0,3).map(member => (
-                                             <div key={member.id} title={member.name} className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-indigo-600 border-2 border-white dark:border-gray-900">
-                                                {member.name.charAt(0)}
-                                            </div>
+                                            <MemberAvatarSmall
+                                                key={member.id}
+                                                member={member}
+                                                size={24}
+                                            />
                                         ))}
+                                        {assignees.length > 3 && (
+                                            <div
+                                                className="w-6 h-6 rounded-full bg-gray-600 dark:bg-gray-700 border-2 border-white dark:border-gray-900 flex items-center justify-center text-[10px] font-bold text-white"
+                                                title={`+${assignees.length - 3} أعضاء`}
+                                            >
+                                                +{assignees.length - 3}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="w-20 flex justify-center">{getStatusIcon(task.status)}</div>
+                                    <div className="w-16 flex justify-center">{getStatusIcon(task.status)}</div>
+                                    {showVarianceIndicators && baselineStats.total > 0 && (
+                                        <div className="w-16 flex justify-center">
+                                            {getVarianceIcon(task.variance, task.varianceDays)}
+                                        </div>
+                                    )}
                                     <div className="w-10 flex justify-center">
                                         {onEditTask && onDeleteTask && (
                                             <button onClick={(e) => handleMenuClick(e, task.id)} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
@@ -327,30 +500,95 @@ export const GanttChart: React.FC<GanttChartProps> = React.memo(({ tasks, member
                             const isCritical = cpmResult?.criticalActivityIds.includes(task.id);
                             const barColors = getBarStatusColors(task.status);
                             
-                            // Recovery Plan Baseline Bar
-                            const hasRecoveryBaseline = task.originalStartDay !== undefined && task.originalDuration !== undefined;
+                            // Baseline visualization
+                            const hasBaseline = showBaseline && task.baselineStartDay !== undefined && task.baselineDuration !== undefined;
+                            
+                            // Determine variance visual styling
+                            let varianceIndicatorColor = '';
+                            if (showVarianceIndicators && task.variance) {
+                                switch (task.variance) {
+                                    case 'ahead':
+                                        varianceIndicatorColor = 'ring-2 ring-green-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900';
+                                        break;
+                                    case 'behind':
+                                        varianceIndicatorColor = 'ring-2 ring-red-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900';
+                                        break;
+                                    case 'on-track':
+                                        varianceIndicatorColor = 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900';
+                                        break;
+                                }
+                            }
 
                             return (
                                 <div
                                     key={task.id}
-                                    className={`absolute h-12 flex items-center group cursor-pointer ${highlightedTaskIds.size > 0 && !highlightedTaskIds.has(task.id) ? 'opacity-30' : ''}`}
+                                    className={`absolute h-12 flex flex-col justify-center group cursor-pointer ${highlightedTaskIds.size > 0 && !highlightedTaskIds.has(task.id) ? 'opacity-30' : ''}`}
                                     style={{ top: `${index * 48}px` }}
                                     onMouseEnter={() => setHoveredTaskId(task.id)}
                                     onMouseLeave={() => setHoveredTaskId(null)}
                                     onClick={() => onEditTask && onEditTask(task)}
                                 >
-                                    {hasRecoveryBaseline && (
+                                    {/* Baseline Bar (shown below actual bar) */}
+                                    {hasBaseline && (
                                         <div 
-                                            className="absolute h-4 bg-gray-300 dark:bg-gray-600 rounded-md opacity-70"
-                                            style={{ left: `${task.originalStartDay! * DAY_WIDTH}px`, width: `${task.originalDuration! * DAY_WIDTH}px` }}
-                                        />
+                                            className="absolute top-8 h-2 bg-gray-400 dark:bg-gray-500 rounded-sm opacity-60 group-hover:opacity-80 transition-opacity"
+                                            style={{ 
+                                                left: `${task.baselineStartDay! * DAY_WIDTH}px`, 
+                                                width: `${task.baselineDuration! * DAY_WIDTH}px` 
+                                            }}
+                                            title={`الأساس: ${task.baselineStart} - ${task.baselineEnd}`}
+                                        >
+                                            <div className="absolute -top-1 left-0 w-0.5 h-4 bg-gray-500"></div>
+                                            <div className="absolute -top-1 right-0 w-0.5 h-4 bg-gray-500"></div>
+                                        </div>
                                     )}
+                                    
+                                    {/* Actual Task Bar */}
                                     <div
-                                        className={`relative h-8 rounded-md flex items-center justify-between px-2 text-xs font-medium text-white ${barColors.bg} ${getBarPriorityClass(task.priority)} ${isCritical ? 'ring-2 ring-red-500' : ''}`}
+                                        className={`relative h-8 rounded-md flex items-center justify-between px-2 text-xs font-medium text-white ${barColors.bg} ${getBarPriorityClass(task.priority)} ${isCritical ? 'ring-2 ring-red-500' : varianceIndicatorColor}`}
                                         style={{ left: `${task.startDay * DAY_WIDTH}px`, width: `${task.duration * DAY_WIDTH}px` }}
                                     >
                                         <div className={`absolute top-0 left-0 h-full rounded-md ${barColors.fill}`} style={{ width: `${task.progress}%` }}></div>
                                         <span className="relative truncate">{task.name}</span>
+                                        
+                                        <div className="relative flex items-center gap-1">
+                                            {/* Member Avatars */}
+                                            {task.assignees && task.assignees.length > 0 && (
+                                                <div className="flex items-center -space-x-2">
+                                                    {task.assignees.slice(0, 3).map((assigneeId) => {
+                                                        const member = members.find(m => m.id === assigneeId);
+                                                        if (!member) return null;
+                                                        return (
+                                                            <MemberAvatarSmall
+                                                                key={member.id}
+                                                                member={member}
+                                                                size={20}
+                                                            />
+                                                        );
+                                                    })}
+                                                    {task.assignees.length > 3 && (
+                                                        <div
+                                                            className="w-5 h-5 rounded-full bg-gray-600 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold"
+                                                            title={`+${task.assignees.length - 3} أعضاء`}
+                                                        >
+                                                            +{task.assignees.length - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            
+                                            {/* Variance indicator badge on bar */}
+                                            {showVarianceIndicators && task.variance && task.varianceDays !== undefined && (
+                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                                    task.variance === 'ahead' ? 'bg-green-500' :
+                                                    task.variance === 'behind' ? 'bg-red-500' :
+                                                    'bg-blue-500'
+                                                }`}>
+                                                    {task.variance === 'ahead' ? `+${Math.abs(task.varianceDays)}` : 
+                                                     task.variance === 'behind' ? `-${task.varianceDays}` : '✓'}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             );

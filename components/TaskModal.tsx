@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ScheduleTask, ScheduleTaskStatus, ScheduleTaskPriority, ProjectMember } from '../types';
 import { X } from 'lucide-react';
+import { TeamMemberPicker } from './TeamMemberPicker';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
   const [status, setStatus] = useState<ScheduleTaskStatus>('To Do');
   const [priority, setPriority] = useState<ScheduleTaskPriority>('Medium');
   const [category, setCategory] = useState('');
+  const [baselineStart, setBaselineStart] = useState('');
+  const [baselineEnd, setBaselineEnd] = useState('');
+  const [showBaselineFields, setShowBaselineFields] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,6 +38,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             setStatus(task.status || 'To Do');
             setPriority(task.priority || 'Medium');
             setCategory(task.category || '');
+            setBaselineStart(task.baselineStart || '');
+            setBaselineEnd(task.baselineEnd || '');
+            setShowBaselineFields(!!(task.baselineStart || task.baselineEnd));
         } else {
             // Reset for new task
             const today = new Date().toISOString().split('T')[0];
@@ -46,6 +53,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             setStatus('To Do');
             setPriority('Medium');
             setCategory('');
+            setBaselineStart('');
+            setBaselineEnd('');
+            setShowBaselineFields(false);
         }
     }
   }, [task, isOpen]);
@@ -64,6 +74,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
         status,
         priority,
         category,
+        baselineStart: baselineStart || undefined,
+        baselineEnd: baselineEnd || undefined,
      };
 
     if (task) {
@@ -99,6 +111,46 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
               <label htmlFor="taskEnd" className="block text-sm font-medium mb-2">تاريخ الانتهاء</label>
               <input id="taskEnd" type="date" value={end} onChange={e => setEnd(e.target.value)} required className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded-lg" />
             </div>
+          </div>
+          
+          {/* Baseline Dates Section */}
+          <div className="mb-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+            <div className="flex justify-between items-center mb-3">
+              <label className="block text-sm font-semibold text-indigo-900 dark:text-indigo-100">تواريخ الأساس (Baseline)</label>
+              <button
+                type="button"
+                onClick={() => setShowBaselineFields(!showBaselineFields)}
+                className="text-xs px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+              >
+                {showBaselineFields ? 'إخفاء' : 'إضافة أساس'}
+              </button>
+            </div>
+            {showBaselineFields && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="baselineStart" className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">تاريخ بدء الأساس</label>
+                  <input 
+                    id="baselineStart" 
+                    type="date" 
+                    value={baselineStart} 
+                    onChange={e => setBaselineStart(e.target.value)} 
+                    className="w-full bg-white dark:bg-slate-700 p-2 rounded-lg text-sm border border-indigo-300 dark:border-indigo-700" 
+                  />
+                  <p className="text-xs text-slate-500 mt-1">التاريخ المخطط الأصلي للبدء</p>
+                </div>
+                <div>
+                  <label htmlFor="baselineEnd" className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">تاريخ انتهاء الأساس</label>
+                  <input 
+                    id="baselineEnd" 
+                    type="date" 
+                    value={baselineEnd} 
+                    onChange={e => setBaselineEnd(e.target.value)} 
+                    className="w-full bg-white dark:bg-slate-700 p-2 rounded-lg text-sm border border-indigo-300 dark:border-indigo-700" 
+                  />
+                  <p className="text-xs text-slate-500 mt-1">التاريخ المخطط الأصلي للانتهاء</p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="mb-4">
             <label htmlFor="taskProgress" className="block text-sm font-medium mb-2">التقدم ({progress}%)</label>
@@ -138,18 +190,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave, t
             </div>
           </div>
            <div className="mb-4">
-            <label htmlFor="taskAssignees" className="block text-sm font-medium mb-2">المسؤولون</label>
-            <select
-                id="taskAssignees"
-                multiple
-                value={assignees}
-                onChange={e => setAssignees(Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value))}
-                className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded-lg h-24"
-            >
-                {members.map(member => (
-                    <option key={member.id} value={member.id}>{member.name}</option>
-                ))}
-            </select>
+            <TeamMemberPicker
+              members={members}
+              selectedMemberIds={assignees}
+              onSelectionChange={setAssignees}
+              label="المسؤولون عن المهمة"
+              placeholder="ابحث عن الأعضاء..."
+            />
           </div>
 
           <div className="flex justify-end gap-4 mt-6">

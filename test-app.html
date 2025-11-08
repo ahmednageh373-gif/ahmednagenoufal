@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOUFAL ERP - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            direction: rtl;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+        }
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            padding: 12px 30px;
+            margin: 10px 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            direction: ltr;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 صفحة اختبار NOUFAL ERP</h1>
+    
+    <div class="status info">
+        <h2>📊 حالة التطبيق</h2>
+        <p id="app-status">جاري التحقق...</p>
+    </div>
+
+    <h2>🔧 إجراءات سريعة</h2>
+    <button onclick="testApp()">اختبار التطبيق</button>
+    <button onclick="clearCache()">مسح الذاكرة المؤقتة</button>
+    <button onclick="window.location.href='/'">فتح التطبيق</button>
+    
+    <h2>📝 سجل الأحداث</h2>
+    <div id="log" class="log"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('app-status');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
+            log.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function testApp() {
+            addLog('🔍 بدء اختبار التطبيق...');
+            
+            // Test 1: Check if React is loaded
+            if (typeof React !== 'undefined') {
+                addLog('✅ React محمل بنجاح', 'success');
+            } else {
+                addLog('❌ React غير محمل', 'error');
+            }
+            
+            // Test 2: Try to load the main app
+            fetch('/assets/').then(response => {
+                if (response.ok) {
+                    addLog('✅ ملفات التطبيق متاحة', 'success');
+                } else {
+                    addLog('❌ ملفات التطبيق غير متاحة', 'error');
+                }
+            }).catch(err => {
+                addLog(`❌ خطأ في تحميل الملفات: ${err.message}`, 'error');
+            });
+            
+            // Test 3: Check localStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                addLog('✅ localStorage يعمل بشكل صحيح', 'success');
+            } catch (err) {
+                addLog(`❌ localStorage لا يعمل: ${err.message}`, 'error');
+            }
+            
+            addLog('✅ اكتمل الاختبار', 'success');
+        }
+
+        function clearCache() {
+            addLog('🗑️ مسح الذاكرة المؤقتة...');
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                addLog('✅ تم مسح الذاكرة المؤقتة بنجاح', 'success');
+                addLog('🔄 سيتم تحديث الصفحة خلال 2 ثانية...');
+                setTimeout(() => location.reload(), 2000);
+            } catch (err) {
+                addLog(`❌ فشل مسح الذاكرة: ${err.message}`, 'error');
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            addLog('✅ صفحة الاختبار محملة');
+            status.innerHTML = '✅ جاهز للاختبار - اضغط على "اختبار التطبيق"';
+        });
+    </script>
+</body>
+</html>

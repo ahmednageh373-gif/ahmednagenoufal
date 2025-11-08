@@ -7,6 +7,7 @@ Flask Server
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from pathlib import Path
+from datetime import datetime
 import sys
 
 # إضافة المسار
@@ -1773,6 +1774,346 @@ def engineering_tools_soil_mechanics():
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================
+# تحليل BOQ شامل مع فحص SBC 2024
+# Comprehensive BOQ Analysis with SBC 2024 Compliance
+# ============================================
+
+@app.route('/api/comprehensive-boq-analysis', methods=['POST'])
+def comprehensive_boq_analysis():
+    """
+    تحليل BOQ شامل يدوي مع فحص الامتثال لكود البناء السعودي SBC 2024
+    
+    يشمل التحليل:
+    1. تحليل المواصفات الفنية (Technical Specifications)
+    2. تصنيف البنود حسب الأنشطة (Item Classification by Activities)
+    3. تحليل طريقة التنفيذ (Execution Method Analysis)
+    4. فحص الامتثال للكود السعودي SBC 2024 (SBC 2024 Compliance Check)
+    5. حساب المدة الزمنية (Duration Calculation)
+    6. اكتشاف التبعيات (Dependency Detection)
+    7. تحديد المخاطر (Risk Assessment)
+    
+    Body params:
+        items (list): List of BOQ items with:
+            - description (str): Item description
+            - quantity (float): Quantity
+            - unit (str): Unit of measurement
+            - amount (float): Total amount
+            - rate (float): Unit rate
+    
+    Returns:
+        Comprehensive analysis including:
+        - analyzed_items: Detailed analysis for each item
+        - sbc_compliance: SBC 2024 compliance check results
+        - summary: Overall project summary
+        - recommendations: Recommendations and warnings
+        - execution_plan: Suggested execution sequence
+    """
+    try:
+        data = request.json
+        items = data.get('items', [])
+        
+        if not items:
+            return jsonify({
+                'success': False,
+                'error': 'لا توجد بنود للتحليل - No items to analyze'
+            }), 400
+        
+        # مرحلة 1: التحليل التفصيلي لكل بند
+        # Phase 1: Detailed analysis of each item
+        analyzed_items = []
+        all_classifications = []
+        total_duration_days = 0
+        sbc_items_for_check = []
+        
+        for idx, item in enumerate(items):
+            try:
+                item_desc = item.get('description', '')
+                item_qty = float(item.get('quantity', 0))
+                item_unit = item.get('unit', '')
+                item_amount = float(item.get('amount', 0))
+                item_rate = float(item.get('rate', 0))
+                
+                # 1.1 تصنيف البند
+                classification = classifier.classify(item_desc)
+                all_classifications.append(classification)
+                
+                # 1.2 التحليل العميق للبند
+                item_analysis = item_analyzer.analyze_item({
+                    'id': idx + 1,
+                    'description': item_desc,
+                    'quantity': item_qty,
+                    'unit': item_unit,
+                    'classification': classification
+                })
+                
+                # 1.3 حساب المدة
+                duration_result = productivity_db.calculate_duration(
+                    classification['tier2_subcategory'],
+                    item_qty,
+                    item_unit,
+                    classification['tier1_category']
+                )
+                
+                if duration_result and 'duration_days' in duration_result:
+                    total_duration_days += duration_result['duration_days']
+                
+                # 1.4 تحضير البند لفحص SBC
+                sbc_items_for_check.append({
+                    'id': idx + 1,
+                    'description': item_desc,
+                    'quantity': item_qty,
+                    'unit': item_unit,
+                    'classification': classification,
+                    'extracted_info': item_analysis.get('extracted_info', {}),
+                    'technical_specs': item_analysis.get('technical_specs', {})
+                })
+                
+                # جمع النتائج
+                analyzed_items.append({
+                    'item_number': idx + 1,
+                    'original_item': item,
+                    'classification': classification,
+                    'item_analysis': item_analysis,
+                    'duration': duration_result,
+                    'complexity_level': item_analysis.get('complexity_level', 'medium'),
+                    'warnings': item_analysis.get('warnings', []),
+                    'dependencies': item_analysis.get('dependencies', [])
+                })
+                
+            except Exception as item_error:
+                # في حالة فشل تحليل بند معين، نستمر مع البنود الأخرى
+                analyzed_items.append({
+                    'item_number': idx + 1,
+                    'original_item': item,
+                    'error': str(item_error),
+                    'status': 'failed'
+                })
+        
+        # مرحلة 2: فحص الامتثال لكود البناء السعودي SBC 2024
+        # Phase 2: SBC 2024 Compliance Check
+        sbc_compliance_results = []
+        sbc_compliance_summary = {
+            'total_items_checked': 0,
+            'compliant_items': 0,
+            'non_compliant_items': 0,
+            'warnings': 0,
+            'critical_violations': []
+        }
+        
+        try:
+            # فحص الامتثال دفعة واحدة
+            compliance_results = compliance_checker.check_batch(sbc_items_for_check, category='all')
+            
+            for result in compliance_results:
+                sbc_compliance_results.append(result)
+                sbc_compliance_summary['total_items_checked'] += 1
+                
+                if result.get('compliant', True):
+                    sbc_compliance_summary['compliant_items'] += 1
+                else:
+                    sbc_compliance_summary['non_compliant_items'] += 1
+                    
+                if result.get('violations'):
+                    for violation in result['violations']:
+                        if violation.get('severity') == 'critical':
+                            sbc_compliance_summary['critical_violations'].append({
+                                'item_id': result.get('item_id'),
+                                'description': result.get('description'),
+                                'violation': violation
+                            })
+                        elif violation.get('severity') == 'warning':
+                            sbc_compliance_summary['warnings'] += 1
+            
+            # توليد تقرير الامتثال
+            compliance_report = compliance_checker.generate_compliance_report(compliance_results)
+            
+        except Exception as compliance_error:
+            compliance_report = {
+                'error': str(compliance_error),
+                'message': 'حدث خطأ في فحص الامتثال - Compliance check error'
+            }
+        
+        # مرحلة 3: إحصائيات التصنيف
+        # Phase 3: Classification Statistics
+        classification_stats = classifier.get_statistics(
+            [{'classification': c} for c in all_classifications]
+        )
+        
+        # مرحلة 4: خطة التنفيذ المقترحة
+        # Phase 4: Suggested Execution Plan
+        execution_plan = {
+            'phases': [],
+            'critical_path_items': [],
+            'parallel_activities': []
+        }
+        
+        try:
+            # تجميع الأنشطة حسب التصنيف
+            activities_by_category = {}
+            for item in analyzed_items:
+                if 'classification' in item:
+                    tier1 = item['classification'].get('tier1_category', 'أخرى')
+                    if tier1 not in activities_by_category:
+                        activities_by_category[tier1] = []
+                    activities_by_category[tier1].append(item)
+            
+            # تحديد المراحل
+            phase_order = [
+                'أعمال تمهيدية',
+                'أساسات',
+                'خرسانة مسلحة',
+                'بناء',
+                'سباكة',
+                'كهرباء',
+                'تشطيبات',
+                'أخرى'
+            ]
+            
+            for phase_name in phase_order:
+                if phase_name in activities_by_category:
+                    execution_plan['phases'].append({
+                        'phase_name': phase_name,
+                        'items_count': len(activities_by_category[phase_name]),
+                        'items': activities_by_category[phase_name]
+                    })
+        
+        except Exception as plan_error:
+            execution_plan['error'] = str(plan_error)
+        
+        # مرحلة 5: الملخص الشامل
+        # Phase 5: Comprehensive Summary
+        summary = {
+            'total_items': len(items),
+            'successfully_analyzed': len([i for i in analyzed_items if 'error' not in i]),
+            'failed_items': len([i for i in analyzed_items if 'error' in i]),
+            'total_estimated_duration_days': round(total_duration_days, 2),
+            'total_estimated_duration_months': round(total_duration_days / 30, 2),
+            'classification_distribution': classification_stats.get('tier1_distribution', {}),
+            'complexity_distribution': {
+                'high': len([i for i in analyzed_items if i.get('complexity_level') == 'high']),
+                'medium': len([i for i in analyzed_items if i.get('complexity_level') == 'medium']),
+                'low': len([i for i in analyzed_items if i.get('complexity_level') == 'low'])
+            },
+            'sbc_compliance_rate': round(
+                (sbc_compliance_summary['compliant_items'] / sbc_compliance_summary['total_items_checked'] * 100)
+                if sbc_compliance_summary['total_items_checked'] > 0 else 0, 2
+            ),
+            'total_project_value': sum([float(i.get('amount', 0)) for i in items])
+        }
+        
+        # مرحلة 6: التوصيات
+        # Phase 6: Recommendations
+        recommendations = []
+        
+        # توصيات بناءً على الامتثال
+        if sbc_compliance_summary['critical_violations']:
+            recommendations.append({
+                'type': 'critical',
+                'category': 'sbc_compliance',
+                'title': 'مخالفات حرجة للكود السعودي',
+                'title_en': 'Critical SBC Violations',
+                'description': f'يوجد {len(sbc_compliance_summary["critical_violations"])} مخالفة حرجة يجب معالجتها فوراً',
+                'action': 'مراجعة البنود المخالفة وتصحيحها وفقاً لكود البناء السعودي SBC 2024'
+            })
+        
+        # توصيات بناءً على التعقيد
+        high_complexity_count = summary['complexity_distribution']['high']
+        if high_complexity_count > 0:
+            recommendations.append({
+                'type': 'warning',
+                'category': 'complexity',
+                'title': 'بنود معقدة تحتاج خبرة متخصصة',
+                'title_en': 'Complex Items Require Specialized Expertise',
+                'description': f'يوجد {high_complexity_count} بند معقد يتطلب مقاولين متخصصين',
+                'action': 'التخطيط لتوفير الخبرات المتخصصة والمعدات اللازمة'
+            })
+        
+        # توصيات بناءً على المدة
+        if summary['total_estimated_duration_months'] > 12:
+            recommendations.append({
+                'type': 'info',
+                'category': 'schedule',
+                'title': 'مشروع طويل المدى',
+                'title_en': 'Long-Term Project',
+                'description': f'المدة المتوقعة للمشروع: {summary["total_estimated_duration_months"]} شهر',
+                'action': 'وضع خطة تفصيلية للمراحل مع مراعاة العوامل الموسمية والظروف المناخية'
+            })
+        
+        # النتيجة النهائية الشاملة
+        return jsonify({
+            'success': True,
+            'analysis_type': 'comprehensive_manual_boq_analysis_with_sbc_2024',
+            'analyzed_items': analyzed_items,
+            'sbc_compliance': {
+                'results': sbc_compliance_results,
+                'summary': sbc_compliance_summary,
+                'report': compliance_report
+            },
+            'summary': summary,
+            'classification_stats': classification_stats,
+            'execution_plan': execution_plan,
+            'recommendations': recommendations,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_type': type(e).__name__
+        }), 500
+
+
+# ============================================
+# Advanced APIs Integration
+# ============================================
+
+try:
+    from advanced_apis import advanced_api
+    app.register_blueprint(advanced_api)
+    print("✅ Advanced APIs registered successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not register advanced APIs: {e}")
+
+
+# ============================================
+# Primavera Magic Tools APIs Integration
+# ============================================
+
+try:
+    from primavera_magic_apis import primavera_magic_api
+    app.register_blueprint(primavera_magic_api)
+    print("✅ Primavera Magic Tools APIs registered successfully")
+    print("   📦 7 Magic Tools Available:")
+    print("      1. SDK Magic Tool - Import/Export to P6")
+    print("      2. XER Magic Tool - Parse XER files")
+    print("      3. XLS Magic Tool - Excel reports")
+    print("      4. SQL Magic Tool - Direct queries")
+    print("      5. WBS Magic Tool - WBS management")
+    print("      6. RSC Magic Tool - Resource management")
+    print("      7. BOQ Magic Tool - BOQ integration")
+except Exception as e:
+    print(f"⚠️ Warning: Could not register Primavera Magic APIs: {e}")
+
+# ============================================
+# PDF Manager APIs Integration
+# ============================================
+
+try:
+    from pdf_manager import pdf_manager_api
+    app.register_blueprint(pdf_manager_api)
+    print("✅ PDF Manager APIs registered successfully")
+    print("   📄 PDF Features Available:")
+    print("      - Upload PDF files (up to 50MB)")
+    print("      - Extract text with PyPDF2/pdfplumber")
+    print("      - AI-powered content analysis")
+    print("      - View/Download PDFs")
+    print("      - Categorize and tag documents")
+except Exception as e:
+    print(f"⚠️ Warning: Could not register PDF Manager APIs: {e}")
 
 
 # ============================================

@@ -39,13 +39,16 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { SimpleApp } from './SimpleApp';
 import './index.css';
 
 console.log('🚀 بدء تحميل React...');
 
-// Import App directly instead of lazy loading to avoid scheduler issues
+// Import App directly
 import App from './App';
+import { ThemeProvider } from './contexts/ThemeContext';
+
+// Initialize performance monitoring
+import './utils/performanceMonitor';
 
 console.log('✅ App module imported');
 
@@ -80,8 +83,18 @@ class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
-      console.warn('⚠️ Error Boundary activated, using SimpleApp fallback');
-      return <SimpleApp />;
+      return (
+        <div style={{padding: '40px', textAlign: 'center', fontFamily: 'Tajawal, sans-serif', direction: 'rtl'}}>
+          <h2 style={{color: '#e74c3c', marginBottom: '20px'}}>⚠️ خطأ في التطبيق</h2>
+          <p style={{color: '#666', marginBottom: '20px'}}>حدث خطأ أثناء تحميل التطبيق</p>
+          <button onClick={() => window.location.reload()} style={{padding: '12px 30px', background: '#3498db', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold'}}>
+            تحديث الصفحة
+          </button>
+          <pre style={{textAlign: 'left', background: '#f5f5f5', padding: '15px', marginTop: '20px', overflow: 'auto', direction: 'ltr'}}>
+            {this.state.error?.message}
+          </pre>
+        </div>
+      );
     }
     return this.props.children;
   }
@@ -90,43 +103,45 @@ class ErrorBoundary extends React.Component<
 const rootElement = document.getElementById('root');
 if (rootElement) {
   try {
-    const root = ReactDOM.createRoot(rootElement);
-    
     console.log('🎨 بدء رندر التطبيق...');
     
-    // Direct render without Suspense (no lazy loading)
+    const root = ReactDOM.createRoot(rootElement);
+    
+    // Render the full app
     root.render(
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
+      <React.StrictMode>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
+        </ErrorBoundary>
+      </React.StrictMode>
     );
     
     console.log('✅ تم رندر التطبيق بنجاح');
     
   } catch (error) {
-    console.error('❌ خطأ حرج:', error);
-    // Try SimpleApp as fallback
-    try {
-      const root = ReactDOM.createRoot(rootElement);
-      root.render(<SimpleApp />);
-      console.log('⚠️ تم استخدام SimpleApp كبديل');
-    } catch (fallbackError) {
-      console.error('❌ فشل SimpleApp أيضاً:', fallbackError);
-      rootElement.innerHTML = `
-        <div style="padding: 40px; text-align: center; font-family: 'Tajawal', sans-serif; direction: rtl;">
-          <h2 style="color: #e74c3c; margin-bottom: 20px;">⚠️ خطأ حرج</h2>
-          <p style="color: #666; margin-bottom: 20px;">فشل تحميل التطبيق. يرجى:</p>
-          <ol style="text-align: right; color: #666; margin: 20px auto; max-width: 400px;">
-            <li>مسح الذاكرة المؤقتة (Cache)</li>
-            <li>تحديث الصفحة</li>
-            <li>استخدام متصفح آخر</li>
-          </ol>
-          <button onclick="location.reload()" style="padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">
-            تحديث الصفحة
-          </button>
-        </div>
-      `;
-    }
+    console.error('❌ خطأ حرج في رندر التطبيق:', error);
+    rootElement.innerHTML = `
+      <div style="padding: 40px; text-align: center; font-family: 'Tajawal', sans-serif; direction: rtl;">
+        <h2 style="color: #e74c3c; margin-bottom: 20px;">⚠️ خطأ حرج</h2>
+        <p style="color: #666; margin-bottom: 20px;">فشل تحميل التطبيق. يرجى:</p>
+        <ol style="text-align: right; color: #666; margin: 20px auto; max-width: 400px;">
+          <li>مسح الذاكرة المؤقتة (Cache)</li>
+          <li>تحديث الصفحة</li>
+          <li>استخدام متصفح آخر</li>
+        </ol>
+        <button onclick="location.reload()" style="padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">
+          تحديث الصفحة
+        </button>
+        <pre style="text-align: left; background: #f5f5f5; padding: 15px; margin-top: 20px; overflow: auto; direction: ltr; max-height: 400px;">
+${String(error)}
+
+Stack Trace:
+${error instanceof Error ? error.stack : 'No stack trace available'}
+        </pre>
+      </div>
+    `;
   }
 } else {
   console.error('❌ لم يتم العثور على عنصر root');

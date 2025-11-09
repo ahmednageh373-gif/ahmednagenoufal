@@ -1,7 +1,7 @@
 # Netlify Configuration - Simplified for Reliability
 
 [build]
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "rm -rf node_modules/.cache node_modules/.vite .cache && npm ci --legacy-peer-deps && npm run build"
   publish = "dist"
 
 [build.environment]
@@ -9,6 +9,8 @@
   NPM_VERSION = "9"
   NPM_FLAGS = "--legacy-peer-deps"
   NODE_ENV = "production"
+  # Force fresh build - Updated: 2025-11-09 05:32
+  BUILD_ID = "20251109-0532"
 
 # SPA redirect - all routes to index.html
 [[redirects]]

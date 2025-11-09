@@ -74,11 +74,13 @@ class ErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error) {
+    console.error('🔴 ErrorBoundary caught error:', error);
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('❌ خطأ في التطبيق:', error, errorInfo);
+    console.error('Stack:', error.stack);
   }
 
   render() {
@@ -92,6 +94,8 @@ class ErrorBoundary extends React.Component<
           </button>
           <pre style={{textAlign: 'left', background: '#f5f5f5', padding: '15px', marginTop: '20px', overflow: 'auto', direction: 'ltr'}}>
             {this.state.error?.message}
+            {'\n\n'}
+            {this.state.error?.stack}
           </pre>
         </div>
       );
@@ -122,6 +126,7 @@ if (rootElement) {
     
   } catch (error) {
     console.error('❌ خطأ حرج في رندر التطبيق:', error);
+    console.error('Stack:', (error as Error).stack);
     rootElement.innerHTML = `
       <div style="padding: 40px; text-align: center; font-family: 'Tajawal', sans-serif; direction: rtl;">
         <h2 style="color: #e74c3c; margin-bottom: 20px;">⚠️ خطأ حرج</h2>

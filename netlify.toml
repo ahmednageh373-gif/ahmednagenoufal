@@ -1,15 +1,15 @@
-# Netlify Configuration - FORCE CACHE BUST v2
+# Netlify Configuration - FINAL FIX v3
 
 [build]
   command = "npm ci --legacy-peer-deps && npm run build"
   publish = "dist"
-  ignore = "git diff --quiet HEAD^ HEAD -- '!(dist/**)"
   
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
-  # Force cache bust
-  NETLIFY_CACHE_ID = "v2-2025-11-09"
+  # Force complete rebuild - no cache
+  NETLIFY_CACHE_ID = "v3-react18-no-chunks-2025-11-09"
+  NODE_ENV = "production"
 
 [[redirects]]
   from = "/*"

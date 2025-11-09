@@ -152,8 +152,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavSection title="المقايسات والجدول الزمني" icon={Table} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Table} label="إدارة المقايسات" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Upload} label="رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Upload} label="تحليل المقايسات المرفوعة" viewName="boq-analyzer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={BarChart3} label="تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                    </NavSection>
+
+                    {/* إدارة القيمة المكتسبة (EVM) */}
+                    <NavSection title="إدارة القيمة المكتسبة (EVM)" icon={TrendingUp} isCollapsed={isDesktopCollapsed}>
+                        <NavItem icon={PieChart} label="لوحة القيمة المكتسبة" viewName="evm-dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={GanttChartSquare} label="Gantt Chart مع EVM" viewName="evm-gantt" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={FileText} label="التقارير الأسبوعية" viewName="evm-weekly-report" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={ShieldAlert} label="نظام التنبيهات التلقائي" viewName="evm-alerts" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
 
                     {/* المخططات والمستندات */}

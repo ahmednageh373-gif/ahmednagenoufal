@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Loading - NOUFAL</title>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            direction: rtl;
+        }
+        .test-box {
+            background: white;
+            color: #333;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .success { border-left: 5px solid #4caf50; }
+        .error { border-left: 5px solid #f44336; }
+        .loading { border-left: 5px solid #ff9800; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            overflow: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        button {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 اختبار تحميل نظام NOUFAL</h1>
+    <p>هذه الصفحة تختبر خطوة بخطوة ما الذي يعطل التطبيق</p>
+
+    <div id="results"></div>
+
+    <button onclick="runTests()">🚀 ابدأ الاختبار</button>
+    <button onclick="location.href='/'">🏠 الصفحة الرئيسية</button>
+    <button onclick="location.reload()">🔄 إعادة التحميل</button>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(title, status, details) {
+            const div = document.createElement('div');
+            div.className = `test-box ${status}`;
+            div.innerHTML = `
+                <h3>${status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳'} ${title}</h3>
+                ${details ? `<pre>${details}</pre>` : ''}
+            `;
+            results.appendChild(div);
+        }
+
+        async function runTests() {
+            results.innerHTML = '';
+            
+            // Test 1: Check if root element exists
+            addResult('اختبار 1: عنصر root', 
+                document.getElementById('root') ? 'success' : 'error',
+                document.getElementById('root') ? 'عنصر root موجود' : 'عنصر root مفقود!');
+
+            // Test 2: Try to load React
+            try {
+                addResult('اختبار 2: تحميل React', 'loading', 'جاري التحميل...');
+                const React = await import('https://esm.sh/react@19.2.0');
+                addResult('اختبار 2: تحميل React', 'success', 'React loaded: ' + typeof React.default);
+            } catch (error) {
+                addResult('اختبار 2: تحميل React', 'error', error.toString());
+            }
+
+            // Test 3: Try to load lucide-react
+            try {
+                addResult('اختبار 3: تحميل lucide-react', 'loading', 'جاري التحميل...');
+                const lucide = await import('https://esm.sh/lucide-react@0.546.0');
+                addResult('اختبار 3: تحميل lucide-react', 'success', 
+                    `lucide-react loaded\nActivity: ${typeof lucide.Activity}\nKeys: ${Object.keys(lucide).slice(0, 10).join(', ')}`);
+            } catch (error) {
+                addResult('اختبار 3: تحميل lucide-react', 'error', error.toString());
+            }
+
+            // Test 4: Check console errors
+            addResult('اختبار 4: أخطاء Console', 'success', 
+                'افتح Console (F12) وابحث عن أخطاء باللون الأحمر');
+
+            // Test 5: Try to load main bundle
+            try {
+                addResult('اختبار 5: تحميل Bundle الرئيسي', 'loading', 'جاري التحميل...');
+                const indexHtml = await fetch('/').then(r => r.text());
+                const match = indexHtml.match(/src="([^"]*index-[^"]*\.js)"/);
+                if (match) {
+                    const bundleUrl = match[1];
+                    addResult('اختبار 5: Bundle الرئيسي', 'success', 
+                        `Bundle found: ${bundleUrl}\nحجم: ${(await fetch(bundleUrl).then(r => r.text())).length} bytes`);
+                    
+                    // Test 6: Try to execute the bundle
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.src = bundleUrl;
+                    script.onload = () => {
+                        addResult('اختبار 6: تنفيذ Bundle', 'success', 'Bundle executed successfully!');
+                    };
+                    script.onerror = (error) => {
+                        addResult('اختبار 6: تنفيذ Bundle', 'error', error.toString());
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    addResult('اختبار 5: Bundle الرئيسي', 'error', 'Bundle not found in HTML!');
+                }
+            } catch (error) {
+                addResult('اختبار 5: Bundle الرئيسي', 'error', error.toString());
+            }
+
+            // Test 7: Check localStorage
+            try {
+                localStorage.setItem('test', '1');
+                localStorage.removeItem('test');
+                addResult('اختبار 7: localStorage', 'success', 'localStorage يعمل بشكل صحيح');
+            } catch (error) {
+                addResult('اختبار 7: localStorage', 'error', error.toString());
+            }
+
+            // Test 8: Network check
+            try {
+                const response = await fetch('/');
+                addResult('اختبار 8: الاتصال بالخادم', 'success', 
+                    `Status: ${response.status}\nHeaders: ${response.headers.get('content-type')}`);
+            } catch (error) {
+                addResult('اختبار 8: الاتصال بالخادم', 'error', error.toString());
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 1000);
+        });
+
+        // Catch all errors
+        window.addEventListener('error', (event) => {
+            addResult('خطأ عام', 'error', 
+                `Message: ${event.message}\nFile: ${event.filename}\nLine: ${event.lineno}\nColumn: ${event.colno}`);
+        });
+    </script>
+</body>
+</html>

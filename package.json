@@ -21,6 +21,7 @@
   "dependencies": {
     "@google/genai": "^1.26.0",
     "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "2.80.0",
     "docx": "^9.5.1",
     "dxf-parser": "^1.1.2",
     "exceljs": "^4.4.0",

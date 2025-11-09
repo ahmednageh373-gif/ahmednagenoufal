@@ -1,12 +1,12 @@
-# Netlify Configuration - Use pre-built dist/ folder
+# Netlify Configuration - Fixed Build Command
 
 [build]
-  # NO BUILD - Just publish the pre-built dist folder
-  command = "echo 'Using pre-built dist folder'"
+  command = "npm ci --legacy-peer-deps && npm run build"
   publish = "dist"
   
 [build.environment]
   NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[redirects]]
   from = "/*"

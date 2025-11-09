@@ -1,12 +1,15 @@
-# Netlify Configuration - Fixed Build Command
+# Netlify Configuration - FORCE CACHE BUST v2
 
 [build]
   command = "npm ci --legacy-peer-deps && npm run build"
   publish = "dist"
+  ignore = "git diff --quiet HEAD^ HEAD -- '!(dist/**)"
   
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
+  # Force cache bust
+  NETLIFY_CACHE_ID = "v2-2025-11-09"
 
 [[redirects]]
   from = "/*"
@@ -17,7 +20,11 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
+    Cache-Control = "no-cache, no-store, must-revalidate, max-age=0"
+    Pragma = "no-cache"
+    Expires = "0"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
     
 [[headers]]
   for = "/assets/*"

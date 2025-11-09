@@ -86,6 +86,10 @@ export default defineConfig(({ mode }) => {
         // تحسين الأداء - استخدام esbuild (أسرع من terser)
         minify: 'esbuild',
         target: 'es2015',
+        // إصلاح مشكلة "Cannot assign to read only property 'name'"
+        esbuild: {
+          keepNames: true, // منع إعادة تسمية الـ classes و functions
+        },
         // تقليل حجم CSS
         cssCodeSplit: true,
         // تمكين Source maps للتطوير فقط

@@ -71,6 +71,13 @@ const PDFManager = React.lazy(() => import('./components/PDFManager').then(modul
 const ThemeCustomizer = React.lazy(() => import('./components/ThemeCustomizer').then(module => ({ default: module.default })));
 const CADUnifiedPlatform = React.lazy(() => import('./components/CADUnifiedPlatform').then(module => ({ default: module.default })));
 
+// EVM Integrated System - نظام القيمة المكتسبة المتكامل
+const EVMIntegratedSystem = React.lazy(() => import('./components/EVMIntegratedSystem'));
+const GanttChartEVM = React.lazy(() => import('./components/GanttChartEVM'));
+const WeeklyReportPDF = React.lazy(() => import('./components/WeeklyReportPDF'));
+const AutoAlertSystem = React.lazy(() => import('./components/AutoAlertSystem'));
+const BOQUploadAnalyzer = React.lazy(() => import('./components/BOQUploadAnalyzer'));
+
 
 const LoadingSpinner = () => (
     <div className="flex flex-col justify-center items-center h-full min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
@@ -433,6 +440,17 @@ const App: React.FC = () => {
                 return <ThemeCustomizer />;
             case 'cad-platform':
                 return <CADUnifiedPlatform />;
+            // EVM Integrated System Cases
+            case 'evm-dashboard':
+                return <EVMIntegratedSystem />;
+            case 'evm-gantt':
+                return <GanttChartEVM />;
+            case 'evm-weekly-report':
+                return <WeeklyReportPDF />;
+            case 'evm-alerts':
+                return <AutoAlertSystem />;
+            case 'boq-analyzer':
+                return <BOQUploadAnalyzer />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

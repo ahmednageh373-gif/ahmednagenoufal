@@ -33,7 +33,7 @@ import {
   Wrench,
   Layout,
   Zap,
-  TrendingUp as Activity,
+  Activity,
   Database,
   GitBranch,
   PieChart,

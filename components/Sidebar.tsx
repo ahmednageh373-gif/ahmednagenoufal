@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, Compass as DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -152,8 +152,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavSection title="المقايسات والجدول الزمني" icon={Table} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Table} label="إدارة المقايسات" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Upload} label="رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Upload} label="تحليل المقايسات المرفوعة" viewName="boq-analyzer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={BarChart3} label="تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                    </NavSection>
+
+                    {/* إدارة القيمة المكتسبة (EVM) */}
+                    <NavSection title="إدارة القيمة المكتسبة (EVM)" icon={TrendingUp} isCollapsed={isDesktopCollapsed}>
+                        <NavItem icon={PieChart} label="لوحة القيمة المكتسبة" viewName="evm-dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={GanttChartSquare} label="Gantt Chart مع EVM" viewName="evm-gantt" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={FileText} label="التقارير الأسبوعية" viewName="evm-weekly-report" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={ShieldAlert} label="نظام التنبيهات التلقائي" viewName="evm-alerts" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
 
                     {/* المخططات والمستندات */}

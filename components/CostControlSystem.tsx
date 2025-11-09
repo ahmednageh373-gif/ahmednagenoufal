@@ -5,7 +5,7 @@ import React, { useState, useMemo } from 'react';
 import {
     DollarSign, TrendingUp, TrendingDown, AlertCircle, 
     FileText, Download, Upload, Plus, Calendar, Filter,
-    PieChart, BarChart3, TrendingUp as Activity, CheckCircle, XCircle,
+    PieChart, BarChart3, Activity, CheckCircle, XCircle,
     Clock, Target, Wallet, CreditCard, Receipt
 } from 'lucide-react';
 import type {
@@ -377,7 +377,7 @@ export const CostControlSystem: React.FC<CostControlSystemProps> = ({ projectId,
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6">
                 <div className="flex gap-2 overflow-x-auto">
                     {[
-                        { key: 'overview', label: 'نظرة عامة', icon: TrendingUp as Activity },
+                        { key: 'overview', label: 'نظرة عامة', icon: Activity },
                         { key: 'costs', label: 'التكاليف', icon: DollarSign },
                         { key: 'budget', label: 'الميزانية', icon: Target },
                         { key: 'payments', label: 'المستخلصات', icon: FileText },

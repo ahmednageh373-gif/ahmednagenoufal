@@ -1,28 +1,40 @@
-# Netlify Configuration - Simplified for Reliability
+# Netlify Configuration - FINAL FIX v3
 
 [build]
-  command = "npm run build"
+  command = "npm ci --legacy-peer-deps && npm run build"
   publish = "dist"
-
+  
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
+  # Force complete rebuild - no cache
+  NETLIFY_CACHE_ID = "v3-react18-no-chunks-2025-11-09"
+  NODE_ENV = "production"
 
-# SPA redirect - all routes to index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = true
 
-# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    # Security Headers
     X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-# Cache static assets
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    
+    # Content Security Policy
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://generativelanguage.googleapis.com https://apis.google.com;"
+    
+    # Cache Control
+    Cache-Control = "no-cache, no-store, must-revalidate, max-age=0"
+    Pragma = "no-cache"
+    Expires = "0"
+    
 [[headers]]
   for = "/assets/*"
   [headers.values]

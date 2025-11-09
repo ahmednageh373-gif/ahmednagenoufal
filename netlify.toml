@@ -5,12 +5,12 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
+  NODE_VERSION = "20"
+  NPM_VERSION = "10"
   NPM_FLAGS = "--legacy-peer-deps"
   NODE_ENV = "production"
-  # Force fresh build - Updated: 2025-11-09 05:32
-  BUILD_ID = "20251109-0532"
+  # Force fresh build - Updated: 2025-11-09 05:42
+  BUILD_ID = "20251109-0542"
 
 # SPA redirect - all routes to index.html
 [[redirects]]

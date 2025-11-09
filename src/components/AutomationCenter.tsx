@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Zap, Plus, Search, Filter, Play, Pause, Trash2, Edit, Copy,
   Calendar, Tag, CheckSquare, Bell, Mail, Users, FolderOpen,
-  Clock, Activity, TrendingUp, AlertCircle, CheckCircle
+  Clock, TrendingUp, AlertCircle, CheckCircle
 } from 'lucide-react';
 
 interface Automation {
@@ -197,7 +197,7 @@ export const AutomationCenter: React.FC = () => {
                 <p className="text-gray-600 text-sm">إجمالي التنفيذات</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.total_executions || 0}</p>
               </div>
-              <Activity className="text-blue-500" size={32} />
+              <TrendingUp className="text-blue-500" size={32} />
             </div>
           </div>
           

@@ -7,7 +7,7 @@ import { mockProjects } from './data/mockData';
 import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem, ProjectMember } from './types';
 
 // Lazy load all the main view components
-const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
+const Dashboard = React.lazy(() => import('./components/EnhancedDashboard').then(module => ({ default: module.EnhancedDashboard })));
 const ScheduleManager = React.lazy(() => import('./components/ScheduleManager').then(module => ({ default: module.ScheduleManager })));
 const FinancialManager = React.lazy(() => import('./components/FinancialManager').then(module => ({ default: module.FinancialManager })));
 const RiskManager = React.lazy(() => import('./components/RiskManager').then(module => ({ default: module.RiskManager })));

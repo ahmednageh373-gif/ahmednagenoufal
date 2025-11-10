@@ -187,6 +187,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                         {/* التصميم تحت التنفيذ */}
                         <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Package} label="مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Sparkles} label="✨ مكتبة CAD المحسّنة" viewName="enhanced-cad-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Shield} label="نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
                     

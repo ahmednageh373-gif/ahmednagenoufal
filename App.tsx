@@ -77,6 +77,7 @@ const GanttChartEVM = React.lazy(() => import('./components/GanttChartEVM'));
 const WeeklyReportPDF = React.lazy(() => import('./components/WeeklyReportPDF'));
 const AutoAlertSystem = React.lazy(() => import('./components/AutoAlertSystem'));
 const BOQUploadAnalyzer = React.lazy(() => import('./components/BOQUploadAnalyzer'));
+const EnhancedCADLibrary = React.lazy(() => import('./components/EnhancedCADLibrary').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -374,6 +375,8 @@ const App: React.FC = () => {
                 return <KnowledgeDatabase project={activeProject} />;
             case 'block-library':
                 return <BlockLibrary />;
+            case 'enhanced-cad-library':
+                return <EnhancedCADLibrary />;
             case 'boq-upload-hub':
                 return <BOQUploadHub projectId={activeProject.id} projectName={activeProject.name} />;
             case 'sbc-compliance':

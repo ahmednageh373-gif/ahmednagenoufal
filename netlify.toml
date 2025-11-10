@@ -5,10 +5,10 @@
   publish = "dist"
   
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "20.19.0"
   NPM_FLAGS = "--legacy-peer-deps"
   # Force complete rebuild - no cache
-  NETLIFY_CACHE_ID = "v3-react18-no-chunks-2025-11-09"
+  NETLIFY_CACHE_ID = "v4-node-20.19-2025-11-10"
   NODE_ENV = "production"
 
 [[redirects]]

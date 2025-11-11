@@ -23,7 +23,7 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                 </div>
             </div>
 
-            {/* NEW: Quick Templates Banner */}
+            {/* Quick Templates Banner */}
             <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-4 border-b border-yellow-200 dark:border-yellow-800">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -89,53 +89,11 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                 </div>
             </div>
 
-            {/* Features List */}
-            <div className="p-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                    الميزات الاحترافية - v2.5 Pro
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                        <span>قوالب فلل (150م²، 200م²)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                        <span>قالب شقة 3 غرف (120م²)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span>حساب مساحات تلقائي</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span>حفظ/تحميل JSON</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>رفع ملفات DWG</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>تصدير PDF (قريباً)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>سحب وإفلات الرموز</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>عارض 3D متقدم</span>
-                    </div>
-                </div>
-            </div>
-
             {/* Usage Guide */}
-            <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-3">📐 كيفية الاستخدام - البداية السريعة</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">1️⃣</span>
                             <span className="font-semibold text-gray-900 dark:text-white">اختر قالب</span>
@@ -144,7 +102,7 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                             افتح القوالب المعمارية واختر (فيلا 150م² أو 200م² أو شقة 3 غرف)
                         </p>
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">2️⃣</span>
                             <span className="font-semibold text-gray-900 dark:text-white">أضف الرموز</span>
@@ -153,7 +111,7 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                             اسحب الأبواب والشبابيك والأثاث من المكتبة وأفلتها على المخطط
                         </p>
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">3️⃣</span>
                             <span className="font-semibold text-gray-900 dark:text-white">احفظ وصدّر</span>
@@ -161,45 +119,6 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                         <p className="text-gray-600 dark:text-gray-400">
                             احفظ المشروع (JSON) أو صدّره (PDF) أو ارفع من BricsCAD (DWG)
                         </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Shortcuts Guide */}
-            <div className="p-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">⌨️ اختصارات لوحة المفاتيح</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">خط</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">L</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">مستطيل</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">REC</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">دائرة</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">C</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">نقل</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">M</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">نسخ</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">CO</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">دوران</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">RO</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">شبكة</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">F7</code>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">حفظ</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">Ctrl+S</code>
                     </div>
                 </div>
             </div>

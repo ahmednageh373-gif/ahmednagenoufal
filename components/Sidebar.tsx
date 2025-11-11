@@ -167,6 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
 
                     {/* المخططات والمستندات */}
                     <NavSection title="المخططات والمستندات" icon={DraftingCompass} isCollapsed={isDesktopCollapsed}>
+                        <NavItem icon={Box} label="🏗️ عارض 4D المتكامل" viewName="4d-viewer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={DraftingCompass} label="المخططات" viewName="drawings" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={FileText} label="المستندات الهندسية" viewName="docs" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={File} label="إدارة ملفات PDF" viewName="pdf-manager" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />

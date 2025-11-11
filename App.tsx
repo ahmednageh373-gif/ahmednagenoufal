@@ -81,6 +81,7 @@ const BOQUploadAnalyzer = React.lazy(() => import('./components/BOQUploadAnalyze
 const EnhancedCADLibrary = React.lazy(() => import('./components/EnhancedCADLibrary').then(module => ({ default: module.default })));
 const ArchitecturalDrawingStudio = React.lazy(() => import('./components/ArchitecturalDrawingStudio').then(module => ({ default: module.default })));
 const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators').then(module => ({ default: module.default })));
+const Viewer4D = React.lazy(() => import('./components/Viewer4D').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -352,6 +353,8 @@ const App: React.FC = () => {
                             onUpdateChecklists={handleUpdateChecklists}
                             onUpdateSchedule={handleUpdateSchedule}
                         />;
+            case '4d-viewer':
+                return <Viewer4D projectId={activeProject.id} projectName={activeProject.name} />;
             case 'drawings':
                 return <DrawingManager project={activeProject} onUpdateDrawings={handleUpdateDrawings} />;
             case 'docs':

@@ -78,6 +78,7 @@ const WeeklyReportPDF = React.lazy(() => import('./components/WeeklyReportPDF'))
 const AutoAlertSystem = React.lazy(() => import('./components/AutoAlertSystem'));
 const BOQUploadAnalyzer = React.lazy(() => import('./components/BOQUploadAnalyzer'));
 const EnhancedCADLibrary = React.lazy(() => import('./components/EnhancedCADLibrary').then(module => ({ default: module.default })));
+const ArchitecturalDrawingStudio = React.lazy(() => import('./components/ArchitecturalDrawingStudio').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -377,6 +378,8 @@ const App: React.FC = () => {
                 return <BlockLibrary />;
             case 'enhanced-cad-library':
                 return <EnhancedCADLibrary />;
+            case 'architectural-drawing-studio':
+                return <ArchitecturalDrawingStudio />;
             case 'boq-upload-hub':
                 return <BOQUploadHub projectId={activeProject.id} projectName={activeProject.name} />;
             case 'sbc-compliance':

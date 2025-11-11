@@ -7,10 +7,9 @@ import {
   Sparkles, MessageSquare, Image as ImageIcon, Ruler, Settings,
   ChevronRight, ChevronLeft, Play, Pause, RefreshCw, Check, X
 } from 'lucide-react';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { yqArchBlocks, blockCategories } from '../data/yqarch-library-data';
 import { yqArchHatches } from '../data/yqarch-hatches';
+import BuildingViewer3D from './BuildingViewer3D';
 
 // ==================== TYPES ====================
 
@@ -152,8 +151,6 @@ export default function ArchitecturalDrawingStudio() {
 
   // 3D View State
   const [show3D, setShow3D] = useState(false);
-  const threeDRef = useRef<HTMLDivElement>(null);
-  const [threeScene, setThreeScene] = useState<THREE.Scene | null>(null);
 
   // Block Library State
   const [showBlockLibrary, setShowBlockLibrary] = useState(false);
@@ -837,118 +834,49 @@ export default function ArchitecturalDrawingStudio() {
 
   // ==================== 3D CONVERSION ====================
 
-  const convert2Dto3D = () => {
-    if (!threeDRef.current) return;
-
-    // Create Three.js scene
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
-
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      threeDRef.current.clientWidth / threeDRef.current.clientHeight,
-      0.1,
-      1000
-    );
-    camera.position.set(10, 10, 10);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(threeDRef.current.clientWidth, threeDRef.current.clientHeight);
-    threeDRef.current.innerHTML = '';
-    threeDRef.current.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 20, 10);
-    scene.add(directionalLight);
-
-    // Add ground
-    const groundGeometry = new THREE.PlaneGeometry(50, 50);
-    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI / 2;
-    scene.add(ground);
-
-    // Convert floor plan elements to 3D
-    const scale3D = 0.05;  // Convert pixels to 3D units
+  // Convert floor plan data to format compatible with BuildingViewer3D
+  const convertFloorPlanTo3DData = () => {
+    const walls: any[] = [];
+    const doors: any[] = [];
+    const windows: any[] = [];
+    const rooms: any[] = [];
 
     floorPlan.elements.forEach(element => {
       if (element.type === 'wall') {
         const wall = element.data as Wall;
-        const width = Math.sqrt(
-          Math.pow(wall.end.x - wall.start.x, 2) + 
-          Math.pow(wall.end.y - wall.start.y, 2)
-        ) * scale3D;
-        const height = wall.height;
-        const thickness = wall.thickness * scale3D;
-
-        const wallGeometry = new THREE.BoxGeometry(width, height, thickness);
-        const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
-        const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
-
-        const centerX = (wall.start.x + wall.end.x) / 2 * scale3D;
-        const centerZ = (wall.start.y + wall.end.y) / 2 * scale3D;
-        const angle = Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x);
-
-        wallMesh.position.set(centerX, height / 2, centerZ);
-        wallMesh.rotation.y = -angle;
-
-        scene.add(wallMesh);
+        walls.push({
+          start: { x: wall.start.x, y: wall.start.y, z: 0 },
+          end: { x: wall.end.x, y: wall.end.y, z: 0 },
+          thickness: wall.thickness / 100,
+          height: wall.height
+        });
       } else if (element.type === 'door') {
         const door = element.data as Door;
-        const doorGeometry = new THREE.BoxGeometry(door.width, 2, 0.05);
-        const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-        const doorMesh = new THREE.Mesh(doorGeometry, doorMaterial);
-        
-        doorMesh.position.set(
-          door.position.x * scale3D,
-          1,
-          door.position.y * scale3D
-        );
-
-        scene.add(doorMesh);
+        doors.push({
+          position: { x: door.position.x, y: door.position.y, z: 0 },
+          width: door.width,
+          height: 2.1
+        });
       } else if (element.type === 'window') {
         const window = element.data as Window;
-        const windowGeometry = new THREE.BoxGeometry(window.width, window.height, 0.05);
-        const windowMaterial = new THREE.MeshStandardMaterial({ 
-          color: 0x87CEEB,
-          transparent: true,
-          opacity: 0.5
+        windows.push({
+          position: { x: window.position.x, y: window.position.y, z: 1.5 },
+          width: window.width,
+          height: window.height
         });
-        const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
-        
-        windowMesh.position.set(
-          window.position.x * scale3D,
-          1.5,
-          window.position.y * scale3D
-        );
-
-        scene.add(windowMesh);
+      } else if (element.type === 'room') {
+        const room = element.data as Room;
+        // Convert room to points
+        rooms.push({
+          name: room.nameAr,
+          points: [], // Would need wall points
+          floor: 0
+        });
       }
     });
 
-    setThreeScene(scene);
-
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
+    return { walls, doors, windows, rooms };
   };
-
-  useEffect(() => {
-    if (show3D) {
-      convert2Dto3D();
-    }
-  }, [show3D, floorPlan]);
 
   // ==================== FILTERED BLOCKS ====================
 
@@ -1214,29 +1142,15 @@ export default function ArchitecturalDrawingStudio() {
         </div>
       </div>
 
-      {/* 3D View Modal */}
+      {/* 3D View Modal - Advanced Building Viewer */}
       {show3D && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">🏢 العرض ثلاثي الأبعاد</h2>
-              <button
-                onClick={() => setShow3D(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-all"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div ref={threeDRef} className="flex-1" />
-
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <p className="text-sm text-gray-600 text-center">
-                استخدم الماوس للدوران • عجلة الماوس للتكبير • زر الماوس الأيمن للتحريك
-              </p>
-            </div>
-          </div>
-        </div>
+        <BuildingViewer3D
+          floorPlan={convertFloorPlanTo3DData()}
+          buildingType="villa"
+          floors={1}
+          style="modern"
+          onClose={() => setShow3D(false)}
+        />
       )}
 
       {/* Block Library Modal */}

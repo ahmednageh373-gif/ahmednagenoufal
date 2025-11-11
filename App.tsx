@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
-import { Menu } from 'lucide-react';
+import { Menu, Globe } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 // Fix: Correct import path for types.
 import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem, ProjectMember } from './types';
 
@@ -94,6 +95,22 @@ const LoadingSpinner = () => (
         </div>
     </div>
 );
+
+// Language Toggle Button Component
+const LanguageToggleButton: React.FC = () => {
+    const { language, toggleLanguage } = useLanguage();
+    
+    return (
+        <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-2 px-3 py-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+            title={language === 'ar' ? 'Switch to English' : 'التبديل للعربية'}
+        >
+            <Globe size={18} />
+            <span className="text-sm font-semibold">{language === 'ar' ? 'EN' : 'عربي'}</span>
+        </button>
+    );
+};
 
 
 const App: React.FC = () => {
@@ -529,9 +546,12 @@ const App: React.FC = () => {
                     <h1 className="text-lg font-bold text-indigo-600 dark:text-indigo-400 truncate">
                         {activeProject?.name || 'AN.AI'}
                     </h1>
-                    <button onClick={() => setIsSidebarOpen(true)} className="p-1">
-                        <Menu size={24} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <LanguageToggleButton />
+                        <button onClick={() => setIsSidebarOpen(true)} className="p-1">
+                            <Menu size={24} />
+                        </button>
+                    </div>
                 </header>
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
                     <Suspense fallback={<LoadingSpinner />}>
@@ -548,4 +568,11 @@ const App: React.FC = () => {
     );
 };
 
-export default App;
+// Wrap App with LanguageProvider
+const AppWithLanguage: React.FC = () => (
+    <LanguageProvider>
+        <App />
+    </LanguageProvider>
+);
+
+export default AppWithLanguage;

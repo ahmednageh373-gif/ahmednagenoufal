@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { BoqAnalysisModal } from './BoqAnalysisModal';
 import { extractFinancialItemsFromBOQ, processBoqToSchedule, generateWBS } from '../services/geminiService';
+import { NOUFALAgentCard } from './NOUFALAgentCard';
 
 interface EnhancedDashboardProps {
     project: Project;
@@ -375,6 +376,11 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
                     />
                 </div>
             </header>
+
+            {/* ─────────────────────────────────────────────────────── */}
+            {/* NOUFAL Agent Card */}
+            {/* ─────────────────────────────────────────────────────── */}
+            <NOUFALAgentCard className="mb-6" />
 
             {/* ─────────────────────────────────────────────────────── */}
             {/* Project Health Status */}

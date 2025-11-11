@@ -302,6 +302,29 @@ export const SmartAssistantChat: React.FC<SmartAssistantChatProps> = ({
 
                 {!isMinimized && (
                     <>
+                        {/* Recent Commands Section */}
+                        {messages.length > 1 && (
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                    <span className="text-xs font-semibold text-blue-900 dark:text-blue-200">
+                                        الأوامر المستخدمة ({messages.filter(m => m.type === 'user').length})
+                                    </span>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                    {messages.filter(m => m.type === 'user').slice(-3).map((msg, idx) => (
+                                        <span
+                                            key={idx}
+                                            className="text-xs bg-blue-100 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full"
+                                            title={msg.content}
+                                        >
+                                            {msg.content.substring(0, 20)}{msg.content.length > 20 ? '...' : ''}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Messages */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4" dir="rtl">
                             {messages.map((message) => (

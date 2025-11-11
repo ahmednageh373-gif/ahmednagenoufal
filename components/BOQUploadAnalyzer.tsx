@@ -20,6 +20,8 @@ import {
   Calendar,
   DollarSign,
 } from 'lucide-react';
+import SmartAssistantChat from './SmartAssistantChat';
+import NOUFALAgentCard from './NOUFALAgentCard';
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -465,12 +467,20 @@ export const BOQUploadAnalyzer: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* NOUFAL Agent Card */}
+      <div className="mb-6">
+        <NOUFALAgentCard mode="compact" />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">رفع وتحليل المقايسة</h1>
           <p className="text-gray-600 mt-1">
             رفع ملف المقايسة وتفكيكه تلقائياً إلى أنشطة فرعية (WBS Level-3)
+
+      {/* Smart Assistant Chat */}
+      <SmartAssistantChat context="boq" projectName="تحليل المقايسات" />
           </p>
         </div>
         {analysisResult && (

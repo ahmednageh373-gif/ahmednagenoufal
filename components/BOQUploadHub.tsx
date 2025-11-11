@@ -11,6 +11,8 @@ import { generateScheduleFromBOQ, generateScheduleSummary } from '../services/sc
 import { generatePurchaseOrders, generatePurchaseOrderSummary } from '../services/purchaseOrderGenerator';
 import { generateProcurementPlan } from '../services/procurementPlanGenerator';
 import { generateComprehensiveReport } from '../services/reportGenerator';
+import SmartAssistantChat from './SmartAssistantChat';
+import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface BOQUploadHubProps {
   projectId: string;
@@ -421,6 +423,11 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8">
       <div className="max-w-6xl mx-auto">
+        {/* NOUFAL Agent Card */}
+        <div className="mb-6">
+          <NOUFALAgentCard mode="compact" />
+        </div>
+
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -436,6 +443,9 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
             ارفع ملف المقايسة وسيتم تلقائياً: توليد الجدول الزمني، أوامر الشراء، خطة المشتريات، والتقارير الشاملة.
           </p>
         </div>
+
+        {/* Smart Assistant Chat */}
+        <SmartAssistantChat context="boq" projectName={projectName} />
 
         {/* Upload Section */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">

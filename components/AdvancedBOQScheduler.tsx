@@ -200,7 +200,7 @@ export const AdvancedBOQScheduler: React.FC<AdvancedBOQSchedulerProps> = ({
 
             // المرحلة 9: استخراج Milestones
             updateProgress('تسليم', 9, 9, 'جاري استخراج نقاط التسليم الرئيسية...');
-            const milestones = this.extractMilestones(activities);
+            const milestones = extractMilestones(activities);
             setStatus(`✅ تم استخراج ${milestones.length} نقطة تسليم رئيسية`);
             await new Promise(resolve => setTimeout(resolve, 500));
 

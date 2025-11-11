@@ -38,105 +38,134 @@ export class SpecificationsAnalyzer {
     /**
      * أنماط البحث عن الأنشطة في المواصفات
      * مرتبة حسب تسلسل التنفيذ الطبيعي
+     * 🔥 محسّن لاستخراج المزيد من الأنشطة
      */
     private static activityPatterns = [
         // 1. أعمال الحفر (أولاً)
         {
-            keywords: ['حفر', 'حفريات', 'excavation', 'حفر بعمق', 'الحفر للأساسات', 'حفر أساسات'],
+            keywords: ['حفر', 'حفريات', 'excavation', 'حفر بعمق', 'الحفر للأساسات', 'حفر أساسات', 'excavate', 'dig'],
             type: 'excavation' as const,
             activityName: 'أعمال الحفر',
             sequence: 10
         },
         // 2. الخرسانة العادية (بعد الحفر)
         {
-            keywords: ['خرسانة عادية', 'plain concrete', 'صب قواعد', 'خرسانه عاديه', 'خرسانة نظافة'],
+            keywords: ['خرسانة عادية', 'plain concrete', 'صب قواعد', 'خرسانه عاديه', 'خرسانة نظافة', 'lean concrete', 'بلين كونكريت'],
             type: 'concrete' as const,
             activityName: 'صب خرسانة عادية',
             sequence: 20
         },
         // 3. حديد التسليح (قبل الخرسانة المسلحة)
         {
-            keywords: ['حديد التسليح', 'reinforcement', 'تسليح', 'التسليح', 'حديد مسلح'],
+            keywords: ['حديد التسليح', 'reinforcement', 'تسليح', 'التسليح', 'حديد مسلح', 'steel bars', 'rebar', 'حديد', 'حديد التسليح'],
             type: 'reinforcement' as const,
             activityName: 'تركيب حديد التسليح',
             sequence: 30
         },
         // 4. النجارة / الشدات (مع التسليح)
         {
-            keywords: ['نجارة', 'formwork', 'شدات', 'قوالب', 'شدة خشبية'],
+            keywords: ['نجارة', 'formwork', 'شدات', 'قوالب', 'شدة خشبية', 'shuttering', 'form work', 'قوالب خشبية', 'الشدة'],
             type: 'formwork' as const,
             activityName: 'أعمال النجارة والشدات',
             sequence: 35
         },
         // 5. الخرسانة المسلحة (بعد التسليح والشدات)
         {
-            keywords: ['خرسانة مسلحة', 'reinforced concrete', 'خرسانه مسلحه', 'قواعد مسلحة', 'صب مسلح'],
+            keywords: ['خرسانة مسلحة', 'reinforced concrete', 'خرسانه مسلحه', 'قواعد مسلحة', 'صب مسلح', 'concrete', 'rc', 'r.c'],
             type: 'concrete' as const,
             activityName: 'صب خرسانة مسلحة',
             sequence: 40
         },
         // 6. الميدات (بعد الخرسانة المسلحة)
         {
-            keywords: ['ميدات', 'ميده', 'grade beams', 'الميدات الأرضية'],
+            keywords: ['ميدات', 'ميده', 'grade beams', 'الميدات الأرضية', 'grade beam', 'tie beam'],
             type: 'concrete' as const,
             activityName: 'تنفيذ الميدات',
             sequence: 45
         },
         // 7. العزل (بعد الخرسانة)
         {
-            keywords: ['عزل', 'waterproofing', 'عزل الأساسات', 'دهان بيتوميني', 'عازل للرطوبة', 'عزل مائي'],
+            keywords: ['عزل', 'waterproofing', 'عزل الأساسات', 'دهان بيتوميني', 'عازل للرطوبة', 'عزل مائي', 'insulation', 'بيتومين', 'bitumen'],
             type: 'waterproofing' as const,
             activityName: 'أعمال العزل',
             sequence: 50
         },
         // 8. المبيدات (قبل الردم)
         {
-            keywords: ['مبيدات', 'النمل الأبيض', 'دودة الأرض', 'رش المبيدات'],
+            keywords: ['مبيدات', 'النمل الأبيض', 'دودة الأرض', 'رش المبيدات', 'pesticide', 'termite'],
             type: 'installation' as const,
             activityName: 'رش المبيدات',
             sequence: 55
         },
         // 9. الردم (بعد العزل)
         {
-            keywords: ['ردم', 'backfill', 'الردم حول', 'رمال نظيفة', 'ناتج الحفر', 'ردم الأساسات'],
+            keywords: ['ردم', 'backfill', 'الردم حول', 'رمال نظيفة', 'ناتج الحفر', 'ردم الأساسات', 'fill', 'back fill'],
             type: 'backfill' as const,
             activityName: 'أعمال الردم',
             sequence: 60
         },
         // 10. الأعمدة (بعد الأساسات)
         {
-            keywords: ['أعمدة', 'columns', 'عمود', 'أعمدة خرسانية', 'باكيات'],
+            keywords: ['أعمدة', 'columns', 'عمود', 'أعمدة خرسانية', 'باكيات', 'column', 'pillar'],
             type: 'concrete' as const,
             activityName: 'تنفيذ الأعمدة',
             sequence: 70
         },
         // 11. البناء (بعد الهيكل)
         {
-            keywords: ['بناء', 'مباني', 'masonry', 'طوب', 'بلوك', 'جدران'],
+            keywords: ['بناء', 'مباني', 'masonry', 'طوب', 'بلوك', 'جدران', 'blockwork', 'brickwork', 'wall'],
             type: 'masonry' as const,
             activityName: 'أعمال البناء',
             sequence: 80
         },
         // 12. الدهان (أخيراً)
         {
-            keywords: ['دهان', 'painting', 'طلاء', 'دهان ناري', 'وجه اساسي'],
+            keywords: ['دهان', 'painting', 'طلاء', 'دهان ناري', 'وجه اساسي', 'paint', 'coating'],
             type: 'painting' as const,
             activityName: 'أعمال الدهان',
             sequence: 90
         },
-        // التركيب
+        // 13. التركيب
         {
-            keywords: ['تركيب', 'installation', 'install', 'تثبيت'],
+            keywords: ['تركيب', 'installation', 'install', 'تثبيت', 'fixing', 'mounting'],
             type: 'installation' as const,
             activityName: 'أعمال التركيب',
             sequence: 85
         },
-        // التوريد
+        // 14. التوريد (في البداية)
         {
-            keywords: ['توريد', 'supply', 'توريد وتركيب', 'توريد و تركيب'],
+            keywords: ['توريد', 'supply', 'توريد وتركيب', 'توريد و تركيب', 'supplying', 'procurement'],
             type: 'supply' as const,
             activityName: 'التوريد',
             sequence: 5
+        },
+        // 15. القواعد والأساسات
+        {
+            keywords: ['قواعد', 'أساسات', 'foundation', 'footing', 'base', 'القاعدة'],
+            type: 'concrete' as const,
+            activityName: 'تنفيذ القواعد',
+            sequence: 25
+        },
+        // 16. الأسقف والبلاطات
+        {
+            keywords: ['سقف', 'بلاطة', 'slab', 'بلاطات', 'الأسقف', 'deck'],
+            type: 'concrete' as const,
+            activityName: 'تنفيذ الأسقف',
+            sequence: 75
+        },
+        // 17. السباكة والكهرباء
+        {
+            keywords: ['سباكة', 'كهرباء', 'plumbing', 'electrical', 'مواسير', 'كابلات', 'pipes', 'cables'],
+            type: 'installation' as const,
+            activityName: 'أعمال السباكة والكهرباء',
+            sequence: 82
+        },
+        // 18. التشطيبات
+        {
+            keywords: ['تشطيب', 'تشطيبات', 'finishing', 'finishes', 'بلاط', 'tiles', 'رخام', 'marble'],
+            type: 'installation' as const,
+            activityName: 'أعمال التشطيبات',
+            sequence: 88
         }
     ];
 
@@ -184,6 +213,7 @@ export class SpecificationsAnalyzer {
     /**
      * استخراج الأنشطة من المواصفات
      * يرتب الأنشطة حسب تسلسل التنفيذ الطبيعي
+     * 🔥 محسّن لاستخراج المزيد من الأنشطة
      */
     private static extractActivitiesFromSpecs(
         specifications: string,
@@ -193,11 +223,15 @@ export class SpecificationsAnalyzer {
     ): ExtractedActivity[] {
         const activities: ExtractedActivity[] = [];
         const specsLower = specifications.toLowerCase();
+        const itemNameLower = itemName.toLowerCase();
+        
+        // البحث في كل من المواصفات واسم البند
+        const searchText = `${specsLower} ${itemNameLower}`;
 
-        // البحث عن كل نمط
+        // البحث عن كل نمط في المواصفات واسم البند
         for (const pattern of this.activityPatterns) {
             const found = pattern.keywords.some(keyword => 
-                specsLower.includes(keyword.toLowerCase())
+                searchText.includes(keyword.toLowerCase())
             );
 
             if (found) {
@@ -209,7 +243,7 @@ export class SpecificationsAnalyzer {
 
                 activities.push({
                     name: `${pattern.activityName} - ${itemName}`,
-                    description: relevantSentences,
+                    description: relevantSentences || specifications.substring(0, 150),
                     type: pattern.type,
                     keywords: pattern.keywords,
                     estimatedQuantity: this.estimateActivityQuantity(
@@ -218,7 +252,7 @@ export class SpecificationsAnalyzer {
                         pattern.type
                     ),
                     unit: this.determineActivityUnit(unit, pattern.type),
-                    sequence: pattern.sequence,  // استخدام sequence من النمط
+                    sequence: pattern.sequence,
                     parentItemName: itemName
                 });
             }
@@ -227,12 +261,34 @@ export class SpecificationsAnalyzer {
         // ترتيب الأنشطة حسب sequence (حفر أولاً، ثم خرسانة، إلخ)
         activities.sort((a, b) => a.sequence - b.sequence);
 
+        // إزالة التكرارات (نفس النوع ونفس البند)
+        const uniqueActivities = activities.filter((activity, index, self) => 
+            index === self.findIndex((a) => 
+                a.type === activity.type && a.sequence === activity.sequence
+            )
+        );
+
         // إذا لم نجد أي أنشطة محددة، ننشئ نشاط عام
-        if (activities.length === 0) {
-            activities.push({
-                name: itemName,
+        if (uniqueActivities.length === 0) {
+            // محاولة استنتاج النوع من الوحدة
+            let activityType: ExtractedActivity['type'] = 'other';
+            let activityName = itemName;
+            
+            if (unit.includes('م3') || unit === 'م٣') {
+                activityType = 'concrete';
+                activityName = `تنفيذ - ${itemName}`;
+            } else if (unit.includes('م2') || unit === 'م٢' || unit.includes('متر مربع')) {
+                activityType = 'installation';
+                activityName = `تركيب - ${itemName}`;
+            } else if (unit.includes('طن') || unit === 'ton') {
+                activityType = 'supply';
+                activityName = `توريد - ${itemName}`;
+            }
+            
+            uniqueActivities.push({
+                name: activityName,
                 description: specifications,
-                type: 'other',
+                type: activityType,
                 keywords: [],
                 estimatedQuantity: quantity,
                 unit: unit,
@@ -241,7 +297,7 @@ export class SpecificationsAnalyzer {
             });
         }
 
-        return activities;
+        return uniqueActivities;
     }
 
     /**

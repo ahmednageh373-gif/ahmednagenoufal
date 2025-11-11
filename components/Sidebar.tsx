@@ -169,6 +169,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavSection title="المخططات والمستندات" icon={DraftingCompass} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Ruler} label="📐 استوديو CAD - دعم DWG" viewName="cad-studio" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Box} label="🏗️ عارض 4D المتكامل" viewName="4d-viewer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Sparkles} label="🏗️ استوديو الرسم المعماري AI" viewName="architectural-drawing-studio" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Package} label="📐 مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Sparkles} label="✨ مكتبة CAD المحسّنة" viewName="enhanced-cad-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={DraftingCompass} label="المخططات" viewName="drawings" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={FileText} label="المستندات الهندسية" viewName="docs" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={File} label="إدارة ملفات PDF" viewName="pdf-manager" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
@@ -185,12 +189,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                         <NavItem icon={HardHat} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={DollarSign} label="الحسابات الهندسية" viewName="financials" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={ClipboardCheck} label="التقييم والترميم" viewName="assessments" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        
-                        {/* التصميم تحت التنفيذ */}
-                        <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={Sparkles} label="🏗️ استوديو الرسم المعماري AI" viewName="architectural-drawing-studio" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={Package} label="مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={Sparkles} label="✨ مكتبة CAD المحسّنة" viewName="enhanced-cad-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Shield} label="نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
                     

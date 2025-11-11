@@ -80,28 +80,25 @@ export const NOUFALAgentCard: React.FC<NOUFALAgentCardProps> = ({ className = ''
 
   if (compact) {
     return (
-      <div className={`bg-gradient-to-r from-orange-500 to-red-500 rounded-lg shadow-md p-3 ${className}`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-white p-2 rounded-lg shadow">
-              <Brain className="w-5 h-5 text-orange-600" />
+      <div className={`bg-gradient-to-r from-orange-500 to-red-500 rounded-md shadow-sm p-1.5 ${className}`}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <div className="bg-white p-1 rounded shadow-sm">
+              <Brain className="w-3.5 h-3.5 text-orange-600" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-white">{t('noufal.title')}</h3>
-              <p className="text-yellow-100 text-xs">{t('noufal.subtitle')}</p>
-            </div>
+            <span className="text-xs font-bold text-white">{t('noufal.title')}</span>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-0.5">
             {quickAccessCards.map(card => {
               const Icon = card.icon;
               return (
                 <button
                   key={card.id}
                   onClick={() => (window as any).location.hash = card.route}
-                  className="bg-white/20 backdrop-blur-md p-1.5 rounded hover:bg-white/30 transition-all"
+                  className="bg-white/20 backdrop-blur-sm p-1 rounded hover:bg-white/30 transition-all"
                   title={t(`noufal.${card.id}.title`)}
                 >
-                  <Icon className="w-4 h-4 text-white" />
+                  <Icon className="w-3 h-3 text-white" />
                 </button>
               );
             })}

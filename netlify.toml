@@ -11,7 +11,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
   # Force complete rebuild - clear all cache
   NETLIFY_USE_YARN = "false"
-  NETLIFY_CACHE_ID = "v5-node20-clear-cache-2025-11-10"
+  NETLIFY_CACHE_ID = "v6-node20-animated-city-2025-11-11"
   NODE_ENV = "production"
 
 [[redirects]]

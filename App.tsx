@@ -79,6 +79,7 @@ const AutoAlertSystem = React.lazy(() => import('./components/AutoAlertSystem'))
 const BOQUploadAnalyzer = React.lazy(() => import('./components/BOQUploadAnalyzer'));
 const EnhancedCADLibrary = React.lazy(() => import('./components/EnhancedCADLibrary').then(module => ({ default: module.default })));
 const ArchitecturalDrawingStudio = React.lazy(() => import('./components/ArchitecturalDrawingStudio').then(module => ({ default: module.default })));
+const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -457,6 +458,8 @@ const App: React.FC = () => {
                 return <AutoAlertSystem />;
             case 'boq-analyzer':
                 return <BOQUploadAnalyzer />;
+            case 'engineering-calculators':
+                return <EngineeringCalculators />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

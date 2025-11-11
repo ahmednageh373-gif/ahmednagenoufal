@@ -16,6 +16,8 @@ import { Upload, AlertCircle, CheckCircle2, FileSpreadsheet, Sparkles } from 'lu
 import { classifyItems, type ClassifiedFinancialItem } from '../intelligence/ItemClassifier';
 import { BOQClassificationView } from './BOQClassificationView';
 import type { FinancialItem } from '../types';
+import SmartAssistantChat from './SmartAssistantChat';
+import NOUFALAgentCard from './NOUFALAgentCard';
 
 declare var XLSX: any;
 
@@ -233,6 +235,11 @@ export const SmartBOQImporter: React.FC<SmartBOQImporterProps> = ({
 
     return (
         <div className="space-y-6">
+            {/* NOUFAL Agent Card */}
+            <div className="mb-6">
+                <NOUFALAgentCard mode="compact" />
+            </div>
+
             {/* العنوان والتبويبات */}
             <div>
                 <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
@@ -242,6 +249,9 @@ export const SmartBOQImporter: React.FC<SmartBOQImporterProps> = ({
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                     استيراد ملفات Excel مع تصنيف تلقائي للبنود وحساب الهدر
                 </p>
+
+            {/* Smart Assistant Chat */}
+            <SmartAssistantChat context="boq" projectName="مستورد المقايسات الذكي" />
 
                 {items.length > 0 && (
                     <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">

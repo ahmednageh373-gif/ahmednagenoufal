@@ -14,8 +14,8 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                 <div className="flex items-center gap-3">
                     <Ruler className="w-8 h-8" />
                     <div>
-                        <h1 className="text-2xl font-bold">استوديو CAD المتكامل</h1>
-                        <p className="text-blue-100">رسم المخططات • دعم DWG كامل • مكتبة رموز • AutoCAD Interface</p>
+                        <h1 className="text-2xl font-bold">استوديو CAD v2.0 - محرك الرسم الهندسي المتكامل</h1>
+                        <p className="text-blue-100">رسم 2D/3D • نظام طبقات متقدم • Object Snap • أدوات تعديل • مكتبة رموز شاملة</p>
                     </div>
                 </div>
             </div>
@@ -27,8 +27,8 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                         <div className="flex items-center gap-3">
                             <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">دعم DWG/DXF</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">AutoCAD 2000-2024</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">نظام طبقات متقدم</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Show/Hide, Freeze, Lock</p>
                             </div>
                         </div>
                     </div>
@@ -37,8 +37,8 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                         <div className="flex items-center gap-3">
                             <Ruler className="w-6 h-6 text-green-600 dark:text-green-400" />
                             <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">أدوات الرسم</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Line, Circle, Rectangle +</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">أدوات رسم وتعديل</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Move, Copy, Rotate, Trim +</p>
                             </div>
                         </div>
                     </div>
@@ -47,8 +47,8 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                         <div className="flex items-center gap-3">
                             <Layers className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                             <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">الطبقات</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Layers Management</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">مكتبة رموز شاملة</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">17+ Blocks with Drag & Drop</p>
                             </div>
                         </div>
                     </div>
@@ -57,8 +57,8 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
                         <div className="flex items-center gap-3">
                             <Box className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                             <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">مكتبة الرموز</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">أبواب، شبابيك، أثاث</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">تحويل 2D إلى 3D</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Extrude + 3D Viewer</p>
                             </div>
                         </div>
                     </div>
@@ -67,88 +67,88 @@ export const CADStudio: React.FC<CADStudioProps> = ({ projectId, projectName }) 
 
             {/* Features List */}
             <div className="p-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">⚡ الميزات الرئيسية</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">⚡ الميزات الرئيسية - v2.0</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span>Zoom & Pan</span>
+                        <span>Enhanced Layer System</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span>Smart Dimensions</span>
+                        <span>Object Snap (6 Types)</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span>Grid & Snap</span>
+                        <span>Ortho Mode (F8)</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span>Ortho Mode</span>
+                        <span>Modify Tools</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>AutoCAD Shortcuts</span>
+                        <span>Block Library (17+ Blocks)</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>Command Line</span>
+                        <span>Drag & Drop Insertion</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>Undo/Redo</span>
+                        <span>2D to 3D Extrusion</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        <span>Export DWG/IFC</span>
+                        <span>3D Viewer (Three.js)</span>
                     </div>
                 </div>
             </div>
 
             {/* Shortcuts Guide */}
             <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">⌨️ الاختصارات - مثل AutoCAD</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">⌨️ الاختصارات - v2.0</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">خط</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">L</code>
+                        <span className="text-gray-700 dark:text-gray-300">نقل</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">M</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">دائرة</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">C</code>
+                        <span className="text-gray-700 dark:text-gray-300">نسخ</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">CO</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">مستطيل</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">REC</code>
+                        <span className="text-gray-700 dark:text-gray-300">دوران</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">RO</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">قياس</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">DIM</code>
+                        <span className="text-gray-700 dark:text-gray-300">قص</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">TR</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">تراجع</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">Ctrl+Z</code>
+                        <span className="text-gray-700 dark:text-gray-300">تمديد</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">EX</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">حفظ</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">Ctrl+S</code>
+                        <span className="text-gray-700 dark:text-gray-300">إزاحة</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">O</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">تكبير</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">Z+E</code>
+                        <span className="text-gray-700 dark:text-gray-300">بثق 3D</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">EXT</code>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                        <span className="text-gray-700 dark:text-gray-300">إلغاء</span>
-                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">ESC</code>
+                        <span className="text-gray-700 dark:text-gray-300">Ortho</span>
+                        <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded">F8</code>
                     </div>
                 </div>
             </div>
 
-            {/* CAD Studio iframe */}
+            {/* CAD Studio v2.0 iframe */}
             <div className="flex-1 relative">
                 <iframe
-                    src="/cad-studio.html"
+                    src="/cad-studio-v2.html"
                     className="w-full h-full border-0"
-                    title="استوديو CAD المتكامل"
+                    title="استوديو CAD v2.0 - محرك الرسم الهندسي المتكامل"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"
                 />
             </div>

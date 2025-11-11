@@ -82,6 +82,7 @@ const EnhancedCADLibrary = React.lazy(() => import('./components/EnhancedCADLibr
 const ArchitecturalDrawingStudio = React.lazy(() => import('./components/ArchitecturalDrawingStudio').then(module => ({ default: module.default })));
 const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators').then(module => ({ default: module.default })));
 const Viewer4D = React.lazy(() => import('./components/Viewer4D').then(module => ({ default: module.default })));
+const CADStudio = React.lazy(() => import('./components/CADStudio').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -355,6 +356,8 @@ const App: React.FC = () => {
                         />;
             case '4d-viewer':
                 return <Viewer4D projectId={activeProject.id} projectName={activeProject.name} />;
+            case 'cad-studio':
+                return <CADStudio projectId={activeProject.id} projectName={activeProject.name} />;
             case 'drawings':
                 return <DrawingManager project={activeProject} onUpdateDrawings={handleUpdateDrawings} />;
             case 'docs':

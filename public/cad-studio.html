@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استوديو CAD المتكامل - دعم DWG كامل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #1e1e1e;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0078d4 0%, #0063b1 100%);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0078d4;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: #2d2d2d;
+            padding: 8px;
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid #3d3d3d;
+            flex-wrap: wrap;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 2px;
+            padding: 0 8px;
+            border-right: 1px solid #3d3d3d;
+        }
+
+        .tool-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #e0e0e0;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #3d3d3d;
+            border-color: #0078d4;
+        }
+
+        .tool-btn.active {
+            background: #0078d4;
+            border-color: #0078d4;
+            color: white;
+        }
+
+        .tool-icon {
+            font-size: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #252526;
+            border-left: 1px solid #3d3d3d;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .sidebar-header {
+            background: #2d2d2d;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #cccccc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            padding: 16px;
+        }
+
+        .property-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .property-label {
+            color: #cccccc;
+        }
+
+        .property-input {
+            background: #3d3d3d;
+            border: 1px solid #4d4d4d;
+            color: #e0e0e0;
+            padding: 4px 8px;
+            border-radius: 3px;
+            width: 80px;
+            font-size: 12px;
+        }
+
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .library-item {
+            background: #3d3d3d;
+            border: 1px solid #4d4d4d;
+            padding: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .library-item:hover {
+            background: #4d4d4d;
+            border-color: #0078d4;
+        }
+
+        .library-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .library-name {
+            font-size: 11px;
+            color: #cccccc;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            background: #1e1e1e;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #cadCanvas {
+            background: #000;
+            cursor: crosshair;
+        }
+
+        .canvas-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        /* Coordinates Display */
+        .coordinates {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2d2d2d;
+            padding: 8px 16px;
+            display: flex;
+            gap: 24px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            border-top: 1px solid #3d3d3d;
+        }
+
+        .coord-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .coord-label {
+            color: #888;
+        }
+
+        .coord-value {
+            color: #0078d4;
+            font-weight: 600;
+        }
+
+        /* Layer Panel */
+        .layer-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #3d3d3d;
+            margin-bottom: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .layer-item:hover {
+            background: #4d4d4d;
+        }
+
+        .layer-visible {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #6d6d6d;
+            border-radius: 3px;
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer-visible.active {
+            background: #0078d4;
+            border-color: #0078d4;
+        }
+
+        .layer-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-left: 8px;
+        }
+
+        .layer-name {
+            flex: 1;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+
+        /* Command Line */
+        .command-line {
+            background: #1e1e1e;
+            border-top: 1px solid #3d3d3d;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .command-prompt {
+            color: #0078d4;
+        }
+
+        .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .command-history {
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #1e1e1e;
+            border-top: 1px solid #3d3d3d;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* File Upload */
+        .file-upload {
+            margin-bottom: 16px;
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 10px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            background: #0063b1;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: absolute;
+            background: #2d2d2d;
+            border: 1px solid #3d3d3d;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            padding: 4px 0;
+            min-width: 180px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .context-menu-item:hover {
+            background: #3d3d3d;
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background: #3d3d3d;
+            margin: 4px 0;
+        }
+
+        /* Shortcuts Help */
+        .shortcuts-help {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2d2d2d;
+            border: 1px solid #0078d4;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 600px;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+
+        .shortcuts-help h3 {
+            color: #0078d4;
+            margin-bottom: 16px;
+        }
+
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #3d3d3d;
+            font-size: 13px;
+        }
+
+        .shortcut-key {
+            background: #3d3d3d;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #0078d4;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #3d3d3d;
+            border-top: 4px solid #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <div class="logo">CAD</div>
+                <h1>استوديو CAD المتكامل - دعم DWG</h1>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="tool-btn" onclick="showHelp()">
+                    <span class="tool-icon">❓</span>
+                    <span>مساعدة</span>
+                </button>
+                <button class="tool-btn" onclick="exportDWG()">
+                    <span class="tool-icon">💾</span>
+                    <span>تصدير DWG</span>
+                </button>
+                <button class="tool-btn" onclick="exportIFC()">
+                    <span class="tool-icon">🏗️</span>
+                    <span>تصدير IFC</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="tool-group">
+                <button class="tool-btn" onclick="newDrawing()">
+                    <span class="tool-icon">📄</span>
+                    <span>جديد</span>
+                </button>
+                <button class="tool-btn">
+                    <span class="tool-icon">📂</span>
+                    <span>فتح</span>
+                    <input type="file" id="dwgFile" accept=".dwg,.dxf" style="display:none" onchange="loadDWG(event)">
+                </button>
+                <button class="tool-btn" onclick="document.getElementById('dwgFile').click()">
+                    <span class="tool-icon">📥</span>
+                    <span>استيراد DWG</span>
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button class="tool-btn" id="selectTool" onclick="selectTool('select')">
+                    <span class="tool-icon">↖️</span>
+                    <span>تحديد</span>
+                </button>
+                <button class="tool-btn active" id="lineTool" onclick="selectTool('line')">
+                    <span class="tool-icon">📏</span>
+                    <span>خط</span>
+                </button>
+                <button class="tool-btn" id="rectTool" onclick="selectTool('rectangle')">
+                    <span class="tool-icon">⬜</span>
+                    <span>مستطيل</span>
+                </button>
+                <button class="tool-btn" id="circleTool" onclick="selectTool('circle')">
+                    <span class="tool-icon">⭕</span>
+                    <span>دائرة</span>
+                </button>
+                <button class="tool-btn" id="polylineTool" onclick="selectTool('polyline')">
+                    <span class="tool-icon">〰️</span>
+                    <span>خط متعدد</span>
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button class="tool-btn" id="dimensionTool" onclick="selectTool('dimension')">
+                    <span class="tool-icon">📐</span>
+                    <span>قياس</span>
+                </button>
+                <button class="tool-btn" id="textTool" onclick="selectTool('text')">
+                    <span class="tool-icon">📝</span>
+                    <span>نص</span>
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button class="tool-btn" onclick="zoomIn()">
+                    <span class="tool-icon">🔍+</span>
+                    <span>تكبير</span>
+                </button>
+                <button class="tool-btn" onclick="zoomOut()">
+                    <span class="tool-icon">🔍-</span>
+                    <span>تصغير</span>
+                </button>
+                <button class="tool-btn" onclick="zoomExtents()">
+                    <span class="tool-icon">⤢</span>
+                    <span>ملء الشاشة</span>
+                </button>
+                <button class="tool-btn" onclick="panView()">
+                    <span class="tool-icon">✋</span>
+                    <span>تحريك</span>
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button class="tool-btn" onclick="undo()">
+                    <span class="tool-icon">↩️</span>
+                    <span>تراجع</span>
+                </button>
+                <button class="tool-btn" onclick="redo()">
+                    <span class="tool-icon">↪️</span>
+                    <span>إعادة</span>
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button class="tool-btn" onclick="toggleGrid()">
+                    <span class="tool-icon">⊞</span>
+                    <span>الشبكة</span>
+                </button>
+                <button class="tool-btn" onclick="toggleSnap()">
+                    <span class="tool-icon">🧲</span>
+                    <span>الالتقاط</span>
+                </button>
+                <button class="tool-btn" onclick="toggleOrtho()">
+                    <span class="tool-icon">⊥</span>
+                    <span>متعامد</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <canvas id="cadCanvas"></canvas>
+                <canvas id="gridCanvas" class="canvas-grid"></canvas>
+                
+                <div class="coordinates">
+                    <div class="coord-item">
+                        <span class="coord-label">X:</span>
+                        <span class="coord-value" id="coordX">0.0000</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">Y:</span>
+                        <span class="coord-value" id="coordY">0.0000</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">المقياس:</span>
+                        <span class="coord-value" id="zoomLevel">1:1</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">الطبقة:</span>
+                        <span class="coord-value" id="currentLayer">0</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">الأداة:</span>
+                        <span class="coord-value" id="currentTool">خط</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- File Operations -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">📁 الملفات</div>
+                    <div class="sidebar-content">
+                        <div class="file-upload">
+                            <button class="upload-btn" onclick="document.getElementById('dwgFile').click()">
+                                <span>📥</span>
+                                <span>استيراد DWG/DXF</span>
+                            </button>
+                        </div>
+                        <div style="font-size: 12px; color: #888; text-align: center;">
+                            <p>يدعم: AutoCAD DWG, DXF</p>
+                            <p>الإصدارات: 2000-2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Properties -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">⚙️ خصائص العنصر</div>
+                    <div class="sidebar-content">
+                        <div class="property-row">
+                            <span class="property-label">اللون:</span>
+                            <input type="color" id="colorPicker" value="#ffffff" class="property-input">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">السماكة:</span>
+                            <input type="number" id="lineWidth" value="1" min="0.5" max="10" step="0.5" class="property-input">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">النمط:</span>
+                            <select id="lineStyle" class="property-input" style="width: 100px;">
+                                <option value="solid">مستمر</option>
+                                <option value="dashed">متقطع</option>
+                                <option value="dotted">نقط</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layers -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">📚 الطبقات</div>
+                    <div class="sidebar-content" id="layersList">
+                        <div class="layer-item" onclick="selectLayer(0)">
+                            <div class="layer-visible active">✓</div>
+                            <div class="layer-color" style="background: #ffffff;"></div>
+                            <div class="layer-name">الطبقة 0</div>
+                        </div>
+                        <div class="layer-item" onclick="selectLayer(1)">
+                            <div class="layer-visible active">✓</div>
+                            <div class="layer-color" style="background: #ff0000;"></div>
+                            <div class="layer-name">الجدران</div>
+                        </div>
+                        <div class="layer-item" onclick="selectLayer(2)">
+                            <div class="layer-visible active">✓</div>
+                            <div class="layer-color" style="background: #00ff00;"></div>
+                            <div class="layer-name">الأبواب</div>
+                        </div>
+                        <div class="layer-item" onclick="selectLayer(3)">
+                            <div class="layer-visible active">✓</div>
+                            <div class="layer-color" style="background: #0000ff;"></div>
+                            <div class="layer-name">الشبابيك</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Library -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">📦 مكتبة الرموز</div>
+                    <div class="sidebar-content">
+                        <div class="library-grid">
+                            <div class="library-item" onclick="insertSymbol('door')">
+                                <div class="library-icon">🚪</div>
+                                <div class="library-name">باب</div>
+                            </div>
+                            <div class="library-item" onclick="insertSymbol('window')">
+                                <div class="library-icon">🪟</div>
+                                <div class="library-name">شباك</div>
+                            </div>
+                            <div class="library-item" onclick="insertSymbol('stair')">
+                                <div class="library-icon">🪜</div>
+                                <div class="library-name">درج</div>
+                            </div>
+                            <div class="library-item" onclick="insertSymbol('chair')">
+                                <div class="library-icon">🪑</div>
+                                <div class="library-name">كرسي</div>
+                            </div>
+                            <div class="library-item" onclick="insertSymbol('table')">
+                                <div class="library-icon">🪑</div>
+                                <div class="library-name">طاولة</div>
+                            </div>
+                            <div class="library-item" onclick="insertSymbol('tree')">
+                                <div class="library-icon">🌳</div>
+                                <div class="library-name">شجرة</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command Line -->
+        <div class="command-line">
+            <span class="command-prompt">Command:</span>
+            <input type="text" id="commandInput" class="command-input" placeholder="اكتب أمر أو اختصار..." onkeypress="handleCommand(event)">
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="contextAction('copy')">
+            <span>📋</span>
+            <span>نسخ</span>
+        </div>
+        <div class="context-menu-item" onclick="contextAction('paste')">
+            <span>📄</span>
+            <span>لصق</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" onclick="contextAction('delete')">
+            <span>🗑️</span>
+            <span>حذف</span>
+        </div>
+        <div class="context-menu-item" onclick="contextAction('properties')">
+            <span>⚙️</span>
+            <span>خصائص</span>
+        </div>
+    </div>
+
+    <!-- Shortcuts Help -->
+    <div class="shortcuts-help" id="shortcutsHelp">
+        <h3>⌨️ الاختصارات - مثل AutoCAD</h3>
+        <div class="shortcut-row">
+            <span>خط</span>
+            <span class="shortcut-key">L</span>
+        </div>
+        <div class="shortcut-row">
+            <span>دائرة</span>
+            <span class="shortcut-key">C</span>
+        </div>
+        <div class="shortcut-row">
+            <span>مستطيل</span>
+            <span class="shortcut-key">REC</span>
+        </div>
+        <div class="shortcut-row">
+            <span>قياس</span>
+            <span class="shortcut-key">DIM</span>
+        </div>
+        <div class="shortcut-row">
+            <span>تراجع</span>
+            <span class="shortcut-key">Ctrl+Z</span>
+        </div>
+        <div class="shortcut-row">
+            <span>إعادة</span>
+            <span class="shortcut-key">Ctrl+Y</span>
+        </div>
+        <div class="shortcut-row">
+            <span>حفظ</span>
+            <span class="shortcut-key">Ctrl+S</span>
+        </div>
+        <div class="shortcut-row">
+            <span>تكبير</span>
+            <span class="shortcut-key">Z + E</span>
+        </div>
+        <div class="shortcut-row">
+            <span>تحريك</span>
+            <span class="shortcut-key">P</span>
+        </div>
+        <div class="shortcut-row">
+            <span>Escape للإلغاء</span>
+            <span class="shortcut-key">ESC</span>
+        </div>
+        <button class="upload-btn" onclick="hideHelp()" style="margin-top: 16px;">
+            إغلاق
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>جاري التحميل...</p>
+    </div>
+
+    <script>
+        // CAD State
+        let canvas, ctx, gridCanvas, gridCtx;
+        let currentTool = 'line';
+        let currentLayer = 0;
+        let zoom = 1;
+        let panX = 0, panY = 0;
+        let gridSize = 20;
+        let showGrid = true;
+        let snapToGrid = true;
+        let orthoMode = false;
+        let elements = [];
+        let selectedElements = [];
+        let drawingElement = null;
+        let isDrawing = false;
+        let startPoint = null;
+        let mouseX = 0, mouseY = 0;
+        let history = [];
+        let historyIndex = -1;
+
+        // Initialize
+        window.addEventListener('load', () => {
+            canvas = document.getElementById('cadCanvas');
+            ctx = canvas.getContext('2d');
+            gridCanvas = document.getElementById('gridCanvas');
+            gridCtx = gridCanvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Mouse events
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel);
+            canvas.addEventListener('contextmenu', handleContextMenu);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+
+            drawGrid();
+            render();
+        });
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight - 40; // minus coordinates bar
+            gridCanvas.width = canvas.width;
+            gridCanvas.height = canvas.height;
+            drawGrid();
+            render();
+        }
+
+        function drawGrid() {
+            if (!showGrid) {
+                gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+                return;
+            }
+
+            gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+            gridCtx.strokeStyle = '#333';
+            gridCtx.lineWidth = 0.5;
+
+            const scaledGridSize = gridSize * zoom;
+            const startX = -panX % scaledGridSize;
+            const startY = -panY % scaledGridSize;
+
+            // Vertical lines
+            for (let x = startX; x < gridCanvas.width; x += scaledGridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(x, 0);
+                gridCtx.lineTo(x, gridCanvas.height);
+                gridCtx.stroke();
+            }
+
+            // Horizontal lines
+            for (let y = startY; y < gridCanvas.height; y += scaledGridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(0, y);
+                gridCtx.lineTo(gridCanvas.width, y);
+                gridCtx.stroke();
+            }
+
+            // Axes
+            gridCtx.strokeStyle = '#555';
+            gridCtx.lineWidth = 1;
+            const originX = panX;
+            const originY = panY;
+            
+            if (originX >= 0 && originX <= gridCanvas.width) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(originX, 0);
+                gridCtx.lineTo(originX, gridCanvas.height);
+                gridCtx.stroke();
+            }
+            
+            if (originY >= 0 && originY <= gridCanvas.height) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(0, originY);
+                gridCtx.lineTo(gridCanvas.width, originY);
+                gridCtx.stroke();
+            }
+        }
+
+        function render() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(panX, panY);
+            ctx.scale(zoom, zoom);
+
+            // Draw elements
+            elements.forEach(element => {
+                drawElement(element);
+            });
+
+            // Draw current drawing element
+            if (drawingElement) {
+                drawElement(drawingElement, true);
+            }
+
+            ctx.restore();
+        }
+
+        function drawElement(element, isPreview = false) {
+            ctx.strokeStyle = isPreview ? '#0078d4' : element.color || '#ffffff';
+            ctx.lineWidth = (element.lineWidth || 1) / zoom;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            if (element.lineStyle === 'dashed') {
+                ctx.setLineDash([10 / zoom, 5 / zoom]);
+            } else if (element.lineStyle === 'dotted') {
+                ctx.setLineDash([2 / zoom, 5 / zoom]);
+            } else {
+                ctx.setLineDash([]);
+            }
+
+            switch (element.type) {
+                case 'line':
+                    ctx.beginPath();
+                    ctx.moveTo(element.x1, element.y1);
+                    ctx.lineTo(element.x2, element.y2);
+                    ctx.stroke();
+                    break;
+
+                case 'rectangle':
+                    ctx.strokeRect(element.x, element.y, element.width, element.height);
+                    break;
+
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(element.x, element.y, element.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    break;
+
+                case 'polyline':
+                    if (element.points && element.points.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(element.points[0].x, element.points[0].y);
+                        for (let i = 1; i < element.points.length; i++) {
+                            ctx.lineTo(element.points[i].x, element.points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                    break;
+            }
+
+            ctx.setLineDash([]);
+        }
+
+        function handleMouseDown(e) {
+            const point = getCanvasPoint(e);
+            startPoint = point;
+            isDrawing = true;
+
+            if (currentTool === 'line') {
+                drawingElement = {
+                    type: 'line',
+                    x1: point.x,
+                    y1: point.y,
+                    x2: point.x,
+                    y2: point.y,
+                    color: document.getElementById('colorPicker').value,
+                    lineWidth: parseFloat(document.getElementById('lineWidth').value),
+                    lineStyle: document.getElementById('lineStyle').value,
+                    layer: currentLayer
+                };
+            } else if (currentTool === 'rectangle') {
+                drawingElement = {
+                    type: 'rectangle',
+                    x: point.x,
+                    y: point.y,
+                    width: 0,
+                    height: 0,
+                    color: document.getElementById('colorPicker').value,
+                    lineWidth: parseFloat(document.getElementById('lineWidth').value),
+                    lineStyle: document.getElementById('lineStyle').value,
+                    layer: currentLayer
+                };
+            } else if (currentTool === 'circle') {
+                drawingElement = {
+                    type: 'circle',
+                    x: point.x,
+                    y: point.y,
+                    radius: 0,
+                    color: document.getElementById('colorPicker').value,
+                    lineWidth: parseFloat(document.getElementById('lineWidth').value),
+                    lineStyle: document.getElementById('lineStyle').value,
+                    layer: currentLayer
+                };
+            }
+        }
+
+        function handleMouseMove(e) {
+            const point = getCanvasPoint(e);
+            mouseX = point.x;
+            mouseY = point.y;
+
+            document.getElementById('coordX').textContent = mouseX.toFixed(4);
+            document.getElementById('coordY').textContent = mouseY.toFixed(4);
+
+            if (!isDrawing || !drawingElement) {
+                render();
+                return;
+            }
+
+            if (currentTool === 'line') {
+                drawingElement.x2 = point.x;
+                drawingElement.y2 = point.y;
+            } else if (currentTool === 'rectangle') {
+                drawingElement.width = point.x - drawingElement.x;
+                drawingElement.height = point.y - drawingElement.y;
+            } else if (currentTool === 'circle') {
+                const dx = point.x - drawingElement.x;
+                const dy = point.y - drawingElement.y;
+                drawingElement.radius = Math.sqrt(dx * dx + dy * dy);
+            }
+
+            render();
+        }
+
+        function handleMouseUp(e) {
+            if (isDrawing && drawingElement) {
+                elements.push(drawingElement);
+                addToHistory();
+                drawingElement = null;
+            }
+            isDrawing = false;
+            render();
+        }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const newZoom = zoom * delta;
+            
+            if (newZoom >= 0.1 && newZoom <= 10) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                panX = mouseX - (mouseX - panX) * delta;
+                panY = mouseY - (mouseY - panY) * delta;
+                zoom = newZoom;
+                
+                document.getElementById('zoomLevel').textContent = '1:' + (1/zoom).toFixed(2);
+                drawGrid();
+                render();
+            }
+        }
+
+        function handleContextMenu(e) {
+            e.preventDefault();
+            const menu = document.getElementById('contextMenu');
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+            menu.style.display = 'block';
+        }
+
+        function handleKeyboard(e) {
+            // ESC to cancel
+            if (e.key === 'Escape') {
+                drawingElement = null;
+                isDrawing = false;
+                render();
+            }
+
+            // Ctrl+Z for undo
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                undo();
+            }
+
+            // Ctrl+Y for redo
+            if (e.ctrlKey && e.key === 'y') {
+                e.preventDefault();
+                redo();
+            }
+        }
+
+        function handleCommand(e) {
+            if (e.key === 'Enter') {
+                const cmd = e.target.value.toUpperCase().trim();
+                e.target.value = '';
+
+                // AutoCAD-like commands
+                switch(cmd) {
+                    case 'L':
+                    case 'LINE':
+                        selectTool('line');
+                        break;
+                    case 'C':
+                    case 'CIRCLE':
+                        selectTool('circle');
+                        break;
+                    case 'REC':
+                    case 'RECTANGLE':
+                        selectTool('rectangle');
+                        break;
+                    case 'DIM':
+                    case 'DIMENSION':
+                        selectTool('dimension');
+                        break;
+                    case 'Z':
+                    case 'ZOOM':
+                        // Wait for next command (E for extents, etc.)
+                        break;
+                    case 'P':
+                    case 'PAN':
+                        panView();
+                        break;
+                }
+            }
+        }
+
+        function getCanvasPoint(e) {
+            const rect = canvas.getBoundingClientRect();
+            let x = (e.clientX - rect.left - panX) / zoom;
+            let y = (e.clientY - rect.top - panY) / zoom;
+
+            if (snapToGrid) {
+                x = Math.round(x / gridSize) * gridSize;
+                y = Math.round(y / gridSize) * gridSize;
+            }
+
+            return { x, y };
+        }
+
+        function selectTool(tool) {
+            currentTool = tool;
+            document.getElementById('currentTool').textContent = tool;
+
+            // Update button states
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tool + 'Tool')?.classList.add('active');
+        }
+
+        function selectLayer(layer) {
+            currentLayer = layer;
+            document.getElementById('currentLayer').textContent = layer;
+        }
+
+        function zoomIn() {
+            zoom *= 1.2;
+            if (zoom > 10) zoom = 10;
+            document.getElementById('zoomLevel').textContent = '1:' + (1/zoom).toFixed(2);
+            drawGrid();
+            render();
+        }
+
+        function zoomOut() {
+            zoom *= 0.8;
+            if (zoom < 0.1) zoom = 0.1;
+            document.getElementById('zoomLevel').textContent = '1:' + (1/zoom).toFixed(2);
+            drawGrid();
+            render();
+        }
+
+        function zoomExtents() {
+            if (elements.length === 0) {
+                zoom = 1;
+                panX = canvas.width / 2;
+                panY = canvas.height / 2;
+            } else {
+                // Calculate bounding box
+                let minX = Infinity, minY = Infinity;
+                let maxX = -Infinity, maxY = -Infinity;
+
+                elements.forEach(el => {
+                    if (el.type === 'line') {
+                        minX = Math.min(minX, el.x1, el.x2);
+                        maxX = Math.max(maxX, el.x1, el.x2);
+                        minY = Math.min(minY, el.y1, el.y2);
+                        maxY = Math.max(maxY, el.y1, el.y2);
+                    }
+                    // Add other element types...
+                });
+
+                const width = maxX - minX;
+                const height = maxY - minY;
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+
+                zoom = Math.min(canvas.width / width, canvas.height / height) * 0.9;
+                panX = canvas.width / 2 - centerX * zoom;
+                panY = canvas.height / 2 - centerY * zoom;
+            }
+
+            document.getElementById('zoomLevel').textContent = '1:' + (1/zoom).toFixed(2);
+            drawGrid();
+            render();
+        }
+
+        function panView() {
+            // Implement pan mode
+        }
+
+        function toggleGrid() {
+            showGrid = !showGrid;
+            drawGrid();
+        }
+
+        function toggleSnap() {
+            snapToGrid = !snapToGrid;
+        }
+
+        function toggleOrtho() {
+            orthoMode = !orthoMode;
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                elements = JSON.parse(JSON.stringify(history[historyIndex]));
+                render();
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                elements = JSON.parse(JSON.stringify(history[historyIndex]));
+                render();
+            }
+        }
+
+        function addToHistory() {
+            history = history.slice(0, historyIndex + 1);
+            history.push(JSON.parse(JSON.stringify(elements)));
+            historyIndex++;
+        }
+
+        function newDrawing() {
+            if (confirm('هل تريد بدء رسم جديد؟ سيتم حذف جميع العناصر.')) {
+                elements = [];
+                history = [];
+                historyIndex = -1;
+                zoom = 1;
+                panX = canvas.width / 2;
+                panY = canvas.height / 2;
+                render();
+            }
+        }
+
+        function loadDWG(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loading').style.display = 'block';
+
+            // Simulate DWG loading (in real app, use DWG parser library)
+            setTimeout(() => {
+                alert('تحميل ملفات DWG يتطلب مكتبة خاصة.\nحالياً النظام جاهز لإضافة المكتبة.');
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+        }
+
+        function exportDWG() {
+            alert('تصدير DWG متاح قريباً!\nحالياً يمكنك حفظ كـ JSON أو تصدير كـ SVG.');
+        }
+
+        function exportIFC() {
+            alert('تصدير IFC للربط مع عارض 4D متاح قريباً!');
+        }
+
+        function insertSymbol(symbol) {
+            alert(`إدراج رمز: ${symbol}\nسيتم إضافة المكتبة الكاملة قريباً!`);
+        }
+
+        function contextAction(action) {
+            document.getElementById('contextMenu').style.display = 'none';
+            alert(`تنفيذ: ${action}`);
+        }
+
+        function showHelp() {
+            document.getElementById('shortcutsHelp').style.display = 'block';
+        }
+
+        function hideHelp() {
+            document.getElementById('shortcutsHelp').style.display = 'none';
+        }
+
+        // Hide context menu on click elsewhere
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.context-menu')) {
+                document.getElementById('contextMenu').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

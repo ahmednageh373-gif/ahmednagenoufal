@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import type { ExecutiveReport, ProjectMetrics, ProjectKPI, Notification } from '../types-extended';
+import AnimatedCityBackground from './AnimatedCityBackground';
 
 interface ExecutiveDashboardProps {
     projectId: string;
@@ -286,9 +287,12 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ projectI
     };
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 relative">
+            {/* Animated City Background */}
+            <AnimatedCityBackground speed={2} buildingCount={12} lightIntensity={0.8} />
+            
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+            <div className="bg-gradient-to-r from-indigo-600/90 to-purple-600/90 backdrop-blur-sm text-white p-6 relative z-10">
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <h1 className="text-3xl font-bold flex items-center gap-3">

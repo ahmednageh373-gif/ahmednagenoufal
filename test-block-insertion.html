@@ -1,149 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار إدراج البلوكات - Block Insertion Test</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold text-center mb-6 text-indigo-600">
-            🎯 اختبار ميزة إدراج البلوكات
-        </h1>
-        
-        <div class="space-y-4">
-            <!-- Block Shapes File -->
-            <div class="bg-green-50 border-2 border-green-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">✅</span>
-                    <span>ملف أشكال البلوكات (yqarch-block-shapes.ts)</span>
-                </h2>
-                <ul class="list-disc list-inside space-y-1 text-gray-700">
-                    <li><strong>الحجم:</strong> 21 KB</li>
-                    <li><strong>عدد البلوكات:</strong> 62 بلوك هندسي</li>
-                    <li><strong>الفئات:</strong> أثاث، أبواب، نوافذ، مطبخ، حمام، إضاءة، نباتات، إنشائي</li>
-                    <li><strong>الحالة:</strong> موجود ويعمل</li>
-                </ul>
-            </div>
-
-            <!-- Block Preview Function -->
-            <div class="bg-green-50 border-2 border-green-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">✅</span>
-                    <span>دالة معاينة البلوكات (drawBlockPreview)</span>
-                </h2>
-                <ul class="list-disc list-inside space-y-1 text-gray-700">
-                    <li><strong>الكود:</strong> ~90 سطر من كود الرسم</li>
-                    <li><strong>الوظيفة:</strong> رسم البلوك شفاف عند موضع الماوس</li>
-                    <li><strong>التحويلات:</strong> تدوير، تحجيم، قلب</li>
-                    <li><strong>الشفافية:</strong> 60% (globalAlpha = 0.6)</li>
-                    <li><strong>اللون:</strong> أزرق فاتح (rgba(100, 150, 255, 0.2))</li>
-                </ul>
-            </div>
-
-            <!-- Block Insertion Function -->
-            <div class="bg-green-50 border-2 border-green-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">✅</span>
-                    <span>دالة إدراج البلوكات (insertBlock)</span>
-                </h2>
-                <ul class="list-disc list-inside space-y-1 text-gray-700">
-                    <li><strong>الإدراج:</strong> بالنقر على Canvas</li>
-                    <li><strong>الموضع:</strong> يتبع مؤشر الماوس</li>
-                    <li><strong>Console Log:</strong> تسجيل كل عملية إدراج</li>
-                    <li><strong>الحالة:</strong> نشط وجاهز</li>
-                </ul>
-            </div>
-
-            <!-- Control Panel -->
-            <div class="bg-green-50 border-2 border-green-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">✅</span>
-                    <span>لوحة التحكم (Control Panel)</span>
-                </h2>
-                <ul class="list-disc list-inside space-y-1 text-gray-700">
-                    <li><strong>منزلق التدوير:</strong> 0-360° (زيادات 15°)</li>
-                    <li><strong>منزلق التحجيم:</strong> 0.1x - 5x (زيادات 0.1)</li>
-                    <li><strong>قلب أفقي:</strong> زر Toggle</li>
-                    <li><strong>قلب رأسي:</strong> زر Toggle</li>
-                    <li><strong>زر إدراج:</strong> يفعل وضع الإدراج</li>
-                    <li><strong>مؤشر الوضع:</strong> يظهر عند التفعيل</li>
-                </ul>
-            </div>
-
-            <!-- Testing Instructions -->
-            <div class="bg-blue-50 border-2 border-blue-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">🧪</span>
-                    <span>خطوات الاختبار</span>
-                </h2>
-                <ol class="list-decimal list-inside space-y-2 text-gray-700">
-                    <li>افتح التطبيق من الرابط أدناه</li>
-                    <li>اذهب إلى تبويب "منصة CAD الموحدة"</li>
-                    <li>في الشريط الجانبي، اختر تبويب "مكتبة البلوكات"</li>
-                    <li>اختر أي بلوك من القائمة (مثل: صوفا 3 مقاعد)</li>
-                    <li>اضبط التدوير والتحجيم من المنزلقات</li>
-                    <li>اضغط على زر "إدراج البلوك"</li>
-                    <li><strong>النتيجة المتوقعة:</strong> سترى معاينة شفافة زرقاء للبلوك تتبع الماوس</li>
-                    <li>انقر على Canvas لإدراج البلوك في الموضع المحدد</li>
-                    <li>تحقق من Console للرسالة: "✅ Block inserted: [اسم البلوك]"</li>
-                </ol>
-            </div>
-
-            <!-- Current Status -->
-            <div class="bg-yellow-50 border-2 border-yellow-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">⚠️</span>
-                    <span>الحالة الحالية - يحتاج تجربة مباشرة</span>
-                </h2>
-                <p class="text-gray-700 mb-3">
-                    الكود موجود وكامل، لكن يجب تجربة الميزة مباشرة في التطبيق للتأكد من:
-                </p>
-                <ul class="list-disc list-inside space-y-1 text-gray-700">
-                    <li>ظهور المعاينة الشفافة عند تحريك الماوس</li>
-                    <li>تطبيق التحويلات (تدوير، تحجيم، قلب) على المعاينة</li>
-                    <li>إدراج البلوك بالنقر بنجاح</li>
-                    <li>عدم وجود أخطاء في Console</li>
-                </ul>
-            </div>
-
-            <!-- Links -->
-            <div class="bg-indigo-50 border-2 border-indigo-500 rounded-lg p-4">
-                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <span class="text-2xl">🔗</span>
-                    <span>روابط الاختبار</span>
-                </h2>
-                <div class="space-y-2">
-                    <a href="https://3003-ibkd9t405z34j9e71te9h-cbeee0f9.sandbox.novita.ai/" 
-                       target="_blank"
-                       class="block bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors text-center font-medium">
-                        🚀 فتح التطبيق واختبار الميزة
-                    </a>
-                    <a href="https://github.com/ahmednageh373-gif/ahmednagenoufal/pull/5" 
-                       target="_blank"
-                       class="block bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors text-center font-medium">
-                        📝 عرض Pull Request #5
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        console.log('🔍 تحليل حالة إدراج البلوكات:');
-        console.log('✅ ملف الأشكال: yqarch-block-shapes.ts (62 بلوك)');
-        console.log('✅ دالة المعاينة: drawBlockPreview() (~90 سطر)');
-        console.log('✅ دالة الإدراج: insertBlock()');
-        console.log('✅ لوحة التحكم: rotation + scale + flip buttons');
-        console.log('');
-        console.log('🧪 للاختبار الكامل:');
-        console.log('1. افتح التطبيق');
-        console.log('2. اختر "منصة CAD الموحدة"');
-        console.log('3. اختر بلوك من المكتبة');
-        console.log('4. اضغط "إدراج البلوك"');
-        console.log('5. حرك الماوس على Canvas');
-        console.log('6. انقر لإدراج');
-    </script>
-</body>
-</html>

@@ -83,6 +83,7 @@ const ArchitecturalDrawingStudio = React.lazy(() => import('./components/Archite
 const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators').then(module => ({ default: module.default })));
 const Viewer4D = React.lazy(() => import('./components/Viewer4D').then(module => ({ default: module.default })));
 const CADStudio = React.lazy(() => import('./components/CADStudio').then(module => ({ default: module.default })));
+const AIAssistantKnowledgeBase = React.lazy(() => import('./components/AIAssistantKnowledgeBase').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -483,6 +484,8 @@ const App: React.FC = () => {
                 return <BOQUploadAnalyzer />;
             case 'engineering-calculators':
                 return <EngineeringCalculators />;
+            case 'ai-knowledge-base':
+                return <AIAssistantKnowledgeBase />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

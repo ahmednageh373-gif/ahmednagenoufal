@@ -7,7 +7,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Search, Download, Eye, Grid, List, Filter, Layers, Box, 
   MessageSquare, Sparkles, Home, Ruler, Maximize2, Play,
-  Image, FileText, Cube, Package, Zap, Settings, ChevronRight,
+  Image, FileText, Package, Zap, Settings, ChevronRight,
   ArrowRight, Star, TrendingUp, Clock, Users
 } from 'lucide-react';
 import { yqarchHatches, hatchCategories } from '../data/yqarch-hatches';
@@ -272,7 +272,7 @@ export const EnhancedCADLibrary: React.FC = () => {
             <div className="aspect-video bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg 
                           flex items-center justify-center">
               <div className="text-center">
-                <Cube className="w-24 h-24 text-blue-500 mx-auto mb-4" />
+                <Box className="w-24 h-24 text-blue-500 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400">
                   معاينة {type === 'block' ? 'البلوك' : 'النمط'}
                 </p>
@@ -353,7 +353,7 @@ export const EnhancedCADLibrary: React.FC = () => {
         <div className="h-full flex flex-col">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Cube className="w-6 h-6 text-blue-600" />
+              <Box className="w-6 h-6 text-blue-600" />
               عارض 3D التفاعلي
             </h3>
             <button onClick={() => setShow3D(false)}
@@ -366,7 +366,7 @@ export const EnhancedCADLibrary: React.FC = () => {
             {/* 3D Canvas سيتم إضافة Three.js هنا */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-white">
-                <Cube className="w-32 h-32 mx-auto mb-4 animate-pulse" />
+                <Box className="w-32 h-32 mx-auto mb-4 animate-pulse" />
                 <p className="text-xl font-semibold mb-2">عارض 3D التفاعلي</p>
                 <p className="text-gray-400">استخدم الماوس للتحريك والتدوير</p>
               </div>
@@ -422,7 +422,7 @@ export const EnhancedCADLibrary: React.FC = () => {
               { id: 'blocks', icon: Package, label: 'البلوكات' },
               { id: 'hatches', icon: Layers, label: 'أنماط التهشير' },
               { id: 'ai', icon: Sparkles, label: 'المساعد الذكي' },
-              { id: '3d', icon: Cube, label: 'العارض 3D' }
+              { id: '3d', icon: Box, label: 'العارض 3D' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -682,7 +682,7 @@ export const EnhancedCADLibrary: React.FC = () => {
         {activeTab === '3d' && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
             <div className="text-center mb-8">
-              <Cube className="w-24 h-24 text-blue-600 mx-auto mb-4" />
+              <Box className="w-24 h-24 text-blue-600 mx-auto mb-4" />
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 عارض 3D المتقدم
               </h2>
@@ -722,7 +722,7 @@ export const EnhancedCADLibrary: React.FC = () => {
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 
                          rounded-xl font-bold text-lg hover:from-blue-700 hover:to-purple-700 
                          transition-all shadow-lg hover:shadow-xl flex items-center gap-3 mx-auto">
-                <Cube className="w-6 h-6" />
+                <Box className="w-6 h-6" />
                 افتح العارض 3D
                 <ChevronRight className="w-5 h-5" />
               </button>

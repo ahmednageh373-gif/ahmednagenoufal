@@ -8,6 +8,8 @@ import { ScheduleImportModal } from './ScheduleImportModal';
 import { WhatIfModal } from './WhatIfModal';
 import { performWhatIfAnalysis, calculateCriticalPath, extractTasksFromXER } from '../services/geminiService';
 import { Bot, Plus, Calendar, File, Printer, Upload, BarChart, CalendarDays, Hash, Network, FileCode } from 'lucide-react';
+import SmartAssistantChat from './SmartAssistantChat';
+import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface ScheduleManagerProps {
     project: Project;
@@ -416,6 +418,14 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
 
     return (
         <div>
+            {/* NOUFAL Agent Card */}
+            <div className="mb-6 no-print">
+                <NOUFALAgentCard mode="compact" />
+            </div>
+
+            {/* Smart Assistant Chat */}
+            <SmartAssistantChat context="schedule" projectName={project.name} />
+
             <header className="flex justify-between items-center mb-8 flex-wrap gap-4 no-print">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">إدارة الجدول الزمني</h1>

@@ -6,8 +6,12 @@
 # =============================================================================
 
 [build]
-  # Build command for Vite frontend
+  # Build command with Python + Rust support (if needed for requirements.txt)
+  # Option A: Frontend only (recommended - faster builds)
   command = "npm run build"
+  
+  # Option B: Full Python + Rust support (uncomment if you need Python backend)
+  # command = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env && pip install -r requirements.txt && npm run build"
   
   # Directory to publish (Vite output)
   publish = "dist"
@@ -115,5 +119,24 @@
 # The requirements.txt file exists for local development/backend features
 # but is NOT used in Netlify frontend deployment. If you need backend Python
 # features, deploy them separately (e.g., Vercel, Railway, or AWS Lambda).
+#
+# =============================================================================
+# Build Options
+# =============================================================================
+#
+# OPTION A: Frontend Only (Current - Recommended)
+# - Fast builds (~2-3 minutes)
+# - No Python dependencies
+# - command = "npm run build"
+#
+# OPTION B: Full Python + Rust Support
+# - Slower builds (~5-10 minutes due to Rust installation)
+# - Installs all Python dependencies from requirements.txt
+# - Useful if you need Python processing during build
+# - To enable: Replace the command in [build] section with:
+#   command = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env && pip install -r requirements.txt && npm run build"
+#
+# NOTE: ujson (not orjson) is now used in requirements.txt to avoid Rust
+# dependency issues. If you switch back to orjson, you MUST use Option B.
 #
 # =============================================================================

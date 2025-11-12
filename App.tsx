@@ -83,6 +83,8 @@ const ArchitecturalDrawingStudio = React.lazy(() => import('./components/Archite
 const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators').then(module => ({ default: module.default })));
 const Viewer4D = React.lazy(() => import('./components/Viewer4D').then(module => ({ default: module.default })));
 const CADStudio = React.lazy(() => import('./components/CADStudio').then(module => ({ default: module.default })));
+// TCI Integration Component
+const BOQToWBSMapper = React.lazy(() => import('./components/BOQToWBSMapper').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -483,6 +485,55 @@ const App: React.FC = () => {
                 return <BOQUploadAnalyzer />;
             case 'engineering-calculators':
                 return <EngineeringCalculators />;
+            case 'tci-mapper':
+                // TCI Mapper requires BOQ items and WBS structure
+                // Convert financials to BOQItemExtended format
+                const boqItems = activeProject.data.financials.map(item => ({
+                    ...item,
+                    code: item.id,
+                    description: item.item,
+                    cost: item.total,
+                    category: item.item.includes('الحفر') ? 'أعمال الحفر' :
+                             item.item.includes('خرسانة') ? 'أعمال الخرسانة' :
+                             item.item.includes('كهرباء') ? 'أعمال الكهرباء' :
+                             item.item.includes('صرف') || item.item.includes('تغذية') ? 'أعمال السباكة' :
+                             item.item.includes('مكيفات') ? 'أعمال التكييف' :
+                             item.item.includes('جبس') ? 'أعمال التشطيبات' : 'أعمال أخرى',
+                    wbsId: null
+                }));
+                
+                // Initialize WBS structure if not exists (simple 2-level example)
+                const defaultWBS = [
+                    { id: 'wbs-1', name: 'أعمال الأساسات والهيكل', nameEn: 'Foundation & Structure', level: 1, parentId: null, linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'structure' },
+                    { id: 'wbs-1-1', name: 'أعمال الحفر', nameEn: 'Excavation Works', level: 2, parentId: 'wbs-1', linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'excavation' },
+                    { id: 'wbs-1-2', name: 'أعمال الخرسانة المسلحة', nameEn: 'Reinforced Concrete', level: 2, parentId: 'wbs-1', linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'concrete' },
+                    { id: 'wbs-2', name: 'الأعمال الكهروميكانيكية', nameEn: 'MEP Works', level: 1, parentId: null, linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'mep' },
+                    { id: 'wbs-2-1', name: 'أعمال الكهرباء', nameEn: 'Electrical Works', level: 2, parentId: 'wbs-2', linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'electrical' },
+                    { id: 'wbs-2-2', name: 'أعمال السباكة', nameEn: 'Plumbing Works', level: 2, parentId: 'wbs-2', linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'plumbing' },
+                    { id: 'wbs-2-3', name: 'أعمال التكييف', nameEn: 'HVAC Works', level: 2, parentId: 'wbs-2', linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'hvac' },
+                    { id: 'wbs-3', name: 'أعمال التشطيبات', nameEn: 'Finishing Works', level: 1, parentId: null, linkedBOQItems: [], linkedScheduleTaskIds: [], totalBudget: 0, allocatedBudget: 0, category: 'finishing' },
+                ];
+                
+                return <BOQToWBSMapper 
+                    boqItems={boqItems}
+                    wbsStructure={defaultWBS}
+                    onUpdateBOQItems={(updatedItems) => {
+                        // Update financials with new WBS links
+                        const updatedFinancials = updatedItems.map(item => ({
+                            id: item.id,
+                            item: item.item,
+                            quantity: item.quantity,
+                            unit: item.unit,
+                            unitPrice: item.unitPrice,
+                            total: item.total
+                        }));
+                        handleUpdateFinancials(activeProject.id, updatedFinancials);
+                    }}
+                    onUpdateWBS={(updatedWBS) => {
+                        // Store WBS in project data (would need to extend ProjectData type)
+                        console.log('Updated WBS:', updatedWBS);
+                    }}
+                />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

@@ -845,3 +845,94 @@ export interface ThemePreset {
         background: string;
     };
 }
+
+// --- Time-Cost Integration (TCI) Types ---
+
+// WBS Node for TCI Integration
+export interface WBSNode {
+    id: string;
+    name: string;
+    nameEn?: string;
+    level: number; // 1 for top level, 2 for second level, etc.
+    parentId: string | null;
+    linkedBOQItems: string[]; // Array of BOQ item IDs
+    linkedScheduleTaskIds: number[]; // Array of schedule task IDs
+    totalBudget: number; // Sum of linked BOQ item costs
+    allocatedBudget: number; // Budget distributed to schedule tasks
+    description?: string;
+    category?: string;
+}
+
+// Extended ProjectItem for BOQ with WBS linking
+export interface BOQItemExtended extends FinancialItem {
+    code: string; // Item code from BOQ
+    category?: string;
+    wbsId?: string | null; // Link to WBS node
+    description: string;
+    cost: number; // Same as 'total' but more explicit
+}
+
+// Extended ScheduleTask with cost and EVM data
+export interface ScheduleTaskExtended extends ScheduleTask {
+    wbsId?: string | null; // Link to WBS node
+    budgetedCost?: number; // Planned Value (PV) for this task
+    actualCost?: number; // Actual Cost (AC) - from invoices/actuals
+    earnedValue?: number; // EV = budgetedCost * (progress / 100)
+    costVariance?: number; // CV = EV - AC
+    scheduleVariance?: number; // SV = EV - PV (at current date)
+    cpi?: number; // Cost Performance Index = EV / AC
+    spi?: number; // Schedule Performance Index = EV / PV
+}
+
+// EVM Summary for Project
+export interface EVMSummary {
+    projectId: string;
+    asOfDate: string;
+    bac: number; // Budget at Completion (total project budget)
+    pv: number; // Planned Value (should be completed by now)
+    ev: number; // Earned Value (actually completed value)
+    ac: number; // Actual Cost (spent so far)
+    cv: number; // Cost Variance = EV - AC
+    sv: number; // Schedule Variance = EV - PV
+    cpi: number; // Cost Performance Index = EV / AC
+    spi: number; // Schedule Performance Index = EV / PV
+    eac: number; // Estimate at Completion = BAC / CPI
+    etc: number; // Estimate to Complete = EAC - AC
+    vac: number; // Variance at Completion = BAC - EAC
+    tcpi: number; // To-Complete Performance Index
+    percentComplete: number; // Overall project completion %
+}
+
+// TCI Mapping Configuration
+export interface TCIConfig {
+    projectId: string;
+    wbsStructure: WBSNode[];
+    costDistributionMethod: 'equal' | 'duration-weighted' | 'manual';
+    autoCalculateEVM: boolean;
+    evmCalculationDate: string; // Date for EVM calculations
+    includedCategories?: string[]; // Filter which BOQ categories to include
+}
+
+// Cost Distribution Rule
+export interface CostDistributionRule {
+    wbsId: string;
+    taskId: number;
+    allocationPercentage: number; // 0-100
+    allocationAmount: number; // Calculated amount
+    method: 'manual' | 'auto';
+}
+
+// TCI Analytics Result
+export interface TCIAnalytics {
+    totalBOQItems: number;
+    linkedBOQItems: number;
+    unlinkedBOQItems: number;
+    totalScheduleTasks: number;
+    linkedScheduleTasks: number;
+    unlinkedScheduleTasks: number;
+    totalBudget: number;
+    allocatedBudget: number;
+    unallocatedBudget: number;
+    evmSummary: EVMSummary;
+    recommendations: string[];
+}

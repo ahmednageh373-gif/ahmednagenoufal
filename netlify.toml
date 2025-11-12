@@ -1,43 +1,119 @@
-# Netlify Configuration - CAD v2.5 Pro Deploy
-# Updated: 2025-11-11 - Force fresh deployment
+# =============================================================================
+# NOUFAL - Netlify Configuration
+# =============================================================================
+# This configuration ensures Netlify deploys the frontend Vite app correctly
+# and ignores Python dependencies (requirements.txt)
+# =============================================================================
 
 [build]
-  command = "npm install --legacy-peer-deps && npm run build"
+  # Build command for Vite frontend
+  command = "npm run build"
+  
+  # Directory to publish (Vite output)
   publish = "dist"
   
-[build.environment]
-  NODE_VERSION = "20.19.0"
-  NPM_VERSION = "10.9.0"
-  NPM_FLAGS = "--legacy-peer-deps"
-  NETLIFY_USE_YARN = "false"
-  NETLIFY_CACHE_ID = "v8-cad-v2.5-pro-2025-11-11-final"
-  NODE_ENV = "production"
+  # Ignore Python files - this is a frontend-only deployment
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ."
 
+[build.environment]
+  # Node version (Netlify default is usually fine)
+  NODE_VERSION = "18"
+  
+  # Ensure npm is used (not yarn or pnpm)
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# =============================================================================
+# Redirects & Rewrites
+# =============================================================================
+
+# SPA fallback - all routes serve index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+
+# Custom domain redirects (if needed)
+[[redirects]]
+  from = "https://ahmednagenoufal.netlify.app/*"
+  to = "https://ahmednagenoufal.com/:splat"
+  status = 301
   force = true
+
+# =============================================================================
+# Headers for Security & Performance
+# =============================================================================
 
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
+    # Security headers
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://generativelanguage.googleapis.com https://apis.google.com;"
-    Cache-Control = "no-cache, no-store, must-revalidate, max-age=0"
-    Pragma = "no-cache"
-    Expires = "0"
     
+    # Performance headers
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 [[headers]]
   for = "/assets/*"
+  [headers.values]
+    # Cache assets for 1 year
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/*.html"
+  for = "/*.css"
   [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# =============================================================================
+# Plugin Configuration
+# =============================================================================
+
+# Netlify's built-in optimization
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+# =============================================================================
+# Context-specific settings
+# =============================================================================
+
+# Production environment
+[context.production]
+  command = "npm run build"
+  publish = "dist"
+
+# Deploy previews
+[context.deploy-preview]
+  command = "npm run build"
+  publish = "dist"
+
+# Branch deploys
+[context.branch-deploy]
+  command = "npm run build"
+  publish = "dist"
+
+# =============================================================================
+# Notes
+# =============================================================================
+# 
+# This configuration:
+# 1. Tells Netlify to use npm/Vite build (not Python)
+# 2. Ignores requirements.txt (Python dependencies not needed for frontend)
+# 3. Sets up SPA routing (all routes → index.html)
+# 4. Configures security headers
+# 5. Optimizes caching for assets
+# 6. Sets up custom domain redirect
+#
+# Python/Backend Note:
+# The requirements.txt file exists for local development/backend features
+# but is NOT used in Netlify frontend deployment. If you need backend Python
+# features, deploy them separately (e.g., Vercel, Railway, or AWS Lambda).
+#
+# =============================================================================

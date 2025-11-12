@@ -4,6 +4,7 @@ import { Menu, Globe } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 // Fix: Correct import path for types.
 import type { Project, ProjectItem, PurchaseOrder, Objective, KeyResult, ProjectWorkflow, FinancialItem, ScheduleTask, Risk, SiteLogEntry, Drawing, DrawingFolder, DocumentCategory, BOQMatch, AssistantSettings, Subcontractor, SubcontractorInvoice, StructuralAssessment, WorkLogEntry, ChecklistItem, ProjectMember } from './types';
 
@@ -621,6 +622,7 @@ const App: React.FC = () => {
                 onClose={() => setIsProjectModalOpen(false)}
                 onAddProject={handleAddProject}
             />
+            <PWAInstallPrompt />
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { logger } from './middleware/logger';
 
 // ==================== INTERFACES ====================
 
@@ -172,8 +173,9 @@ const initialProject: ProjectMetadata = {
 // ==================== STORE IMPLEMENTATION ====================
 
 export const useProjectStore = create<ProjectState>()(
-  devtools(
-    persist(
+  logger(
+    devtools(
+      persist(
       (set, get) => ({
         // Initial data
         boq: [],
@@ -578,8 +580,20 @@ export const useProjectStore = create<ProjectState>()(
           project: state.project,
           // Don't persist notifications and loading states
         }),
-      }
-    )
+        {
+          name: 'noufal-project-store',
+          partialize: (state) => ({
+            boq: state.boq,
+            schedule: state.schedule,
+            financial: state.financial,
+            risks: state.risks,
+            project: state.project,
+            // Don't persist notifications and loading states
+          }),
+        }
+      )
+    ),
+    'ProjectStore' // Store name for logger
   )
 );
 

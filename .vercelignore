@@ -1,24 +1,74 @@
+# Dependencies
 node_modules
-.git
-.env.local
-.env*.local
+.pnp
+.pnp.js
+
+# Testing
+coverage
+*.sw?
+
+# Production
+dist-ssr
+
+# Misc
+.DS_Store
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.DS_Store
-*.log
+
+# Local env files
+.env.local
+.env*.local
+*.local
+
+# Editor directories
 .vscode
 .idea
-coverage
-*.sw?
+*.swp
+*.swo
+
+# Turbo
 .turbo
-dist-ssr
-*.local
-backend
-__pycache__
+
+# Git
+.git
+
+# Python Backend (NOT DEPLOYED TO VERCEL)
+backend/
+__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 env/
 venv/
+*.egg-info/
+requirements*.txt
+*.py
+scripts/
+test-*.ts
+import-*.ts
+import-*.cjs
+parse-*.cjs
+read-*.cjs
+analyze_*.py
+capture_*.py
+fix_*.py
+test_*.py
+
+# Data files
+qassim*
+uploaded_files/
+uploads/
+*.xlsx
+*.db
+
+# Documentation (not needed in deployment)
+*.md
+!README.md
+
+# Config files not needed
+docker-compose.yml
+Dockerfile
+.dockerignore

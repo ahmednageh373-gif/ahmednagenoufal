@@ -15,7 +15,7 @@ ipython==9.2.0
 # -----------------------------------------------------------------------------
 # Core Data Science & Analysis
 # -----------------------------------------------------------------------------
-orjson==3.10.18
+ujson==5.10.0  # سريع جداً ولا يحتاج Rust (بديل orjson)
 pandas==2.2.3
 numpy==1.26.4
 scipy==1.13.1
@@ -118,6 +118,7 @@ pytest==8.3.5
 # Python Version: 3.9 - 3.11 (Recommended: 3.10)
 # 
 # Known Issues:
+# - orjson replaced with ujson (no Rust/Cargo dependency required)
 # - gensim 4.3.3 may have compatibility issues, use 4.3.2 instead
 # - pythonocc-core requires specific system dependencies
 # - open3d may require GPU drivers for visualization

@@ -6,8 +6,8 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       server: {
-        port: 3002,
-        strictPort: true, // لا تغير المنفذ تلقائياً - استخدم 3002 دائماً
+        port: 5173,
+        strictPort: false, // اسمح بالتغيير التلقائي للمنفذ
         host: '0.0.0.0',
         allowedHosts: [
           'localhost',

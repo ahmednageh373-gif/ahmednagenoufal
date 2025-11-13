@@ -1,0 +1,62 @@
+# Netlify Configuration for civilengineer Account
+
+## Site Information
+Account: civilengineer
+Project: NOUFAL - نظام إدارة المشاريع الذكي
+Repository: ahmednageh373-gif/ahmednagenoufal (or fork)
+
+## Quick Setup Commands
+
+### Option 1: Using Netlify UI (Recommended)
+1. Visit: https://app.netlify.com
+2. Login as: civilengineer
+3. Click: "Add new site" → "Import project"
+4. Select: GitHub repository
+5. Deploy settings are auto-detected from netlify.toml
+
+### Option 2: Using Netlify CLI
+```bash
+# Install CLI
+npm install -g netlify-cli
+
+# Login
+netlify login
+
+# Initialize site
+cd /home/user/webapp
+netlify init
+
+# Deploy
+netlify deploy --prod
+```
+
+## Build Configuration (from netlify.toml)
+Build Command: npm run build
+Publish Directory: dist
+Node Version: 18
+
+## Environment Variables (if needed)
+Add in Netlify UI: Settings → Build & deploy → Environment
+
+Example variables:
+- VITE_API_KEY
+- VITE_GEMINI_KEY
+- VITE_APP_URL=https://ahmednagenoufal.com
+
+## Custom Domain Setup
+1. Domain: ahmednagenoufal.com
+2. Netlify DNS or external DNS
+3. CNAME record: www → [site-name].netlify.app
+4. SSL: Auto-provisioned by Netlify
+
+## Deploy Status
+- Build Time: ~2-3 minutes
+- Monthly Builds: ~100-150 (Free plan: 300 min/month)
+- Bandwidth: Generous free tier
+
+## Support
+- Netlify Docs: https://docs.netlify.com
+- Community: https://answers.netlify.com
+
+Created: 2024-11-12
+Status: Ready for deployment

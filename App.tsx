@@ -84,6 +84,8 @@ const EngineeringCalculators = React.lazy(() => import('./components/Engineering
 const Viewer4D = React.lazy(() => import('./components/Viewer4D').then(module => ({ default: module.default })));
 const CADStudio = React.lazy(() => import('./components/CADStudio').then(module => ({ default: module.default })));
 const AIAssistantKnowledgeBase = React.lazy(() => import('./components/AIAssistantKnowledgeBase').then(module => ({ default: module.default })));
+// AutoCAD Integration Hub - مركز تكامل AutoCAD (نسخة مبسطة آمنة)
+const AutoCADIntegrationHub = React.lazy(() => import('./components/AutoCADIntegrationHubSimple').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -471,6 +473,8 @@ const App: React.FC = () => {
                 return <ThemeCustomizer />;
             case 'cad-platform':
                 return <CADUnifiedPlatform />;
+            case 'autocad-integration':
+                return <AutoCADIntegrationHub />;
             // EVM Integrated System Cases
             case 'evm-dashboard':
                 return <EVMIntegratedSystem />;

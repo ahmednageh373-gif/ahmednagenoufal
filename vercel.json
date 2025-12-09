@@ -1,9 +1,18 @@
 {
   "version": 2,
-  "buildCommand": null,
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": null,
-  "framework": null,
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "vite",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/assets/(.*)",

@@ -31,13 +31,24 @@ export default defineConfig(({ mode }) => {
       },
       build: {
         chunkSizeWarningLimit: 5000, // رفع الحد إلى 5000 KB (5MB)
-        // Disable minification to debug icon issues
-        minify: false,
+        // Enable minification for production
+        minify: mode === 'production' ? 'esbuild' : false,
         target: 'es2020',
         // تقليل حجم CSS
         cssCodeSplit: true,
         // تمكين Source maps للتطوير فقط
         sourcemap: mode === 'development',
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'react-vendor': ['react', 'react-dom'],
+              'charts': ['recharts'],
+              'three': ['three', '@react-three/fiber', '@react-three/drei'],
+              'pdf-tools': ['jspdf', 'jspdf-autotable', 'pdf-lib'],
+              'excel': ['xlsx', 'exceljs']
+            }
+          }
+        }
       },
       // تحسين الأداء
       optimizeDeps: {

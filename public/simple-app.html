@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOUFAL - نسخة مبسطة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Tajawal', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div class="min-h-screen p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <h1 class="text-4xl font-bold text-indigo-600 mb-4">
+                    🎯 نظام إدارة المشاريع NOUFAL
+                </h1>
+                <p class="text-gray-600 text-lg">
+                    نسخة مبسطة للتأكد من أن التطبيق يعمل
+                </p>
+                <div class="mt-4 flex gap-4">
+                    <button onclick="location.href='/'" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                        🏠 الصفحة الرئيسية (React)
+                    </button>
+                    <button onclick="location.href='/test-load.html'" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                        🔍 صفحة الاختبار
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">HTML يعمل</h3>
+                    <p class="text-gray-600">هذه الصفحة تعمل بشكل صحيح</p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">CSS يعمل</h3>
+                    <p class="text-gray-600">Tailwind CSS محمّل بشكل صحيح</p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">JavaScript يعمل</h3>
+                    <p class="text-gray-600">الأزرار التفاعلية تعمل</p>
+                </div>
+            </div>
+
+            <!-- Features List -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">🎨 الأنظمة المتاحة في NOUFAL:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 p-4 bg-indigo-50 rounded-lg">
+                        <span class="text-2xl">📊</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">لوحة التحكم التنفيذية</h4>
+                            <p class="text-sm text-gray-600">Executive Dashboard</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
+                        <span class="text-2xl">📈</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">مركز التحليلات المتكاملة</h4>
+                            <p class="text-sm text-gray-600">Integrated Analytics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                        <span class="text-2xl">⚡</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">مركز الأتمتة</h4>
+                            <p class="text-sm text-gray-600">Automation Center</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
+                        <span class="text-2xl">💰</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">نظام التحكم بالتكاليف</h4>
+                            <p class="text-sm text-gray-600">Cost Control System</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
+                        <span class="text-2xl">🔧</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">NOUFAL Backend Hub</h4>
+                            <p class="text-sm text-gray-600">مركز الباك إند</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-pink-50 rounded-lg">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">NOUFAL Enhanced</h4>
+                            <p class="text-sm text-gray-600">النظام المحسّن</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg">
+                        <span class="text-2xl">🤖</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">GenSpark Agent</h4>
+                            <p class="text-sm text-gray-600">الوكيل الذكي</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnostic Info -->
+            <div class="mt-8 bg-gray-900 text-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold mb-4">🔍 معلومات التشخيص:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-sm">
+                    <div>
+                        <strong>المتصفح:</strong> <span id="browser"></span>
+                    </div>
+                    <div>
+                        <strong>الوقت:</strong> <span id="time"></span>
+                    </div>
+                    <div>
+                        <strong>localStorage:</strong> <span id="storage"></span>
+                    </div>
+                    <div>
+                        <strong>Screen:</strong> <span id="screen"></span>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                    <strong>User Agent:</strong>
+                    <pre class="text-xs mt-2 whitespace-pre-wrap" id="ua"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fill diagnostic info
+        document.getElementById('browser').textContent = navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                                                          navigator.userAgent.includes('Firefox') ? 'Firefox' : 
+                                                          navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+        document.getElementById('time').textContent = new Date().toLocaleString('ar-SA');
+        document.getElementById('storage').textContent = typeof(Storage) !== 'undefined' ? 'متاح ✅' : 'غير متاح ❌';
+        document.getElementById('screen').textContent = `${window.innerWidth}x${window.innerHeight}`;
+        document.getElementById('ua').textContent = navigator.userAgent;
+
+        console.log('✅ Simple app loaded successfully!');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('🌐 Origin:', window.location.origin);
+    </script>
+</body>
+</html>

@@ -8,6 +8,8 @@ import { CostBreakdownModal } from './CostBreakdownModal';
 import { OrderModal } from './OrderModal';
 import { marked } from 'marked';
 import { v4 as uuidv4 } from 'uuid';
+import SmartAssistantChat from './SmartAssistantChat';
+import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface FinancialManagerProps {
     project: Project;
@@ -147,6 +149,14 @@ export const FinancialManager: React.FC<FinancialManagerProps> = ({ project, onU
 
     return (
         <div>
+            {/* NOUFAL Agent Card */}
+            <div className="mb-6">
+                <NOUFALAgentCard mode="compact" />
+            </div>
+
+            {/* Smart Assistant Chat */}
+            <SmartAssistantChat context="financial" projectName={project.name} />
+
             <header className="flex justify-between items-center mb-8 flex-wrap gap-4">
                 <div>
                     <h1 className="text-3xl font-bold">الإدارة المالية</h1>

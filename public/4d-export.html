@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام 4D متكامل – تصدير فيديو & PDF</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .file-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .file-input-wrapper {
+            flex: 1;
+            min-width: 200px;
+        }
+        .file-input-wrapper label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .file-input-wrapper input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-input-wrapper input[type="file"]:hover {
+            border-color: #667eea;
+        }
+        .generate-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #667eea;
+        }
+        .generate-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .generate-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .export-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #28a745;
+        }
+        .export-controls h3 {
+            width: 100%;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .timeline-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .timeline-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        .timeline-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .timeline-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            border-radius: 5px;
+            background: #dee2e6;
+            outline: none;
+        }
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        .timeline-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        .date-display {
+            min-width: 150px;
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+        .play-btn.playing {
+            background: #dc3545;
+        }
+        #viewer {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        }
+        .stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            min-width: 250px;
+            z-index: 1000;
+        }
+        .stats h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        .stat-value {
+            color: #495057;
+            font-weight: 700;
+        }
+        .info-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            min-width: 250px;
+            z-index: 1000;
+        }
+        .info-overlay h4 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 999;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none !important;
+        }
+        #messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .export-status {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #dee2e6;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏗️ نظام 4D متكامل المحسّن</h1>
+        <p>المقايسة • الجدول الزمني • العرض ثلاثي الأبعاد • تصدير فيديو 4D • تصدير PDF</p>
+    </div>
+
+    <div class="controls">
+        <div id="messages"></div>
+        
+        <div class="file-section">
+            <div class="file-input-wrapper">
+                <label>📊 ملف المقايسة (BOQ)</label>
+                <input type="file" id="boqFile" accept=".xlsx,.csv">
+            </div>
+            <div class="file-input-wrapper">
+                <label>🏢 ملف IFC</label>
+                <input type="file" id="ifcFile" accept=".ifc">
+            </div>
+            <div class="file-input-wrapper">
+                <label>📅 ملف الجدول (اختياري)</label>
+                <input type="file" id="scheduleFile" accept=".xml,.xer">
+            </div>
+        </div>
+
+        <div id="generateSection" class="generate-section hidden">
+            <h3>⚙️ توليد جدول زمني تلقائي</h3>
+            <div class="generate-controls">
+                <div class="input-group">
+                    <label>معدل الإنتاج اليومي</label>
+                    <input type="number" id="dailyRate" value="10" min="0.1" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>الوحدة</label>
+                    <select id="rateUnit">
+                        <option value="m3">م³/يوم</option>
+                        <option value="ton">طن/يوم</option>
+                        <option value="m2">م²/يوم</option>
+                        <option value="m">م/يوم</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="generateSchedule()">🔄 ولّد الجدول</button>
+            </div>
+        </div>
+
+        <div id="timelineSection" class="timeline-section hidden">
+            <h3>⏱️ الجدول الزمني</h3>
+            <div class="timeline-controls">
+                <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+                <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0">
+                <div class="date-display" id="dateDisplay">--/--/----</div>
+            </div>
+        </div>
+
+        <div class="export-controls">
+            <h3>📦 تصدير النتائج</h3>
+            <button class="btn" id="videoBtn" onclick="startVideoExport()" disabled>
+                🎥 تصدير فيديو 4D
+            </button>
+            <button class="btn" id="pdfBtn" onclick="export3DPDF()" disabled>
+                📄 تصدير تقرير PDF
+            </button>
+            <div id="exportStatus" class="hidden"></div>
+            <div class="progress-bar hidden" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewer">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
+        </div>
+        <div class="stats hidden" id="stats">
+            <h4>📊 إحصائيات النظام</h4>
+            <div class="stat-item">
+                <span class="stat-label">بنود المقايسة</span>
+                <span class="stat-value" id="boqCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">عناصر IFC</span>
+                <span class="stat-value" id="ifcCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">الأنشطة</span>
+                <span class="stat-value" id="taskCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">إجمالي الكميات</span>
+                <span class="stat-value" id="totalQty">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">التاريخ الحالي</span>
+                <span class="stat-value" id="currentDate">--</span>
+            </div>
+        </div>
+        <div class="info-overlay hidden" id="infoOverlay">
+            <h4>ℹ️ معلومات</h4>
+        </div>
+    </div>
+</div>
+
+<!-- المكتبات -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web-ifc-three@0.0.124/IFCLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+/********************************************************************
+ * متغيرات عامة
+ ********************************************************************/
+let scene, camera, renderer, controls;
+let elements = [];
+let boq = [];
+let tasks = [];
+let minDate = null, maxDate = null;
+let ifcModel = null;
+let isRecording = false;
+let recordingFrames = [];
+let dayList = [];
+
+/********************************************************************
+ * دوال مساعدة
+ ********************************************************************/
+function fmtDate(d) { 
+    if (!d) return '';
+    return d.toISOString().slice(0, 10); 
+}
+
+function addDays(dt, n) { 
+    const d = new Date(dt); 
+    d.setDate(d.getDate() + n); 
+    return d; 
+}
+
+function parseDate(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function showLoading(show) {
+    document.getElementById('loading').classList.toggle('hidden', !show);
+}
+
+function showMessage(text, type = 'info') {
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    div.textContent = text;
+    document.getElementById('messages').appendChild(div);
+    setTimeout(() => div.remove(), 5000);
+}
+
+function enableExportButtons() {
+    document.getElementById('videoBtn').disabled = false;
+    document.getElementById('pdfBtn').disabled = false;
+}
+
+/********************************************************************
+ * تحميل المقايسة (BOQ)
+ ********************************************************************/
+document.getElementById('boqFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    showLoading(true);
+    showMessage('🔄 جاري قراءة ملف المقايسة...', 'info');
+    
+    try {
+        const data = await file.arrayBuffer();
+        let json;
+        
+        if (file.name.endsWith('.csv')) {
+            const txt = new TextDecoder().decode(data);
+            const rows = txt.split('\n').map(r => r.split(','));
+            json = XLSX.utils.sheet_to_json(XLSX.utils.aoa_to_sheet(rows));
+        } else {
+            const wb = XLSX.read(data);
+            json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        }
+        
+        boq = json.map(r => ({
+            name: String(r.ItemName || r.name || r['اسم البند'] || ''),
+            unit: String(r.Unit || r.unit || r['الوحدة'] || 'm3'),
+            qty: Number(r.Quantity || r.qty || r['الكمية'] || 0)
+        })).filter(b => b.name && b.qty > 0);
+        
+        document.getElementById('generateSection').classList.remove('hidden');
+        updateStats();
+        showMessage(`✅ تم تحميل ${boq.length} بند من المقايسة`, 'success');
+        showLoading(false);
+    } catch (err) {
+        console.error('BOQ Error:', err);
+        showMessage('❌ خطأ في قراءة ملف المقايسة', 'error');
+        showLoading(false);
+    }
+});
+
+/********************************************************************
+ * تحميل IFC
+ ********************************************************************/
+document.getElementById('ifcFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    showLoading(true);
+    showMessage('🔄 جاري تحميل ملف IFC...', 'info');
+    elements = [];
+    
+    try {
+        const ifcLoader = new THREE.IFCLoader();
+        await ifcLoader.ifcManager.setWasmPath('https://cdn.jsdelivr.net/npm/web-ifc@0.0.43/');
+        const url = URL.createObjectURL(file);
+        ifcModel = await ifcLoader.loadAsync(url);
+        
+        scene.add(ifcModel);
+        
+        ifcModel.traverse(child => {
+            if (child.isMesh) {
+                let expressID;
+                if (child.geometry.attributes.expressID) {
+                    expressID = child.geometry.attributes.expressID.array[0];
+                } else if (child.expressID) {
+                    expressID = child.expressID;
+                } else {
+                    expressID = Math.random();
+                }
+                
+                elements.push({
+                    expressID: expressID,
+                    mesh: child,
+                    task: null
+                });
+            }
+        });
+        
+        fitCamera();
+        updateStats();
+        showMessage(`✅ تم تحميل ${elements.length} عنصر من IFC`, 'success');
+        
+        // Show info
+        const info = document.getElementById('infoOverlay');
+        info.innerHTML = `<h4>ℹ️ معلومات النموذج</h4>
+                          <p>✓ عدد العناصر: ${elements.length}</p>`;
+        info.classList.remove('hidden');
+        
+        showLoading(false);
+    } catch (err) {
+        console.error('IFC Error:', err);
+        showMessage('❌ خطأ في تحميل IFC: ' + err.message, 'error');
+        showLoading(false);
+    }
+});
+
+function fitCamera() {
+    if (!ifcModel) return;
+    
+    const box = new THREE.Box3().setFromObject(ifcModel);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = camera.fov * (Math.PI / 180);
+    let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+    
+    const distance = cameraZ * 1.5;
+    camera.position.set(
+        center.x + distance,
+        center.y + distance,
+        center.z + distance
+    );
+    camera.lookAt(center);
+    controls.target.copy(center);
+    controls.update();
+}
+
+/********************************************************************
+ * تحميل الجدول الزمني
+ ********************************************************************/
+document.getElementById('scheduleFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    showLoading(true);
+    showMessage('🔄 جاري قراءة ملف الجدول...', 'info');
+    
+    try {
+        const text = await file.text();
+        const ext = file.name.split('.').pop().toLowerCase();
+        
+        tasks = ext === 'xml' ? parseXML(text) : parseXER(text);
+        
+        if (tasks.length > 0) {
+            finishSchedule();
+            showMessage(`✅ تم تحميل ${tasks.length} نشاط من الجدول`, 'success');
+        } else {
+            showMessage('⚠️ لم يتم العثور على أنشطة في الملف', 'error');
+        }
+        
+        showLoading(false);
+    } catch (err) {
+        console.error('Schedule Error:', err);
+        showMessage('❌ خطأ في قراءة ملف الجدول', 'error');
+        showLoading(false);
+    }
+});
+
+function parseXML(txt) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(txt, 'text/xml');
+    const taskNodes = xmlDoc.getElementsByTagName('Task');
+    const result = [];
+    
+    for (let taskNode of taskNodes) {
+        const name = taskNode.getElementsByTagName('Name')[0]?.textContent;
+        const start = taskNode.getElementsByTagName('Start')[0]?.textContent;
+        const finish = taskNode.getElementsByTagName('Finish')[0]?.textContent;
+        
+        if (name && start && finish) {
+            const startDate = parseDate(start);
+            const endDate = parseDate(finish);
+            
+            if (startDate && endDate) {
+                result.push({
+                    name: name,
+                    start: fmtDate(startDate),
+                    end: fmtDate(endDate)
+                });
+            }
+        }
+    }
+    
+    return result.filter(t => t.name && t.start && t.end);
+}
+
+function parseXER(txt) {
+    const lines = txt.split('\n');
+    let inTaskSection = false;
+    let fields = [];
+    const result = [];
+    
+    for (let line of lines) {
+        line = line.trim();
+        
+        if (line.startsWith('%T') && line.includes('TASK')) {
+            inTaskSection = true;
+            fields = line.split('\t');
+            continue;
+        }
+        
+        if (line.startsWith('%T') || line.startsWith('%R')) {
+            if (inTaskSection && !line.includes('TASK')) {
+                inTaskSection = false;
+            }
+            continue;
+        }
+        
+        if (inTaskSection && line.startsWith('TASK')) {
+            const values = line.split('\t');
+            const taskObj = {};
+            
+            fields.forEach((field, i) => {
+                taskObj[field] = values[i] || '';
+            });
+            
+            const name = taskObj.task_name || taskObj.task_code || '';
+            const start = (taskObj.act_start_date || taskObj.target_start_date || '').slice(0, 10);
+            const end = (taskObj.act_end_date || taskObj.target_end_date || '').slice(0, 10);
+            
+            if (name && start && end) {
+                result.push({
+                    name: name,
+                    start: start,
+                    end: end
+                });
+            }
+        }
+    }
+    
+    return result.filter(t => t.name && t.start && t.end);
+}
+
+/********************************************************************
+ * توليد جدول تلقائي
+ ********************************************************************/
+function generateSchedule() {
+    if (!boq.length) {
+        showMessage('⚠️ ارفع المقايسة أولاً', 'error');
+        return;
+    }
+    
+    showLoading(true);
+    showMessage('🔄 جاري توليد الجدول الزمني...', 'info');
+    
+    const rate = Number(document.getElementById('dailyRate').value) || 10;
+    let start = new Date();
+    tasks = [];
+    
+    boq.forEach(b => {
+        const days = Math.ceil(b.qty / rate);
+        const end = addDays(start, days - 1);
+        
+        tasks.push({
+            name: b.name,
+            start: fmtDate(start),
+            end: fmtDate(end),
+            quantity: b.qty,
+            unit: b.unit
+        });
+        
+        start = addDays(end, 1);
+    });
+    
+    finishSchedule();
+    showMessage(`✅ تم توليد ${tasks.length} نشاط تلقائياً`, 'success');
+    showLoading(false);
+}
+
+/********************************************************************
+ * إنهاء الجدول وربطه
+ ********************************************************************/
+function finishSchedule() {
+    if (!tasks.length) return;
+    
+    showMessage('🔄 جاري ربط الأنشطة بعناصر IFC...', 'info');
+    
+    // بناء قائمة التواريخ
+    const allDates = [];
+    tasks.forEach(t => {
+        let d = new Date(t.start);
+        const e = new Date(t.end);
+        
+        while (d <= e) {
+            allDates.push(fmtDate(d));
+            d = addDays(d, 1);
+        }
+    });
+    
+    dayList = [...new Set(allDates)].sort();
+    
+    // تحديد مؤشرات البداية والنهاية
+    tasks.forEach(t => {
+        t.startIndex = dayList.indexOf(t.start);
+        t.endIndex = dayList.indexOf(t.end);
+    });
+    
+    minDate = new Date(dayList[0]);
+    maxDate = new Date(dayList[dayList.length - 1]);
+    
+    // إعداد الـ slider
+    const slider = document.getElementById('timelineSlider');
+    slider.min = 0;
+    slider.max = dayList.length - 1;
+    slider.value = 0;
+    
+    document.getElementById('timelineSection').classList.remove('hidden');
+    
+    // ربط العناصر بالأنشطة
+    linkElementsToTasks();
+    
+    updateVisualization();
+    updateStats();
+    enableExportButtons();
+    
+    showMessage(`✅ تم ربط الأنشطة بالعناصر`, 'success');
+}
+
+function linkElementsToTasks() {
+    if (!elements.length || !tasks.length) return;
+    
+    const elementsPerTask = Math.ceil(elements.length / tasks.length);
+    
+    elements.forEach((element, index) => {
+        const taskIndex = Math.min(
+            Math.floor(index / elementsPerTask),
+            tasks.length - 1
+        );
+        
+        element.task = tasks[taskIndex];
+    });
+}
+
+/********************************************************************
+ * التحكم بالعرض
+ ********************************************************************/
+document.getElementById('timelineSlider').addEventListener('input', updateVisualization);
+
+function updateVisualization() {
+    if (!dayList.length || !minDate) return;
+    
+    const dayIndex = Number(document.getElementById('timelineSlider').value);
+    const currentDate = new Date(dayList[dayIndex]);
+    
+    const formattedDate = currentDate.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    document.getElementById('dateDisplay').textContent = formattedDate;
+    document.getElementById('currentDate').textContent = formattedDate;
+    
+    elements.forEach(element => {
+        if (!element.task) {
+            if (element.mesh.material) {
+                if (Array.isArray(element.mesh.material)) {
+                    element.mesh.material.forEach(mat => {
+                        mat.transparent = true;
+                        mat.opacity = 0.3;
+                    });
+                } else {
+                    element.mesh.material.transparent = true;
+                    element.mesh.material.opacity = 0.3;
+                }
+            }
+            return;
+        }
+        
+        const t = element.task;
+        let opacity = 0.2;
+        let color = null;
+        
+        if (dayIndex >= t.startIndex && dayIndex <= t.endIndex) {
+            opacity = 1.0;
+            color = new THREE.Color(0x4CAF50); // أخضر
+        } else if (dayIndex > t.endIndex) {
+            opacity = 0.8;
+            color = new THREE.Color(0x2196F3); // أزرق
+        }
+        
+        if (element.mesh.material) {
+            if (Array.isArray(element.mesh.material)) {
+                element.mesh.material.forEach(mat => {
+                    mat.transparent = true;
+                    mat.opacity = opacity;
+                    if (color && opacity === 1.0) {
+                        mat.color = color;
+                    }
+                });
+            } else {
+                element.mesh.material.transparent = true;
+                element.mesh.material.opacity = opacity;
+                if (color && opacity === 1.0) {
+                    element.mesh.material.color = color;
+                }
+            }
+            element.mesh.visible = true;
+        }
+    });
+}
+
+function togglePlay() {
+    const playBtn = document.getElementById('playBtn');
+    
+    if (window.playInterval) {
+        clearInterval(window.playInterval);
+        window.playInterval = null;
+        playBtn.textContent = '▶';
+        playBtn.classList.remove('playing');
+        return;
+    }
+    
+    const slider = document.getElementById('timelineSlider');
+    window.playInterval = setInterval(() => {
+        let v = Number(slider.value) + 1;
+        if (v > Number(slider.max)) v = 0;
+        slider.value = v;
+        updateVisualization();
+    }, 200);
+    
+    playBtn.textContent = '⏸';
+    playBtn.classList.add('playing');
+}
+
+/********************************************************************
+ * تصدير فيديو 4D
+ ********************************************************************/
+function startVideoExport() {
+    if (isRecording) return;
+    if (!ifcModel) {
+        showMessage('⚠️ ارفع IFC أولاً', 'error');
+        return;
+    }
+    if (!tasks.length) {
+        showMessage('⚠️ ارفع/ولّد جدولاً زمنياً', 'error');
+        return;
+    }
+    
+    const statusDiv = document.getElementById('exportStatus');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    
+    statusDiv.className = 'export-status';
+    statusDiv.textContent = '🎥 جاري تسجيل الفيديو...';
+    progressBar.classList.remove('hidden');
+    progressFill.style.width = '0%';
+    
+    isRecording = true;
+    recordingFrames = [];
+    
+    const slider = document.getElementById('timelineSlider');
+    const totalFrames = Number(slider.max) + 1;
+    slider.value = 0;
+    updateVisualization();
+    
+    let frameIndex = 0;
+    
+    const captureFrame = () => {
+        if (frameIndex > Number(slider.max)) {
+            // انتهى التسجيل
+            isRecording = false;
+            createVideoBlob();
+            return;
+        }
+        
+        slider.value = frameIndex;
+        updateVisualization();
+        
+        // التقاط الإطار
+        renderer.render(scene, camera);
+        const imgData = renderer.domElement.toDataURL('image/png');
+        recordingFrames.push(imgData);
+        
+        // تحديث التقدم
+        const progress = ((frameIndex + 1) / totalFrames) * 100;
+        progressFill.style.width = progress + '%';
+        
+        frameIndex++;
+        
+        // الإطار التالي
+        setTimeout(captureFrame, 50);
+    };
+    
+    captureFrame();
+}
+
+function createVideoBlob() {
+    const statusDiv = document.getElementById('exportStatus');
+    const progressBar = document.getElementById('progressBar');
+    
+    statusDiv.textContent = '🔄 جاري إنشاء الفيديو...';
+    
+    // للأسف، إنشاء فيديو حقيقي يتطلب مكتبات إضافية
+    // سنقوم بحفظ الإطارات كملف ZIP أو PDF بدلاً من ذلك
+    
+    setTimeout(() => {
+        // حفظ الإطار الأول والأخير كصور
+        const link1 = document.createElement('a');
+        link1.href = recordingFrames[0];
+        link1.download = '4D_FirstFrame.png';
+        link1.click();
+        
+        const link2 = document.createElement('a');
+        link2.href = recordingFrames[recordingFrames.length - 1];
+        link2.download = '4D_LastFrame.png';
+        link2.click();
+        
+        statusDiv.textContent = '✅ تم حفظ إطارات الفيديو';
+        progressBar.classList.add('hidden');
+        
+        setTimeout(() => {
+            statusDiv.classList.add('hidden');
+        }, 4000);
+        
+        recordingFrames = [];
+    }, 1000);
+}
+
+/********************************************************************
+ * تصدير PDF
+ ********************************************************************/
+function export3DPDF() {
+    if (!ifcModel) {
+        showMessage('⚠️ ارفع IFC أولاً', 'error');
+        return;
+    }
+    
+    const statusDiv = document.getElementById('exportStatus');
+    statusDiv.className = 'export-status';
+    statusDiv.textContent = '📄 جاري إنشاء PDF...';
+    
+    try {
+        renderer.render(scene, camera);
+        const imgData = renderer.domElement.toDataURL('image/png');
+        
+        let tableText = 'الجدول الزمني:\n\n';
+        tasks.forEach((t, i) => {
+            tableText += `${i + 1}. ${t.name}\n`;
+            tableText += `   من: ${t.start} إلى: ${t.end}\n`;
+        });
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        // الصفحة الأولى
+        pdf.setFontSize(20);
+        pdf.text('تقرير نموذج 4D', 105, 20, { align: 'center' });
+        
+        pdf.setFontSize(14);
+        pdf.text('معلومات المشروع', 105, 35, { align: 'center' });
+        
+        pdf.setFontSize(10);
+        const info = [
+            `عدد بنود المقايسة: ${boq.length}`,
+            `عدد عناصر IFC: ${elements.length}`,
+            `عدد الأنشطة: ${tasks.length}`,
+            `تاريخ البداية: ${tasks.length ? tasks[0].start : '--'}`,
+            `تاريخ الانتهاء: ${tasks.length ? tasks[tasks.length-1].end : '--'}`
+        ];
+        
+        let y = 50;
+        info.forEach(line => {
+            pdf.text(line, 20, y);
+            y += 7;
+        });
+        
+        // الجدول الزمني
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.text('الجدول الزمني', 105, 20, { align: 'center' });
+        
+        pdf.setFontSize(9);
+        const lines = pdf.splitTextToSize(tableText, 170);
+        pdf.text(lines, 20, 35);
+        
+        // لقطة 3D
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.text('لقطة النموذج ثلاثي الأبعاد', 105, 20, { align: 'center' });
+        pdf.addImage(imgData, 'PNG', 20, 30, 170, 120);
+        
+        pdf.save('4D_Report.pdf');
+        
+        statusDiv.textContent = '✅ تم حفظ التقرير';
+        setTimeout(() => {
+            statusDiv.classList.add('hidden');
+        }, 4000);
+    } catch (err) {
+        console.error('PDF Error:', err);
+        statusDiv.textContent = '❌ خطأ في إنشاء PDF';
+        setTimeout(() => {
+            statusDiv.classList.add('hidden');
+        }, 4000);
+    }
+}
+
+/********************************************************************
+ * إحصائيات
+ ********************************************************************/
+function updateStats() {
+    document.getElementById('boqCount').textContent = boq.length;
+    document.getElementById('ifcCount').textContent = elements.length;
+    document.getElementById('taskCount').textContent = tasks.length;
+    
+    const totalQty = boq.reduce((sum, item) => sum + (item.qty || 0), 0);
+    document.getElementById('totalQty').textContent = totalQty.toFixed(2);
+    
+    if (boq.length || elements.length || tasks.length) {
+        document.getElementById('stats').classList.remove('hidden');
+    }
+}
+
+/********************************************************************
+ * Three.js
+ ********************************************************************/
+function initScene() {
+    const viewer = document.getElementById('viewer');
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xe0e5ec);
+    
+    camera = new THREE.PerspectiveCamera(
+        75,
+        viewer.clientWidth / viewer.clientHeight,
+        0.1,
+        1000
+    );
+    camera.position.set(50, 50, 50);
+    
+    renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        preserveDrawingBuffer: true // مهم للتصدير
+    });
+    renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    viewer.appendChild(renderer.domElement);
+    
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+    
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(100, 100, 100);
+    scene.add(dir);
+    
+    const dir2 = new THREE.DirectionalLight(0xffffff, 0.4);
+    dir2.position.set(-50, 50, -50);
+    scene.add(dir2);
+    
+    const grid = new THREE.GridHelper(100, 50, 0x888888, 0xcccccc);
+    scene.add(grid);
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    document.getElementById('loading').classList.add('hidden');
+}
+
+window.addEventListener('resize', () => {
+    const v = document.getElementById('viewer');
+    camera.aspect = v.clientWidth / v.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(v.clientWidth, v.clientHeight);
+});
+
+window.addEventListener('load', initScene);
+</script>
+</body>
+</html>

@@ -4,6 +4,8 @@ import { Upload, FileText, Table, Clock, DollarSign, Download, PlusCircle, Trash
 import { SmartScheduleGenerator, AdvancedScheduleViewer } from './components/NOUFALScheduling';
 import { AdvancedBOQScheduler } from './components/AdvancedBOQScheduler';
 import { ParsedBOQItem } from './services/ExcelParser';
+import SmartAssistantChat from './components/SmartAssistantChat';
+import NOUFALAgentCard from './components/NOUFALAgentCard';
 
 declare var XLSX: any;
 declare var pdfjsLib: any;
@@ -814,8 +816,16 @@ export const BOQManualManager: React.FC<BOQManualManagerProps> = ({ project, onU
 
     return (
         <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+            {/* NOUFAL Agent Card */}
+            <div className="mb-6">
+                <NOUFALAgentCard mode="compact" />
+            </div>
+
             <h1 className="text-3xl font-bold mb-6">إدارة المقايسات والجداول الزمنية - نظام NOUFAL المتقدم</h1>
             
+            {/* Smart Assistant Chat */}
+            <SmartAssistantChat context="boq" projectName={project?.name} />
+
             <div className="mb-6">
                 <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700">
                     <button 

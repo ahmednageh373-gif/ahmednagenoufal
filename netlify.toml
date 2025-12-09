@@ -1,29 +1,142 @@
-# Netlify Configuration - Simplified for Reliability
+# =============================================================================
+# NOUFAL - Netlify Configuration
+# =============================================================================
+# This configuration ensures Netlify deploys the frontend Vite app correctly
+# and ignores Python dependencies (requirements.txt)
+# =============================================================================
 
 [build]
+  # Build command with Python + Rust support (if needed for requirements.txt)
+  # Option A: Frontend only (recommended - faster builds)
   command = "npm run build"
+  
+  # Option B: Full Python + Rust support (uncomment if you need Python backend)
+  # command = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env && pip install -r requirements.txt && npm run build"
+  
+  # Directory to publish (Vite output)
   publish = "dist"
+  
+  # Ignore Python files - this is a frontend-only deployment
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ."
 
 [build.environment]
+  # Node version (Netlify default is usually fine)
   NODE_VERSION = "18"
+  
+  # Ensure npm is used (not yarn or pnpm)
   NPM_FLAGS = "--legacy-peer-deps"
 
-# SPA redirect - all routes to index.html
+# =============================================================================
+# Redirects & Rewrites
+# =============================================================================
+
+# SPA fallback - all routes serve index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
 
-# Security headers
+# Custom domain redirects (if needed)
+[[redirects]]
+  from = "https://ahmednagenoufal.netlify.app/*"
+  to = "https://ahmednagenoufal.com/:splat"
+  status = 301
+  force = true
+
+# =============================================================================
+# Headers for Security & Performance
+# =============================================================================
+
 [[headers]]
   for = "/*"
   [headers.values]
+    # Security headers
     X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Performance headers
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# Cache static assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
+    # Cache assets for 1 year
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# =============================================================================
+# Plugin Configuration
+# =============================================================================
+
+# Netlify's built-in optimization
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+# =============================================================================
+# Context-specific settings
+# =============================================================================
+
+# Production environment
+[context.production]
+  command = "npm run build"
+  publish = "dist"
+
+# Deploy previews
+[context.deploy-preview]
+  command = "npm run build"
+  publish = "dist"
+
+# Branch deploys
+[context.branch-deploy]
+  command = "npm run build"
+  publish = "dist"
+
+# =============================================================================
+# Notes
+# =============================================================================
+# 
+# This configuration:
+# 1. Tells Netlify to use npm/Vite build (not Python)
+# 2. Ignores requirements.txt (Python dependencies not needed for frontend)
+# 3. Sets up SPA routing (all routes → index.html)
+# 4. Configures security headers
+# 5. Optimizes caching for assets
+# 6. Sets up custom domain redirect
+#
+# Python/Backend Note:
+# The requirements.txt file exists for local development/backend features
+# but is NOT used in Netlify frontend deployment. If you need backend Python
+# features, deploy them separately (e.g., Vercel, Railway, or AWS Lambda).
+#
+# =============================================================================
+# Build Options
+# =============================================================================
+#
+# OPTION A: Frontend Only (Current - Recommended)
+# - Fast builds (~2-3 minutes)
+# - No Python dependencies
+# - command = "npm run build"
+#
+# OPTION B: Full Python + Rust Support
+# - Slower builds (~5-10 minutes due to Rust installation)
+# - Installs all Python dependencies from requirements.txt
+# - Useful if you need Python processing during build
+# - To enable: Replace the command in [build] section with:
+#   command = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env && pip install -r requirements.txt && npm run build"
+#
+# NOTE: ujson (not orjson) is now used in requirements.txt to avoid Rust
+# dependency issues. If you switch back to orjson, you MUST use Option B.
+#
+# =============================================================================

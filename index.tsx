@@ -39,6 +39,8 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './index.css';
 
 console.log('🚀 بدء تحميل React...');
@@ -46,6 +48,8 @@ console.log('🚀 بدء تحميل React...');
 // Import App directly
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { queryClient } from './store/queryClient';
 
 // Initialize performance monitoring
 import './utils/performanceMonitor';
@@ -63,42 +67,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Error Boundary Component
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('❌ خطأ في التطبيق:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{padding: '40px', textAlign: 'center', fontFamily: 'Tajawal, sans-serif', direction: 'rtl'}}>
-          <h2 style={{color: '#e74c3c', marginBottom: '20px'}}>⚠️ خطأ في التطبيق</h2>
-          <p style={{color: '#666', marginBottom: '20px'}}>حدث خطأ أثناء تحميل التطبيق</p>
-          <button onClick={() => window.location.reload()} style={{padding: '12px 30px', background: '#3498db', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold'}}>
-            تحديث الصفحة
-          </button>
-          <pre style={{textAlign: 'left', background: '#f5f5f5', padding: '15px', marginTop: '20px', overflow: 'auto', direction: 'ltr'}}>
-            {this.state.error?.message}
-          </pre>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+// Using the new enhanced ErrorBoundary component from src/components/ErrorBoundary.tsx
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
@@ -107,13 +76,23 @@ if (rootElement) {
     
     const root = ReactDOM.createRoot(rootElement);
     
-    // Render the full app
+    // Render the full app with React Query and enhanced Error Boundary
     root.render(
       <React.StrictMode>
-        <ErrorBoundary>
-          <ThemeProvider>
-            <App />
-          </ThemeProvider>
+        <ErrorBoundary
+          onError={(error, errorInfo) => {
+            console.error('🔴 Application Error:', error, errorInfo);
+            // You can send to error tracking service here (e.g., Sentry)
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <App />
+            </ThemeProvider>
+            {process.env.NODE_ENV === 'development' && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
+          </QueryClientProvider>
         </ErrorBoundary>
       </React.StrictMode>
     );
@@ -122,6 +101,7 @@ if (rootElement) {
     
   } catch (error) {
     console.error('❌ خطأ حرج في رندر التطبيق:', error);
+    console.error('Stack:', (error as Error).stack);
     rootElement.innerHTML = `
       <div style="padding: 40px; text-align: center; font-family: 'Tajawal', sans-serif; direction: rtl;">
         <h2 style="color: #e74c3c; margin-bottom: 20px;">⚠️ خطأ حرج</h2>

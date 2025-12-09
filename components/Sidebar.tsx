@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, Compass as DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight, Calculator, Ruler, FileUp } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -152,12 +152,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                     <NavSection title="المقايسات والجدول الزمني" icon={Table} isCollapsed={isDesktopCollapsed}>
                         <NavItem icon={Table} label="إدارة المقايسات" viewName="boq-manual" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Upload} label="رفع المقايسات" viewName="boq-upload-hub" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Upload} label="تحليل المقايسات المرفوعة" viewName="boq-analyzer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={GanttChartSquare} label="الجدول الزمني" viewName="schedule" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={BarChart3} label="تحليل الجدول الزمني" viewName="schedule-analysis" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
 
+                    {/* إدارة القيمة المكتسبة (EVM) */}
+                    <NavSection title="إدارة القيمة المكتسبة (EVM)" icon={TrendingUp} isCollapsed={isDesktopCollapsed}>
+                        <NavItem icon={PieChart} label="لوحة القيمة المكتسبة" viewName="evm-dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={GanttChartSquare} label="Gantt Chart مع EVM" viewName="evm-gantt" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={FileText} label="التقارير الأسبوعية" viewName="evm-weekly-report" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={ShieldAlert} label="نظام التنبيهات التلقائي" viewName="evm-alerts" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                    </NavSection>
+
                     {/* المخططات والمستندات */}
                     <NavSection title="المخططات والمستندات" icon={DraftingCompass} isCollapsed={isDesktopCollapsed}>
+                        <NavItem icon={Ruler} label="📐 استوديو CAD - دعم DWG" viewName="cad-studio" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={FileUp} label="🔗 مركز تكامل AutoCAD" viewName="autocad-integration" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Box} label="🏗️ عارض 4D المتكامل" viewName="4d-viewer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Sparkles} label="🏗️ استوديو الرسم المعماري AI" viewName="architectural-drawing-studio" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Package} label="📐 مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Sparkles} label="✨ مكتبة CAD المحسّنة" viewName="enhanced-cad-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={DraftingCompass} label="المخططات" viewName="drawings" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={FileText} label="المستندات الهندسية" viewName="docs" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={File} label="إدارة ملفات PDF" viewName="pdf-manager" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
@@ -174,10 +190,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                         <NavItem icon={HardHat} label="مقاولي الباطن" viewName="subcontractors" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={DollarSign} label="الحسابات الهندسية" viewName="financials" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={ClipboardCheck} label="التقييم والترميم" viewName="assessments" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        
-                        {/* التصميم تحت التنفيذ */}
-                        <NavItem icon={DraftingCompass} label="🎨 رسم المخططات (CAD)" viewName="cad-platform" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
-                        <NavItem icon={Package} label="مكتبة YQArch" viewName="block-library" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Shield} label="نظام SBC 2024" viewName="sbc-compliance" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
                     
@@ -223,8 +235,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                         <NavItem icon={Zap} label="NOUFAL المطور 2.0" viewName="noufal-enhanced" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={BrainCircuit} label="مركز قيادة نوفل" viewName="noufal-command" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Brain} label="مميزات AI المتقدمة" viewName="ai-features" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Database} label="قاعدة المعرفة للمساعد الذكي" viewName="ai-knowledge-base" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Zap} label="معالج AI الحقيقي" viewName="real-ai" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                         <NavItem icon={Building2} label="مركز الهندسة الاحترافي" viewName="pro-engineering" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
+                        <NavItem icon={Calculator} label="🧮 الحاسبات الهندسية (نوفل)" viewName="engineering-calculators" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} indent />
                     </NavSection>
 
                     {/* التقارير والتحليلات */}

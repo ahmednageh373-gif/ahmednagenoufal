@@ -51,9 +51,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { queryClient } from './store/queryClient';
 
-// Initialize performance monitoring
-import './utils/performanceMonitor';
-
 console.log('✅ App module imported');
 
 const LoadingFallback = () => (
@@ -67,7 +64,46 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Using the new enhanced ErrorBoundary component from src/components/ErrorBoundary.tsx
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    console.error('🔴 ErrorBoundary caught error:', error);
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('❌ خطأ في التطبيق:', error, errorInfo);
+    console.error('Stack:', error.stack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{padding: '40px', textAlign: 'center', fontFamily: 'Tajawal, sans-serif', direction: 'rtl'}}>
+          <h2 style={{color: '#e74c3c', marginBottom: '20px'}}>⚠️ خطأ في التطبيق</h2>
+          <p style={{color: '#666', marginBottom: '20px'}}>حدث خطأ أثناء تحميل التطبيق</p>
+          <button onClick={() => window.location.reload()} style={{padding: '12px 30px', background: '#3498db', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold'}}>
+            تحديث الصفحة
+          </button>
+          <pre style={{textAlign: 'left', background: '#f5f5f5', padding: '15px', marginTop: '20px', overflow: 'auto', direction: 'ltr'}}>
+            {this.state.error?.message}
+            {'\n\n'}
+            {this.state.error?.stack}
+          </pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const rootElement = document.getElementById('root');
 if (rootElement) {

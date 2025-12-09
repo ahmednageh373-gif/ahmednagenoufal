@@ -2068,6 +2068,25 @@ def comprehensive_boq_analysis():
 
 
 # ============================================
+# Navisworks API Integration
+# ============================================
+
+try:
+    from api.navisworks_api import navisworks_bp
+    app.register_blueprint(navisworks_bp)
+    print("✅ Navisworks API registered successfully")
+    print("   📦 9 Endpoints Available:")
+    print("      • POST   /api/projects/:projectId/navisworks/import")
+    print("      • GET    /api/projects/:projectId/navisworks/models")
+    print("      • GET    /api/projects/:projectId/navisworks/models/:modelId")
+    print("      • GET    /api/projects/:projectId/navisworks/models/:modelId/elements")
+    print("      • GET    /api/projects/:projectId/navisworks/models/:modelId/categories")
+    print("      • DELETE /api/projects/:projectId/navisworks/models/:modelId")
+except Exception as e:
+    print(f"⚠️ Warning: Could not register Navisworks API: {e}")
+
+
+# ============================================
 # Advanced APIs Integration
 # ============================================
 

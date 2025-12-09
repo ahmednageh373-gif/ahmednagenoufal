@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage 
+    SchemaVersion="1.0" 
+    AutodeskProduct="Navisworks" 
+    ProductType="Application" 
+    Name="NOUFAL.NavisworksPlugin" 
+    AppVersion="1.0.0" 
+    Description="Export model data to NOUFAL project management platform" 
+    Author="NOUFAL"
+    ProductCode="{A1B2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}"
+    UpgradeCode="{B2C3D4E5-F6A7-4B5C-8D9E-0F1A2B3C4D5E}">
+  
+  <CompanyDetails 
+      Name="NOUFAL" 
+      Url="https://noufal.com" 
+      Email="support@noufal.com"/>
+  
+  <RuntimeRequirements 
+      OS="Win64" 
+      Platform="Navisworks" 
+      SeriesMin="2021" 
+      SeriesMax="2025"/>
+  
+  <Components Description="NOUFAL Navisworks Plugin">
+    <ComponentEntry 
+        AppName="NOUFAL.NavisworksPlugin" 
+        ModuleName="./Contents/NOUFAL.NavisworksPlugin.dll" 
+        AppDescription="Export model data to NOUFAL platform" 
+        LoadOnCommandInvocation="True" 
+        LoadOnRevitStartup="False"/>
+  </Components>
+</ApplicationPackage>

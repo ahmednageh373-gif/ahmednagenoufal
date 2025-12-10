@@ -22,6 +22,7 @@ import { DocumentManager } from './components/DocumentManager';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import UserGuide from './components/UserGuide';
 import {
   LayoutDashboard,
   Zap,
@@ -46,7 +47,9 @@ import {
   Folder,
   Image,
   Target,
-  Activity
+  Activity,
+  BookOpen,
+  HelpCircle
 } from 'lucide-react';
 
 type AppView = 
@@ -56,6 +59,7 @@ type AppView =
   | 'engineering-tools'
   | 'analytics'
   | 'documents'
+  | 'user-guide'
   // Executive Management
   | 'financial-manager'
   | 'schedule-manager'
@@ -108,6 +112,7 @@ export const App: React.FC = () => {
       color: 'text-blue-600',
       pages: [
         { id: 'dashboard', label: 'Dashboard', labelAr: 'لوحة التحكم', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { id: 'user-guide', label: 'User Guide', labelAr: 'دليل الاستخدام', icon: <BookOpen className="w-4 h-4" />, badge: 'NEW' },
         { id: 'analytics', label: 'Analytics', labelAr: 'التحليلات', icon: <BarChart3 className="w-4 h-4" />, badge: 'NEW' },
       ]
     },
@@ -166,6 +171,8 @@ export const App: React.FC = () => {
     switch (currentView) {
       case 'dashboard':
         return <UnifiedDashboard />;
+      case 'user-guide':
+        return <UserGuide />;
       case 'analytics':
         return <AdvancedAnalytics />;
       case 'documents':
@@ -372,6 +379,7 @@ export const App: React.FC = () => {
   function getCurrentPageDescription(): string {
     const descriptions: Record<AppView, string> = {
       'dashboard': 'مركزك الرئيسي لإدارة المشاريع الهندسية',
+      'user-guide': 'دليل شامل لاستخدام جميع مميزات التطبيق بالتفصيل',
       'analytics': 'رؤى في الوقت الفعلي وتوصيات مدعومة بالذكاء الاصطناعي',
       'documents': 'إدارة وتنظيم والتعاون على مستندات المشروع',
       'quick-tools': 'وصول سريع للأدوات الشائعة',

@@ -269,6 +269,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
                     <NavItem icon={Palette} label="تخصيص المظهر" viewName="theme-customizer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     <NavItem icon={HelpCircle} label="المساعدة والتوثيق" viewName="docs-viewer" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-2 border-2 border-indigo-200 dark:border-indigo-800">
+                        <NavItem icon={BookOpen} label="📖 دليل الاستخدام" viewName="how-to-use" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    </div>
                     <button
                         onClick={onToggleDesktopCollapse}
                         className="hidden lg:flex w-full items-center justify-center py-3 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"

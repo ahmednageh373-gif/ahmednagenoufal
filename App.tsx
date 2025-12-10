@@ -86,6 +86,8 @@ const Viewer4D = React.lazy(() => import('./components/Viewer4D').then(module =>
 const CADStudio = React.lazy(() => import('./components/CADStudio').then(module => ({ default: module.default })));
 // TCI Integration Component
 const BOQToWBSMapper = React.lazy(() => import('./components/BOQToWBSMapper').then(module => ({ default: module.default })));
+// How To Use Guide - دليل الاستخدام التفاعلي
+const HowToUseGuide = React.lazy(() => import('./components/HowToUseGuide').then(module => ({ default: module.default })));
 
 
 const LoadingSpinner = () => (
@@ -535,6 +537,8 @@ const App: React.FC = () => {
                         console.log('Updated WBS:', updatedWBS);
                     }}
                 />;
+            case 'how-to-use':
+                return <HowToUseGuide />;
             default:
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }

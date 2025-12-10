@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Quick Push Script for ahmednagenoufal.com
-# Created by: AHMED NAGEH
+# Quick Push Script for NOUFAL EMS
+# Developer: AHMED NAGEH
 # Date: 2025-12-10
 
-echo "============================================"
-echo "🚀 Quick Push to GitHub"
-echo "============================================"
+echo "=================================================="
+echo "🚀 NOUFAL EMS - Quick Push to Production"
+echo "=================================================="
 echo ""
 
 # Colors
@@ -16,92 +16,79 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Check if we're in the right directory
-if [ ! -d ".git" ]; then
-    echo -e "${RED}❌ Error: Not in a git repository${NC}"
-    exit 1
-fi
+# Navigate to project directory
+cd /home/user/webapp || exit 1
 
-echo -e "${BLUE}📂 Current directory: $(pwd)${NC}"
+echo -e "${BLUE}📋 Current Status:${NC}"
+echo "Branch: $(git branch --show-current)"
+echo "Commits ahead: $(git rev-list --count origin/genspark_ai_developer..HEAD 2>/dev/null || echo '0')"
 echo ""
 
-# Show current branch
-CURRENT_BRANCH=$(git branch --show-current)
-echo -e "${BLUE}🌿 Current branch: ${GREEN}${CURRENT_BRANCH}${NC}"
-echo ""
-
-# Show commits to push
-COMMITS_AHEAD=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")
-echo -e "${BLUE}📊 Commits to push: ${GREEN}${COMMITS_AHEAD}${NC}"
-echo ""
-
-if [ "$COMMITS_AHEAD" = "0" ]; then
-    echo -e "${YELLOW}⚠️  No commits to push${NC}"
-    exit 0
-fi
-
-# Show last 5 commits
-echo -e "${BLUE}📝 Last 5 commits:${NC}"
+echo -e "${YELLOW}📊 Recent Commits:${NC}"
 git log --oneline -5
 echo ""
 
-# Check git status
-echo -e "${BLUE}📋 Git status:${NC}"
-git status -s
+echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo -e "${RED}⚠️  AUTHENTICATION REQUIRED ⚠️${NC}"
+echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo ""
+echo "To push to GitHub, you need to:"
+echo ""
+echo "OPTION 1: Use Personal Access Token (PAT)"
+echo "  1. Go to: https://github.com/settings/tokens"
+echo "  2. Generate new token (classic)"
+echo "  3. Select: repo, workflow permissions"
+echo "  4. Copy the token"
+echo "  5. Run:"
+echo -e "     ${GREEN}git remote set-url origin https://YOUR_TOKEN@github.com/ahmednageh373-gif/ahmednagenoufal.git${NC}"
+echo -e "     ${GREEN}git push origin genspark_ai_developer${NC}"
+echo ""
+echo "OPTION 2: Use SSH Key"
+echo "  1. Generate key: ssh-keygen -t ed25519 -C \"your_email@example.com\""
+echo "  2. Add to GitHub: cat ~/.ssh/id_ed25519.pub"
+echo "  3. Run:"
+echo -e "     ${GREEN}git remote set-url origin git@github.com:ahmednageh373-gif/ahmednagenoufal.git${NC}"
+echo -e "     ${GREEN}git push origin genspark_ai_developer${NC}"
+echo ""
+echo -e "${BLUE}════════════════════════════════════════${NC}"
 echo ""
 
-# Ask for confirmation
-echo -e "${YELLOW}⚠️  Ready to push ${COMMITS_AHEAD} commits to origin/${CURRENT_BRANCH}?${NC}"
-echo -e "${YELLOW}   This will push to: https://github.com/ahmednageh373-gif/ahmednagenoufal.git${NC}"
-echo ""
-read -p "Continue? (y/n): " -n 1 -r
-echo ""
+# Try to push (will fail but shows the command)
+echo -e "${YELLOW}Attempting to push...${NC}"
+git push origin genspark_ai_developer 2>&1
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${RED}❌ Push cancelled${NC}"
-    exit 1
-fi
+EXIT_CODE=$?
 
-echo ""
-echo -e "${BLUE}🚀 Pushing to remote...${NC}"
-echo ""
-
-# Try to push
-if git push origin "$CURRENT_BRANCH"; then
+if [ $EXIT_CODE -eq 0 ]; then
     echo ""
-    echo -e "${GREEN}✅ Successfully pushed to origin/${CURRENT_BRANCH}!${NC}"
+    echo -e "${GREEN}════════════════════════════════════════${NC}"
+    echo -e "${GREEN}✅ SUCCESS! Pushed to GitHub${NC}"
+    echo -e "${GREEN}════════════════════════════════════════${NC}"
     echo ""
-    echo -e "${BLUE}📌 Next steps:${NC}"
-    echo -e "   1. Go to: ${GREEN}https://github.com/ahmednageh373-gif/ahmednagenoufal${NC}"
-    echo -e "   2. Create a Pull Request from ${GREEN}${CURRENT_BRANCH}${NC} to ${GREEN}main${NC}"
-    echo -e "   3. Review and merge the PR"
-    echo -e "   4. Deploy will happen automatically via Cloudflare Pages"
+    echo "Next steps:"
+    echo "1. Create Pull Request: https://github.com/ahmednageh373-gif/ahmednagenoufal/compare"
+    echo "2. Merge to main branch"
+    echo "3. Deploy to ahmednagenoufal.com"
     echo ""
-    echo -e "${GREEN}🎉 Done!${NC}"
 else
     echo ""
-    echo -e "${RED}❌ Push failed!${NC}"
+    echo -e "${RED}════════════════════════════════════════${NC}"
+    echo -e "${RED}❌ Push failed - Authentication required${NC}"
+    echo -e "${RED}════════════════════════════════════════${NC}"
     echo ""
-    echo -e "${YELLOW}💡 Possible solutions:${NC}"
+    echo "Please set up authentication using one of the options above."
     echo ""
-    echo -e "${BLUE}1. Use Personal Access Token:${NC}"
-    echo -e "   ${YELLOW}git remote set-url origin https://YOUR_TOKEN@github.com/ahmednageh373-gif/ahmednagenoufal.git${NC}"
-    echo -e "   ${YELLOW}git push origin ${CURRENT_BRANCH}${NC}"
+    echo -e "${YELLOW}Quick Setup Commands:${NC}"
     echo ""
-    echo -e "${BLUE}2. Generate token at:${NC}"
-    echo -e "   ${GREEN}https://github.com/settings/tokens${NC}"
-    echo -e "   Select: ${YELLOW}repo (full control)${NC}"
+    echo "# For Personal Access Token:"
+    echo "git remote set-url origin https://YOUR_TOKEN@github.com/ahmednageh373-gif/ahmednagenoufal.git"
     echo ""
-    echo -e "${BLUE}3. Or use SSH:${NC}"
-    echo -e "   ${YELLOW}git remote set-url origin git@github.com:ahmednageh373-gif/ahmednagenoufal.git${NC}"
-    echo -e "   ${YELLOW}git push origin ${CURRENT_BRANCH}${NC}"
+    echo "# For SSH:"
+    echo "git remote set-url origin git@github.com:ahmednageh373-gif/ahmednagenoufal.git"
     echo ""
-    echo -e "${BLUE}4. Or use GitHub Desktop / VSCode Git${NC}"
+    echo "Then run: ./quick-push.sh again"
     echo ""
-    exit 1
 fi
 
+echo -e "${BLUE}📚 For detailed guide, see:${NC} PUSH-TO-PRODUCTION-GUIDE.md"
 echo ""
-echo -e "${BLUE}============================================${NC}"
-echo -e "${GREEN}✨ Push Complete! ✨${NC}"
-echo -e "${BLUE}============================================${NC}"

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import SmartAssistantChat from './SmartAssistantChat';
 import NOUFALAgentCard from './NOUFALAgentCard';
+import { processBOQFile, exportBOQToExcel } from '../src/utils/excelProcessor';
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -364,96 +365,134 @@ export const BOQUploadAnalyzer: React.FC = () => {
     setUploadedFile(file);
     setIsProcessing(true);
 
-    // Simulate file processing
-    setTimeout(() => {
-      // Demo result
+    try {
+      // ✅ REAL FILE PROCESSING - Fixed BOQ bug
+      console.log('🔄 Processing BOQ file:', file.name);
+      
+      // Process the Excel file
+      const processedData = await processBOQFile(file);
+      
+      console.log('✅ BOQ processing completed:', {
+        totalItems: processedData.totalItems,
+        totalCost: processedData.totalCost,
+        categories: Object.keys(processedData.categories).length
+      });
+
+      // Generate WBS activities from BOQ items
+      const wbsActivities = generateWBSActivities(processedData.items);
+
+      // Calculate total duration
+      const totalDuration = wbsActivities.reduce((sum, act) => sum + act.durationDays, 0);
+      const avgProductivity = wbsActivities.length > 0 
+        ? wbsActivities.reduce((sum, act) => sum + act.productivityRate, 0) / wbsActivities.length
+        : 0;
+
       const result: AnalysisResult = {
-        boqItems: [
-          {
-            code: 'TILE-001',
-            description: 'بلاط بورسلين 60×60 سم - داخلي',
-            unit: 'م²',
-            quantity: 1200,
-            unitPrice: 150,
-            totalPrice: 180000,
-            category: 'أعمال التشطيبات',
-          },
-          {
-            code: 'CONC-001',
-            description: 'خرسانة مسلحة C30 - بلاطات',
-            unit: 'م³',
-            quantity: 100,
-            unitPrice: 450,
-            totalPrice: 45000,
-            category: 'الأعمال الخرسانية',
-          },
-          {
-            code: 'PLAST-001',
-            description: 'لياسة جدران داخلية',
-            unit: 'م²',
-            quantity: 500,
-            unitPrice: 35,
-            totalPrice: 17500,
-            category: 'أعمال التشطيبات',
-          },
-        ],
-        wbsActivities: [
-          {
-            code: 'TILE-001-B',
-            nameAr: 'فرشة أسمنتية',
-            nameEn: 'Cement Screed',
-            unit: 'م²',
-            quantity: 1200,
-            productivityRate: 300,
-            crew: '2 عامل + خلاطة',
-            durationDays: 4.5,
-            costRiyal: 14400,
-            weightPercent: 8.0,
-          },
-          {
-            code: 'TILE-001-D',
-            nameAr: 'تركيب البلاط',
-            nameEn: 'Tile Installation',
-            unit: 'م²',
-            quantity: 1200,
-            productivityRate: 30,
-            crew: '1 مبلط + 1 مساعد',
-            durationDays: 42,
-            costRiyal: 144000,
-            weightPercent: 80.0,
-          },
-          {
-            code: 'CONC-001-H',
-            nameAr: 'صب الخرسانة',
-            nameEn: 'Concrete Pouring',
-            unit: 'م³',
-            quantity: 100,
-            productivityRate: 40,
-            crew: 'مضخة + 6 عامل',
-            durationDays: 2.8,
-            costRiyal: 18000,
-            weightPercent: 40.0,
-          },
-        ],
+        boqItems: processedData.items,
+        wbsActivities,
         summary: {
-          totalItems: 3,
-          totalBudget: 242500,
-          totalDuration: 49.3,
-          avgProductivity: 124.3,
-          categories: {
-            'أعمال التشطيبات': 197500,
-            'الأعمال الخرسانية': 45000,
-          },
+          totalItems: processedData.totalItems,
+          totalBudget: processedData.totalCost,
+          totalDuration,
+          avgProductivity,
+          categories: processedData.categories,
         },
       };
 
       setAnalysisResult(result);
       setIsProcessing(false);
-    }, 3000);
+
+      console.log('🎉 Analysis complete - displaying results');
+    } catch (error) {
+      console.error('❌ Error processing BOQ file:', error);
+      alert(`خطأ في معالجة الملف: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsProcessing(false);
+      setUploadedFile(null);
+    }
+  };
+
+  /**
+   * Generate WBS activities from BOQ items
+   * This creates sub-activities for each BOQ item based on the work type
+   */
+  const generateWBSActivities = (boqItems: BOQItem[]): WBSActivity[] => {
+    const activities: WBSActivity[] = [];
+    let totalCost = 0;
+
+    // Calculate total cost for weight calculation
+    boqItems.forEach(item => {
+      totalCost += item.totalPrice;
+    });
+
+    boqItems.forEach((item, index) => {
+      // Determine work type and create appropriate activities
+      const desc = item.description.toLowerCase();
+      let activityType = 'general';
+      let productivityRate = 30; // Default
+      let crew = 'طاقم عمل عام';
+
+      if (desc.includes('بلاط') || desc.includes('tile')) {
+        activityType = 'tiling';
+        productivityRate = 40;
+        crew = '1 مبلط + 1 مساعد';
+      } else if (desc.includes('خرسانة') || desc.includes('concrete')) {
+        activityType = 'concrete';
+        productivityRate = 50;
+        crew = 'مضخة + 6 عامل';
+      } else if (desc.includes('دهان') || desc.includes('paint')) {
+        activityType = 'painting';
+        productivityRate = 80;
+        crew = '2 دهان';
+      } else if (desc.includes('حديد') || desc.includes('steel')) {
+        activityType = 'steel';
+        productivityRate = 1.2;
+        crew = '2 حداد + 1 مساعد';
+      }
+
+      // Calculate duration
+      const duration = item.quantity / productivityRate;
+      const weight = (item.totalPrice / totalCost) * 100;
+
+      // Create main activity
+      const activity: WBSActivity = {
+        code: `${item.code}-A`,
+        nameAr: item.description,
+        nameEn: item.description, // Could be translated
+        unit: item.unit,
+        quantity: item.quantity,
+        productivityRate,
+        crew,
+        durationDays: duration,
+        costRiyal: item.totalPrice,
+        weightPercent: weight,
+      };
+
+      activities.push(activity);
+    });
+
+    return activities;
   };
 
   const handleExport = () => {
-    alert('سيتم تصدير البيانات إلى Excel');
+    if (!analysisResult) return;
+
+    try {
+      // Export processed BOQ data to Excel
+      const processedData = {
+        items: analysisResult.boqItems,
+        totalItems: analysisResult.summary.totalItems,
+        totalCost: analysisResult.summary.totalBudget,
+        averageCost: analysisResult.summary.totalBudget / analysisResult.summary.totalItems,
+        categories: analysisResult.summary.categories,
+      };
+
+      exportBOQToExcel(processedData, `boq_analysis_${new Date().toISOString().split('T')[0]}.xlsx`);
+      
+      console.log('✅ BOQ data exported to Excel');
+    } catch (error) {
+      console.error('❌ Error exporting to Excel:', error);
+      alert('حدث خطأ أثناء تصدير البيانات');
+    }
   };
 
   const handleProceed = () => {

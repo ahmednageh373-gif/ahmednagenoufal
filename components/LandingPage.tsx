@@ -207,7 +207,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-2xl transition-all duration-300 transform hover:scale-105"
               >
                 <Rocket size={24} />
-                <span>ابدأ الآن مجاناً</span>
+                <span>ابدأ العمل الآن</span>
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
               <button
@@ -490,7 +490,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               className="group inline-flex items-center justify-center gap-3 bg-white text-indigo-600 px-8 py-4 rounded-xl text-lg font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
             >
               <Rocket size={24} />
-              <span>ابدأ مجاناً الآن</span>
+              <span>ابدأ العمل مجاناً</span>
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>

@@ -381,7 +381,7 @@ const App: React.FC = () => {
                     />
                 );
             case 'dashboard':
-                return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
+                return <Dashboard project={activeProject} onSelectView={handleViewChange} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
             case 'noufal-backend':
                 return <NOUFALBackendHub />;
             case 'schedule':
@@ -534,7 +534,7 @@ const App: React.FC = () => {
             case 'ai-knowledge-base':
                 return <AIAssistantKnowledgeBase />;
             default:
-                return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
+                return <Dashboard project={activeProject} onSelectView={handleViewChange} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
         }
     };
 
@@ -621,6 +621,17 @@ const App: React.FC = () => {
                     </div>
                 </header>
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+                    {/* Navigation Buttons */}
+                    {activeView !== 'landing' && activeView !== 'home' && (
+                        <NavigationButtons
+                            onBack={historyIndex > 0 ? handleBack : undefined}
+                            onForward={historyIndex < viewHistory.length - 1 ? handleForward : undefined}
+                            onHome={handleGoHome}
+                            showBack={historyIndex > 0}
+                            showForward={historyIndex < viewHistory.length - 1}
+                            showHome={true}
+                        />
+                    )}
                     <Suspense fallback={<LoadingSpinner />}>
                         {renderView()}
                     </Suspense>

@@ -147,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                 <nav className="flex-grow space-y-1 overflow-y-auto overflow-x-hidden">
                     {/* الصفحة الرئيسية */}
                     <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-1 mb-2 border-2 border-indigo-300 dark:border-indigo-700">
-                        <NavItem icon={Home} label="🏠 الصفحة الرئيسية" viewName="landing-page" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                        <NavItem icon={Home} label="🏠 الصفحة الرئيسية" viewName="home" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     </div>
                     {/* لوحة التحكم الرئيسية */}
                     <NavItem icon={LayoutDashboard} label="لوحة التحكم" viewName="dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />

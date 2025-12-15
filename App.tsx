@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { LandingPage } from './components/LandingPage';
+import { NavigationButtons } from './components/NavigationButtons';
 import { Menu, Globe } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
@@ -120,13 +121,6 @@ const LanguageToggleButton: React.FC = () => {
 
 
 const App: React.FC = () => {
-    // Landing page state
-    const [showLandingPage, setShowLandingPage] = useState(() => {
-        // Show landing page on first visit or if user clicks logo
-        const hasVisited = localStorage.getItem('AN_AI_HAS_VISITED');
-        return !hasVisited;
-    });
-    
     // Error state management
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -168,6 +162,8 @@ const App: React.FC = () => {
     });
 
     const [activeView, setActiveView] = useState('dashboard');
+    const [viewHistory, setViewHistory] = useState<string[]>(['dashboard']);
+    const [historyIndex, setHistoryIndex] = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
@@ -325,6 +321,37 @@ const App: React.FC = () => {
         updateProjectData(projectId, () => ({ members: newMembers }));
     }, [updateProjectData]);
 
+    // Navigation history functions
+    const handleViewChange = useCallback((newView: string) => {
+        setViewHistory(prev => {
+            const newHistory = prev.slice(0, historyIndex + 1);
+            newHistory.push(newView);
+            return newHistory;
+        });
+        setHistoryIndex(prev => prev + 1);
+        setActiveView(newView);
+        setIsSidebarOpen(false); // Close sidebar on mobile
+    }, [historyIndex]);
+
+    const handleBack = useCallback(() => {
+        if (historyIndex > 0) {
+            const newIndex = historyIndex - 1;
+            setHistoryIndex(newIndex);
+            setActiveView(viewHistory[newIndex]);
+        }
+    }, [historyIndex, viewHistory]);
+
+    const handleForward = useCallback(() => {
+        if (historyIndex < viewHistory.length - 1) {
+            const newIndex = historyIndex + 1;
+            setHistoryIndex(newIndex);
+            setActiveView(viewHistory[newIndex]);
+        }
+    }, [historyIndex, viewHistory]);
+
+    const handleGoHome = useCallback(() => {
+        handleViewChange('landing');
+    }, [handleViewChange]);
 
     // Retry function for error recovery
     const handleRetry = () => {
@@ -555,13 +582,11 @@ const App: React.FC = () => {
         return <LoadingSpinner />;
     }
     
-    // Show landing page on first visit
-    if (showLandingPage) {
+    // Show landing page when user selects 'home' view from sidebar
+    if (activeView === 'home' || activeView === 'landing') {
         return (
             <LandingPage 
                 onGetStarted={() => {
-                    localStorage.setItem('AN_AI_HAS_VISITED', 'true');
-                    setShowLandingPage(false);
                     setActiveView('dashboard');
                 }}
             />
@@ -576,7 +601,7 @@ const App: React.FC = () => {
                 activeProjectId={activeProjectId}
                 onSelectProject={setActiveProjectId}
                 activeView={activeView}
-                onSelectView={setActiveView}
+                onSelectView={handleViewChange}
                 onAddProject={() => setIsProjectModalOpen(true)}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}

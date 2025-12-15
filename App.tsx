@@ -371,6 +371,9 @@ const App: React.FC = () => {
         }
 
         switch (activeView) {
+            case 'home':
+                // Home view will show dashboard instead
+                return <Dashboard project={activeProject} onSelectView={handleViewChange} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
             case 'dashboard':
                 return <Dashboard project={activeProject} onSelectView={handleViewChange} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
             case 'noufal-backend':
@@ -571,17 +574,6 @@ const App: React.FC = () => {
     // Show loading screen
     if (isLoading) {
         return <LoadingSpinner />;
-    }
-    
-    // Show landing page when user selects 'home' view from sidebar
-    if (activeView === 'home' || activeView === 'landing') {
-        return (
-            <LandingPage 
-                onGetStarted={() => {
-                    handleViewChange('dashboard');
-                }}
-            />
-        );
     }
     
     return (

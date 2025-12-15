@@ -371,14 +371,6 @@ const App: React.FC = () => {
         }
 
         switch (activeView) {
-            case 'landing-page':
-                return (
-                    <LandingPage 
-                        onGetStarted={() => {
-                            setActiveView('dashboard');
-                        }}
-                    />
-                );
             case 'dashboard':
                 return <Dashboard project={activeProject} onSelectView={handleViewChange} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
             case 'noufal-backend':

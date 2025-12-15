@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // Fix: Correct import path for types.
 import type { Project } from '../types';
-import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, Compass as DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight, Calculator, Ruler, FileUp, BookOpen } from 'lucide-react';
+import { ChevronDown, Plus, LayoutDashboard, GanttChartSquare, DollarSign, ShieldAlert, Camera, Compass as DraftingCompass, FileText, ShoppingCart, LayoutGrid, Target, Pyramid, BrainCircuit, Mic, HelpCircle, Moon, Sun, X, Users, Undo2, ClipboardCheck, History, BarChart3, HardHat, ChevronsRight, Building2, Table, GraduationCap, Database, Server, Zap, Workflow, Package, Upload, Shield, Edit3, Layers, Brain, Sparkles, Briefcase, TrendingUp, PieChart, Hammer, Compass, Box, File, Palette, ChevronRight, Calculator, Ruler, FileUp, BookOpen, Home } from 'lucide-react';
 
 interface SidebarProps {
     projects: Project[];
@@ -145,6 +145,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
                 </div>
 
                 <nav className="flex-grow space-y-1 overflow-y-auto overflow-x-hidden">
+                    {/* الصفحة الرئيسية */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-1 mb-2 border-2 border-indigo-300 dark:border-indigo-700">
+                        <NavItem icon={Home} label="🏠 الصفحة الرئيسية" viewName="landing-page" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
+                    </div>
                     {/* لوحة التحكم الرئيسية */}
                     <NavItem icon={LayoutDashboard} label="لوحة التحكم" viewName="dashboard" activeView={activeView} onSelect={handleSelectView} isCollapsed={isDesktopCollapsed} />
                     

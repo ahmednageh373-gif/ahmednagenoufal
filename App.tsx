@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { LandingPage } from './components/LandingPage';
 import { Menu, Globe } from 'lucide-react';
 import { ProjectModal } from './components/ProjectModal';
 import { mockProjects } from './data/mockData';
@@ -119,6 +120,13 @@ const LanguageToggleButton: React.FC = () => {
 
 
 const App: React.FC = () => {
+    // Landing page state
+    const [showLandingPage, setShowLandingPage] = useState(() => {
+        // Show landing page on first visit or if user clicks logo
+        const hasVisited = localStorage.getItem('AN_AI_HAS_VISITED');
+        return !hasVisited;
+    });
+    
     // Error state management
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -337,6 +345,14 @@ const App: React.FC = () => {
         }
 
         switch (activeView) {
+            case 'landing-page':
+                return (
+                    <LandingPage 
+                        onGetStarted={() => {
+                            setActiveView('dashboard');
+                        }}
+                    />
+                );
             case 'dashboard':
                 return <Dashboard project={activeProject} onSelectView={setActiveView} onUpdateFinancials={handleUpdateFinancials} onUpdateSchedule={handleUpdateSchedule} onUpdateWorkflow={handleUpdateWorkflow} />;
             case 'noufal-backend':
@@ -537,6 +553,19 @@ const App: React.FC = () => {
     // Show loading screen
     if (isLoading) {
         return <LoadingSpinner />;
+    }
+    
+    // Show landing page on first visit
+    if (showLandingPage) {
+        return (
+            <LandingPage 
+                onGetStarted={() => {
+                    localStorage.setItem('AN_AI_HAS_VISITED', 'true');
+                    setShowLandingPage(false);
+                    setActiveView('dashboard');
+                }}
+            />
+        );
     }
     
     return (

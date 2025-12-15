@@ -362,10 +362,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ projectI
 
             {/* Main Content */}
             <div className="flex-1 overflow-auto p-6">
-                {/* NOUFAL Agent Enhanced Card */}
-                <div className="mb-6">
+                {/* NOUFAL Agent Card - REMOVED as per user request */}
+                {false && <div className="mb-6">
                     <div className="relative bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-2xl shadow-2xl overflow-hidden">
-                        {/* Animated Background Pattern */}
+                        Animated Background Pattern
                         <div className="absolute inset-0 opacity-10">
                             <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse"></div>
                             <div className="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full blur-3xl animate-pulse delay-75"></div>
@@ -612,7 +612,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ projectI
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - KPIs and Metrics */}

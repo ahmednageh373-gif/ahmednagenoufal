@@ -6,9 +6,9 @@
 # =============================================================================
 
 [build]
-  # Build command with Python + Rust support (if needed for requirements.txt)
-  # Option A: Frontend only (recommended - faster builds)
-  command = "npm run build"
+  # Build command - npm ci uses exact versions from package-lock.json
+  # This prevents dependency conflicts during build
+  command = "npm ci && npm run build"
   
   # Option B: Full Python + Rust support (uncomment if you need Python backend)
   # command = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env && pip install -r requirements.txt && npm run build"
@@ -20,8 +20,8 @@
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ."
 
 [build.environment]
-  # Node version (Netlify default is usually fine)
-  NODE_VERSION = "18"
+  # Node version - Use 20+ to avoid Vite module-runner errors
+  NODE_VERSION = "20.11.0"
   
   # Ensure npm is used (not yarn or pnpm)
   NPM_FLAGS = "--legacy-peer-deps"
@@ -90,17 +90,17 @@
 
 # Production environment
 [context.production]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 # Deploy previews
 [context.deploy-preview]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 # Branch deploys
 [context.branch-deploy]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 # =============================================================================

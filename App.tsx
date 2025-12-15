@@ -352,34 +352,6 @@ const App: React.FC = () => {
         updateProjectData(projectId, () => ({ members: newMembers }));
     }, [updateProjectData]);
 
-    // Navigation history functions
-    const handleViewChange = useCallback((newView: string) => {
-        setViewHistory(prev => {
-            const newHistory = prev.slice(0, historyIndex + 1);
-            newHistory.push(newView);
-            return newHistory;
-        });
-        setHistoryIndex(prev => prev + 1);
-        setActiveView(newView);
-        setIsSidebarOpen(false); // Close sidebar on mobile
-    }, [historyIndex]);
-
-    const handleBack = useCallback(() => {
-        if (historyIndex > 0) {
-            const newIndex = historyIndex - 1;
-            setHistoryIndex(newIndex);
-            setActiveView(viewHistory[newIndex]);
-        }
-    }, [historyIndex, viewHistory]);
-
-    const handleForward = useCallback(() => {
-        if (historyIndex < viewHistory.length - 1) {
-            const newIndex = historyIndex + 1;
-            setHistoryIndex(newIndex);
-            setActiveView(viewHistory[newIndex]);
-        }
-    }, [historyIndex, viewHistory]);
-
     // Retry function for error recovery
     const handleRetry = () => {
         setHasError(false);

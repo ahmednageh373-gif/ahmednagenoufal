@@ -165,6 +165,37 @@ const App: React.FC = () => {
     const [viewHistory, setViewHistory] = useState<string[]>(['dashboard']);
     const [historyIndex, setHistoryIndex] = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    
+    // Navigation handlers
+    const handleViewChange = useCallback((newView: string) => {
+        if (newView !== activeView) {
+            const newHistory = viewHistory.slice(0, historyIndex + 1);
+            newHistory.push(newView);
+            setViewHistory(newHistory);
+            setHistoryIndex(newHistory.length - 1);
+            setActiveView(newView);
+        }
+    }, [activeView, viewHistory, historyIndex]);
+    
+    const handleBack = useCallback(() => {
+        if (historyIndex > 0) {
+            const newIndex = historyIndex - 1;
+            setHistoryIndex(newIndex);
+            setActiveView(viewHistory[newIndex]);
+        }
+    }, [historyIndex, viewHistory]);
+    
+    const handleForward = useCallback(() => {
+        if (historyIndex < viewHistory.length - 1) {
+            const newIndex = historyIndex + 1;
+            setHistoryIndex(newIndex);
+            setActiveView(viewHistory[newIndex]);
+        }
+    }, [historyIndex, viewHistory]);
+    
+    const handleGoHome = useCallback(() => {
+        handleViewChange('home');
+    }, [handleViewChange]);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
     
@@ -348,10 +379,6 @@ const App: React.FC = () => {
             setActiveView(viewHistory[newIndex]);
         }
     }, [historyIndex, viewHistory]);
-
-    const handleGoHome = useCallback(() => {
-        handleViewChange('landing');
-    }, [handleViewChange]);
 
     // Retry function for error recovery
     const handleRetry = () => {
@@ -587,7 +614,7 @@ const App: React.FC = () => {
         return (
             <LandingPage 
                 onGetStarted={() => {
-                    setActiveView('dashboard');
+                    handleViewChange('dashboard');
                 }}
             />
         );

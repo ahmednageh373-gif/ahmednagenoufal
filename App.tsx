@@ -361,11 +361,20 @@ const App: React.FC = () => {
     };
     
     const renderView = () => {
-        if (!activeProject) {
+        // Check if current view requires an active project
+        const viewsWithoutProject = [
+            'home', 'noufal-backend', 'automation', 'docs-viewer', 'audit-log',
+            'block-library', 'enhanced-cad-library', 'architectural-drawing-studio',
+            'boq-upload-hub', 'sbc-compliance', 'noufal-command', 'library-showcase',
+            'manual-analysis', 'quantities-extraction', 'noufal-enhanced'
+        ];
+
+        if (!activeProject && !viewsWithoutProject.includes(activeView)) {
             return (
                  <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
                     <h2 className="text-2xl font-bold mb-4">لا يوجد مشروع محدد</h2>
                     <p>الرجاء تحديد مشروع من القائمة أو إنشاء مشروع جديد للبدء.</p>
+                    <p className="mt-4 text-sm">أو يمكنك رفع مقايسة لإنشاء مشروع جديد من <button onClick={() => handleViewChange('boq-upload-hub')} className="text-indigo-600 hover:underline font-semibold">هنا</button></p>
                 </div>
             );
         }
@@ -445,7 +454,10 @@ const App: React.FC = () => {
             case 'architectural-drawing-studio':
                 return <ArchitecturalDrawingStudio />;
             case 'boq-upload-hub':
-                return <BOQUploadHub projectId={activeProject.id} projectName={activeProject.name} />;
+                return <BOQUploadHub 
+                    projectId={activeProject?.id || 'new-project'} 
+                    projectName={activeProject?.name || 'مشروع جديد'} 
+                />;
             case 'sbc-compliance':
                 return <SBCComplianceChecker />;
             case 'schedule-analysis':

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار صفحة رفع المقايسات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover {
+            background: #eef0ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+        
+        .upload-zone.dragover {
+            background: #e0e3ff;
+            border-color: #764ba2;
+            border-width: 4px;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .upload-hint {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .file-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .supported-formats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+        
+        .links {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 مركز رفع المقايسات</h1>
+        <p class="subtitle">صفحة اختبار - NOUFAL System</p>
+        
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">اسحب وأفلت ملف Excel أو CSV هنا</div>
+            <div class="upload-hint">أو انقر للاختيار من جهازك</div>
+            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                اختر ملف
+            </button>
+        </div>
+        
+        <div class="supported-formats">
+            <strong>الصيغ المدعومة:</strong> .xlsx, .xls, .csv
+        </div>
+        
+        <div class="file-info" id="fileInfo"></div>
+        <div class="status" id="status"></div>
+        
+        <div class="links">
+            <a href="/">← العودة للصفحة الرئيسية</a>
+            <a href="/#/boq-upload-hub">التطبيق الرئيسي →</a>
+        </div>
+    </div>
+    
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const status = document.getElementById('status');
+        
+        // Click to upload
+        uploadZone.addEventListener('click', (e) => {
+            if (e.target === uploadZone || e.target.closest('.upload-icon, .upload-text, .upload-hint')) {
+                fileInput.click();
+            }
+        });
+        
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            // Show file info
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = `
+                <strong>الملف المختار:</strong><br>
+                📄 الاسم: ${file.name}<br>
+                📦 الحجم: ${(file.size / 1024).toFixed(2)} KB<br>
+                📅 آخر تعديل: ${new Date(file.lastModified).toLocaleDateString('ar-SA')}
+            `;
+            
+            // Validate file type
+            const validTypes = ['.xlsx', '.xls', '.csv'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (validTypes.includes(fileExt)) {
+                showStatus('success', '✅ الملف صالح! يمكنك الآن رفعه إلى التطبيق الرئيسي.');
+            } else {
+                showStatus('error', '❌ نوع الملف غير مدعوم. يرجى اختيار ملف Excel (.xlsx, .xls) أو CSV.');
+            }
+        }
+        
+        function showStatus(type, message) {
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+        
+        // Log page load
+        console.log('✅ صفحة اختبار رفع المقايسات تم تحميلها بنجاح');
+        console.log('📊 التاريخ:', new Date().toLocaleString('ar-SA'));
+        console.log('🌐 المتصفح:', navigator.userAgent);
+    </script>
+</body>
+</html>

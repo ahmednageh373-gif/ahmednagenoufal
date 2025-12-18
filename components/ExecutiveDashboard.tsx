@@ -362,257 +362,6 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ projectI
 
             {/* Main Content */}
             <div className="flex-1 overflow-auto p-6">
-                {/* NOUFAL Agent Card - REMOVED as per user request */}
-                {false && <div className="mb-6">
-                    <div className="relative bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-2xl shadow-2xl overflow-hidden">
-                        Animated Background Pattern
-                        <div className="absolute inset-0 opacity-10">
-                            <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse"></div>
-                            <div className="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full blur-3xl animate-pulse delay-75"></div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="relative p-8">
-                            <div className="flex items-start justify-between mb-6">
-                                <div className="flex items-center gap-4">
-                                    {/* Main Icon */}
-                                    <div className="relative">
-                                        <div className="absolute inset-0 bg-white rounded-2xl blur-md opacity-50 animate-pulse"></div>
-                                        <div className="relative bg-gradient-to-br from-white to-yellow-100 p-4 rounded-2xl shadow-lg">
-                                            <Brain className="w-12 h-12 text-orange-600 animate-pulse" />
-                                        </div>
-                                    </div>
-
-                                    {/* Title */}
-                                    <div>
-                                        <h2 className="text-3xl font-black text-white mb-2 flex items-center gap-2">
-                                            🧠 وكيل أحمد ناجح نوفل
-                                            <Sparkles className="w-6 h-6 text-yellow-200 animate-spin" style={{ animationDuration: '3s' }} />
-                                        </h2>
-                                        <p className="text-yellow-100 text-lg font-semibold">
-                                            مساعدك الذكي للحسابات الهندسية ورسم المخططات
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <div className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-full text-sm font-bold shadow-lg">
-                                                <Zap className="w-3 h-3 animate-pulse" />
-                                                <span>متصل ونشط</span>
-                                            </div>
-                                            <div className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-bold shadow-lg">
-                                                <Shield className="w-3 h-3" />
-                                                <span>AI متقدم</span>
-                                            </div>
-                                            <div className="flex items-center gap-1 px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-bold shadow-lg">
-                                                <TrendingUp className="w-3 h-3" />
-                                                <span>دقة عالية</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Quick Access Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* Calculator Card */}
-                                <button
-                                    onClick={() => (window as any).location.hash = '#/engineering-calculators'}
-                                    className="group bg-white/95 backdrop-blur-md rounded-xl p-6 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-right"
-                                >
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg group-hover:rotate-12 transition-transform">
-                                            <Calculator className="w-6 h-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-900">الحاسبات الهندسية</h3>
-                                            <p className="text-sm text-gray-600">Engineering Calculators</p>
-                                        </div>
-                                    </div>
-                                    <ul className="space-y-2 text-sm text-gray-700">
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                            <span>حاسبة الأعمدة القصيرة</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                            <span>حاسبة الكمرات</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                            <span>حاسبة البلاطات</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                            <span>حاسبة قطاعات التسليح</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                            <span>حاسبة الخرسانة والتكاليف</span>
-                                        </li>
-                                    </ul>
-                                    <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-600 font-semibold">6 حاسبات متقدمة</span>
-                                            <ArrowUp className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
-                                </button>
-
-                                {/* Drawing Studio Card */}
-                                <button
-                                    onClick={() => (window as any).location.hash = '#/architectural-drawing-studio'}
-                                    className="group bg-white/95 backdrop-blur-md rounded-xl p-6 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-right"
-                                >
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg group-hover:rotate-12 transition-transform">
-                                            <PenTool className="w-6 h-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-900">استوديو الرسم</h3>
-                                            <p className="text-sm text-gray-600">Drawing Studio</p>
-                                        </div>
-                                    </div>
-                                    <ul className="space-y-2 text-sm text-gray-700">
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                            <span>رسم المخططات المعمارية</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                            <span>مساعد AI للتصميم</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                            <span>تحويل 2D إلى 3D</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                            <span>مكتبة 157 بلوك</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                            <span>67 نمط هاتشينج</span>
-                                        </li>
-                                    </ul>
-                                    <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-600 font-semibold">استوديو متكامل</span>
-                                            <ArrowUp className="w-4 h-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
-                                </button>
-
-                                {/* 3D Viewer Card */}
-                                <button
-                                    onClick={() => (window as any).location.hash = '#/enhanced-cad-library'}
-                                    className="group bg-white/95 backdrop-blur-md rounded-xl p-6 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-right"
-                                >
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg group-hover:rotate-12 transition-transform">
-                                            <Box className="w-6 h-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-900">عارض 3D</h3>
-                                            <p className="text-sm text-gray-600">3D Viewer</p>
-                                        </div>
-                                    </div>
-                                    <ul className="space-y-2 text-sm text-gray-700">
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                            <span>عرض ثلاثي الأبعاد</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                            <span>إضاءة واقعية</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                            <span>جولات افتراضية</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                            <span>تحريك الكاميرا</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                            <span>وضع نهار/ليل</span>
-                                        </li>
-                                    </ul>
-                                    <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-600 font-semibold">عرض احترافي</span>
-                                            <ArrowUp className="w-4 h-4 text-green-600 group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
-                                </button>
-
-                                {/* AI Analysis Card */}
-                                <button
-                                    onClick={() => (window as any).location.hash = '#/noufal-integrated'}
-                                    className="group bg-white/95 backdrop-blur-md rounded-xl p-6 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-right"
-                                >
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg group-hover:rotate-12 transition-transform">
-                                            <Brain className="w-6 h-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-900">تحليل AI</h3>
-                                            <p className="text-sm text-gray-600">AI Analysis</p>
-                                        </div>
-                                    </div>
-                                    <ul className="space-y-2 text-sm text-gray-700">
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-                                            <span>تحليل BOQ</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-                                            <span>الجدولة الذكية</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-                                            <span>فحص SBC 304</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-                                            <span>التنبؤ المالي</span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-                                            <span>معدلات الإنتاجية</span>
-                                        </li>
-                                    </ul>
-                                    <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-600 font-semibold">10+ قدرة ذكية</span>
-                                            <ArrowUp className="w-4 h-4 text-orange-600 group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-
-                            {/* Bottom Stats */}
-                            <div className="mt-6 pt-6 border-t border-white/30">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="text-center">
-                                        <div className="text-3xl font-black text-white mb-1">6</div>
-                                        <div className="text-yellow-100 text-sm font-semibold">حاسبات إنشائية</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-black text-white mb-1">157</div>
-                                        <div className="text-yellow-100 text-sm font-semibold">بلوك معماري</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-black text-white mb-1">67</div>
-                                        <div className="text-yellow-100 text-sm font-semibold">نمط هاتشينج</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-black text-white mb-1">10+</div>
-                                        <div className="text-yellow-100 text-sm font-semibold">قدرة AI متقدمة</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - KPIs and Metrics */}

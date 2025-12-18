@@ -12,7 +12,6 @@ import { generatePurchaseOrders, generatePurchaseOrderSummary } from '../service
 import { generateProcurementPlan } from '../services/procurementPlanGenerator';
 import { generateComprehensiveReport } from '../services/reportGenerator';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface BOQUploadHubProps {
   projectId: string;
@@ -425,7 +424,6 @@ export const BOQUploadHub: React.FC<BOQUploadHubProps> = ({ projectId, projectNa
       <div className="max-w-6xl mx-auto">
         {/* NOUFAL Agent Card */}
         <div className="mb-6">
-          <NOUFALAgentCard mode="compact" />
         </div>
 
         {/* Header */}

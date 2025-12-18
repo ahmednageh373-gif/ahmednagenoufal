@@ -17,7 +17,6 @@ import { classifyItems, type ClassifiedFinancialItem } from '../intelligence/Ite
 import { BOQClassificationView } from './BOQClassificationView';
 import type { FinancialItem } from '../types';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 
 declare var XLSX: any;
 
@@ -237,7 +236,6 @@ export const SmartBOQImporter: React.FC<SmartBOQImporterProps> = ({
         <div className="space-y-6">
             {/* NOUFAL Agent Card */}
             <div className="mb-6">
-                <NOUFALAgentCard mode="compact" />
             </div>
 
             {/* العنوان والتبويبات */}

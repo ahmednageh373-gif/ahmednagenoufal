@@ -21,7 +21,6 @@ import {
   DollarSign,
 } from 'lucide-react';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 import { processBOQFile, exportBOQToExcel } from '../src/utils/excelProcessor';
 
 // ═══════════════════════════════════════════════════════════════
@@ -508,7 +507,6 @@ export const BOQUploadAnalyzer: React.FC = () => {
     <div className="p-6 max-w-7xl mx-auto">
       {/* NOUFAL Agent Card */}
       <div className="mb-6">
-        <NOUFALAgentCard mode="compact" />
       </div>
 
       {/* Header */}

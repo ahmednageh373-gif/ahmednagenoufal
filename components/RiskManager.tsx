@@ -8,7 +8,6 @@ import { suggestRisks } from '../services/geminiService';
 import { Plus, Bot, AlertTriangle, ChevronDown, Trash2, Pencil, Download, FileSpreadsheet, Printer } from 'lucide-react';
 import { RiskModal } from './RiskModal';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface RiskManagerProps {
     project: Project;
@@ -203,7 +202,6 @@ export const RiskManager: React.FC<RiskManagerProps> = ({ project, onUpdateRisks
         <div>
             {/* NOUFAL Agent Card */}
             <div className="mb-6">
-                <NOUFALAgentCard mode="compact" />
             </div>
 
             {/* Smart Assistant Chat */}

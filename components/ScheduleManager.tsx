@@ -9,7 +9,6 @@ import { WhatIfModal } from './WhatIfModal';
 import { performWhatIfAnalysis, calculateCriticalPath, extractTasksFromXER } from '../services/geminiService';
 import { Bot, Plus, Calendar, File, Printer, Upload, BarChart, CalendarDays, Hash, Network, FileCode } from 'lucide-react';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface ScheduleManagerProps {
     project: Project;
@@ -420,7 +419,6 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ project, onUpd
         <div>
             {/* NOUFAL Agent Card */}
             <div className="mb-6 no-print">
-                <NOUFALAgentCard mode="compact" />
             </div>
 
             {/* Smart Assistant Chat */}

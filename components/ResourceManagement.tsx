@@ -8,7 +8,6 @@ import {
     Download, Upload, Edit2, Trash2, Eye, Settings
 } from 'lucide-react';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 import type { 
     LaborResource, EquipmentResource, MaterialResource, 
     ResourceAllocation, ResourceType, ResourceStatus 
@@ -265,7 +264,6 @@ export const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectI
         <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
             {/* NOUFAL Agent Card */}
             <div className="m-6 mb-0">
-                <NOUFALAgentCard mode="compact" />
             </div>
 
             {/* Smart Assistant Chat */}

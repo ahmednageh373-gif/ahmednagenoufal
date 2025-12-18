@@ -9,7 +9,6 @@ import { OrderModal } from './OrderModal';
 import { marked } from 'marked';
 import { v4 as uuidv4 } from 'uuid';
 import SmartAssistantChat from './SmartAssistantChat';
-import NOUFALAgentCard from './NOUFALAgentCard';
 
 interface FinancialManagerProps {
     project: Project;
@@ -151,7 +150,6 @@ export const FinancialManager: React.FC<FinancialManagerProps> = ({ project, onU
         <div>
             {/* NOUFAL Agent Card */}
             <div className="mb-6">
-                <NOUFALAgentCard mode="compact" />
             </div>
 
             {/* Smart Assistant Chat */}
